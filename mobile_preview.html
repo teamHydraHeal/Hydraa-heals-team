@@ -1,0 +1,1840 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Jal Guard - Mobile App Preview</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background-attachment: fixed;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            overflow-x: hidden;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: 
+                radial-gradient(circle at 20% 80%, rgba(120, 119, 198, 0.3) 0%, transparent 50%),
+                radial-gradient(circle at 80% 20%, rgba(255, 119, 198, 0.3) 0%, transparent 50%);
+            pointer-events: none;
+            z-index: -1;
+        }
+
+        .phone-container {
+            width: 375px;
+            height: 812px;
+            background: #000;
+            border-radius: 40px;
+            padding: 8px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+            position: relative;
+        }
+
+        .phone-screen {
+            width: 100%;
+            height: 100%;
+            background: #fff;
+            border-radius: 32px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .screen {
+            width: 100%;
+            height: 100%;
+            position: absolute;
+            top: 0;
+            left: 0;
+            transition: all 0.3s ease;
+            opacity: 0;
+            transform: translateX(100%);
+            z-index: 1;
+        }
+
+        .screen.hidden {
+            opacity: 0;
+            transform: translateX(100%);
+            z-index: 1;
+        }
+
+        .screen.active {
+            opacity: 1;
+            transform: translateX(0);
+            z-index: 2;
+        }
+
+        .status-bar {
+            height: 44px;
+            background: #2E7D32;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 20px;
+            color: white;
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        .app-bar {
+            height: 56px;
+            background: #2E7D32;
+            display: flex;
+            align-items: center;
+            padding: 0 16px;
+            color: white;
+            position: relative;
+        }
+
+        .app-bar h1 {
+            font-size: 18px;
+            font-weight: 600;
+            margin-left: 16px;
+        }
+
+        .back-btn {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 20px;
+            cursor: pointer;
+        }
+
+        .content {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+        }
+
+        .welcome-screen {
+            background: linear-gradient(135deg, #2E7D32 0%, #4CAF50 100%);
+            color: white;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            padding: 40px 20px;
+        }
+
+        .logo {
+            width: 80px;
+            height: 80px;
+            background: rgba(255,255,255,0.2);
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 24px;
+            font-size: 40px;
+        }
+
+        .app-title {
+            font-size: 32px;
+            font-weight: bold;
+            margin-bottom: 8px;
+        }
+
+        .app-subtitle {
+            font-size: 16px;
+            opacity: 0.8;
+            margin-bottom: 32px;
+        }
+
+        .mission-box {
+            background: rgba(255,255,255,0.1);
+            padding: 20px;
+            border-radius: 16px;
+            margin-bottom: 40px;
+            font-size: 14px;
+            line-height: 1.5;
+        }
+
+        .btn {
+            width: 100%;
+            height: 56px;
+            border: none;
+            border-radius: 12px;
+            font-size: 18px;
+            font-weight: 600;
+            cursor: pointer;
+            margin-bottom: 16px;
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary {
+            background: white;
+            color: #2E7D32;
+        }
+
+        .btn-secondary {
+            background: transparent;
+            color: white;
+            border: 2px solid white;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+        }
+
+        .footer {
+            font-size: 12px;
+            opacity: 0.6;
+            margin-top: 32px;
+        }
+
+        .form-group {
+            margin-bottom: 24px;
+        }
+
+        .form-label {
+            font-size: 16px;
+            font-weight: 600;
+            color: #2E7D32;
+            margin-bottom: 8px;
+            display: block;
+        }
+
+        .form-input {
+            width: 100%;
+            height: 48px;
+            border: 2px solid #e0e0e0;
+            border-radius: 12px;
+            padding: 0 16px;
+            font-size: 16px;
+            transition: border-color 0.3s ease;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: #2E7D32;
+        }
+
+        .otp-container {
+            display: flex;
+            justify-content: space-between;
+            margin: 24px 0;
+        }
+
+        .otp-input {
+            width: 45px;
+            height: 55px;
+            border: 2px solid #e0e0e0;
+            border-radius: 12px;
+            text-align: center;
+            font-size: 20px;
+            font-weight: bold;
+        }
+
+        .otp-input:focus {
+            outline: none;
+            border-color: #2E7D32;
+        }
+
+        .info-box {
+            background: rgba(33, 150, 243, 0.1);
+            border: 1px solid rgba(33, 150, 243, 0.3);
+            border-radius: 12px;
+            padding: 16px;
+            margin: 24px 0;
+            display: flex;
+            align-items: flex-start;
+        }
+
+        .info-icon {
+            color: #2196F3;
+            margin-right: 12px;
+            font-size: 20px;
+        }
+
+        .info-text {
+            color: #2196F3;
+            font-size: 14px;
+            line-height: 1.4;
+        }
+
+        .demo-info {
+            background: rgba(255, 152, 0, 0.1);
+            border-color: rgba(255, 152, 0, 0.3);
+        }
+
+        .demo-info .info-icon,
+        .demo-info .info-text {
+            color: #FF9800;
+        }
+
+        .navigation {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 80px;
+            background: white;
+            border-top: 1px solid #e0e0e0;
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+        }
+
+        .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            cursor: pointer;
+            padding: 8px;
+            border-radius: 8px;
+            transition: background-color 0.3s ease;
+        }
+
+        .nav-item:hover {
+            background-color: #f5f5f5;
+        }
+
+        .nav-item.active {
+            color: #2E7D32;
+        }
+
+        .nav-icon {
+            font-size: 24px;
+            margin-bottom: 4px;
+        }
+
+        .nav-label {
+            font-size: 12px;
+            font-weight: 500;
+        }
+
+        .map-container {
+            height: 300px;
+            background: linear-gradient(45deg, #4CAF50, #8BC34A, #FFC107, #FF9800, #F44336);
+            border-radius: 12px;
+            margin: 16px 0;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .district {
+            position: absolute;
+            padding: 8px 12px;
+            border-radius: 20px;
+            color: white;
+            font-weight: 600;
+            font-size: 12px;
+            cursor: pointer;
+            transition: transform 0.3s ease;
+        }
+
+        .district:hover {
+            transform: scale(1.1);
+        }
+
+        .district.low { background: #4CAF50; }
+        .district.medium { background: #FF9800; }
+        .district.high { background: #F44336; }
+        .district.critical { background: #9C27B0; }
+
+        .district:nth-child(1) { top: 20%; left: 30%; }
+        .district:nth-child(2) { top: 40%; left: 20%; }
+        .district:nth-child(3) { top: 60%; left: 50%; }
+        .district:nth-child(4) { top: 30%; left: 70%; }
+        .district:nth-child(5) { top: 70%; left: 30%; }
+
+        .risk-summary {
+            background: white;
+            border-radius: 12px;
+            padding: 16px;
+            margin: 16px 0;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .risk-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 0;
+            border-bottom: 1px solid #f0f0f0;
+        }
+
+        .risk-item:last-child {
+            border-bottom: none;
+        }
+
+        .risk-level {
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 600;
+            color: white;
+        }
+
+        .controls {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: white;
+            border-radius: 12px;
+            padding: 16px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            z-index: 1000;
+            max-height: calc(100vh - 40px);
+            overflow-y: auto;
+            width: 200px;
+        }
+        
+        @media (max-width: 768px) {
+            .controls {
+                position: fixed;
+                top: 10px;
+                right: 10px;
+                left: 10px;
+                width: auto;
+                max-height: 200px;
+                padding: 12px;
+            }
+            
+            .phone-container {
+                width: 300px;
+                height: 600px;
+                margin-top: 220px;
+            }
+            
+            body {
+                padding: 10px;
+            }
+        }
+
+        .control-btn {
+            display: block;
+            width: 100%;
+            padding: 8px 16px;
+            margin: 4px 0;
+            background: #2E7D32;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background-color 0.3s ease;
+        }
+
+        .control-btn:hover {
+            background: #1B5E20;
+        }
+
+        .control-btn.active {
+            background: #4CAF50;
+        }
+
+        /* Splash Screen Animations */
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); opacity: 0.3; }
+            50% { transform: translateY(-20px); opacity: 0.6; }
+        }
+
+        @keyframes ripple {
+            0% { transform: scale(0.5); opacity: 1; }
+            100% { transform: scale(1.5); opacity: 0; }
+        }
+
+        @keyframes logoScale {
+            0% { transform: scale(0) rotate(0deg); }
+            60% { transform: scale(1.1) rotate(5deg); }
+            100% { transform: scale(1) rotate(0deg); }
+        }
+
+        @keyframes logoRotate {
+            0%, 100% { transform: rotate(0deg); }
+            50% { transform: rotate(10deg); }
+        }
+
+        @keyframes textSlide {
+            0% { transform: translateY(30px); opacity: 0; }
+            100% { transform: translateY(0); opacity: 1; }
+        }
+
+        @keyframes progressFade {
+            0% { opacity: 0; transform: translateY(20px); }
+            100% { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes progressBar {
+            0% { width: 0%; }
+            30% { width: 30%; }
+            60% { width: 60%; }
+            90% { width: 90%; }
+            100% { width: 100%; }
+        }
+
+        @keyframes loadingText {
+            0% { opacity: 0.6; }
+            100% { opacity: 1; }
+        }
+    </style>
+</head>
+<body>
+    <div class="controls" id="controls">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+            <h3 style="color: #2E7D32; margin: 0;">🎯 All Features Preview</h3>
+            <button id="toggle-controls" style="background: none; border: none; font-size: 18px; cursor: pointer;" onclick="toggleControls()">−</button>
+        </div>
+        <div id="controls-content">
+            <div style="font-size: 12px; color: #666; margin-bottom: 12px;">Complete Flutter App Demo</div>
+        
+        <div style="margin-bottom: 8px; font-weight: bold; color: #2E7D32;">🔐 Authentication</div>
+        <button class="control-btn active" onclick="showScreen('splash')">Splash Screen</button>
+        <button class="control-btn" onclick="showScreen('welcome')">Welcome</button>
+        <button class="control-btn" onclick="showScreen('aadhaar')">Aadhaar Entry</button>
+        <button class="control-btn" onclick="showScreen('otp')">OTP Verification</button>
+        <button class="control-btn" onclick="showScreen('professional')">Professional Verify</button>
+        
+        <div style="margin: 12px 0 8px; font-weight: bold; color: #2E7D32;">👨‍⚕️ Health Official</div>
+        <button class="control-btn" onclick="showScreen('command-center')">Command Center</button>
+        <button class="control-btn" onclick="showScreen('ai-copilot')">AI Co-pilot</button>
+        <button class="control-btn" onclick="showScreen('broadcast')">Broadcast</button>
+        <button class="control-btn" onclick="showScreen('district-details')">District Details</button>
+        <button class="control-btn" onclick="showScreen('resources')">Resources</button>
+        <button class="control-btn" onclick="showScreen('emergency')">Emergency</button>
+        
+        <div style="margin: 12px 0 8px; font-weight: bold; color: #2E7D32;">👩‍⚕️ ASHA Worker</div>
+        <button class="control-btn" onclick="showScreen('field-dashboard')">Field Dashboard</button>
+        <button class="control-btn" onclick="showScreen('report-form')">Report Form</button>
+        <button class="control-btn" onclick="showScreen('mcp-card')">MCP Card</button>
+        <button class="control-btn" onclick="showScreen('education')">Education</button>
+        
+        <div style="margin: 12px 0 8px; font-weight: bold; color: #2E7D32;">👤 Citizen</div>
+        <button class="control-btn" onclick="showScreen('citizen-dashboard')">Citizen Dashboard</button>
+        <button class="control-btn" onclick="showScreen('concern-report')">Concern Report</button>
+        
+        <div style="margin: 12px 0 8px; font-weight: bold; color: #2E7D32;">⚙️ Shared</div>
+        <button class="control-btn" onclick="showScreen('notifications')">Notifications</button>
+        <button class="control-btn" onclick="showScreen('profile')">Profile</button>
+        <button class="control-btn" onclick="showScreen('settings')">Settings</button>
+        </div>
+    </div>
+
+    <div class="phone-container">
+        <div class="phone-screen">
+            <!-- Splash Screen -->
+            <div class="screen active" id="splash">
+                <div class="status-bar">
+                    <span>9:41</span>
+                    <span>Jal Guard</span>
+                    <span>100%</span>
+                </div>
+                <div style="background: linear-gradient(135deg, #1B5E20 0%, #2E7D32 30%, #4CAF50 70%, #66BB6A 100%); height: 100%; display: flex; flex-direction: column; justify-content: center; align-items: center; position: relative; overflow: hidden;">
+                    
+                    <!-- Floating particles -->
+                    <div style="position: absolute; top: 10%; left: 15%; width: 4px; height: 4px; background: rgba(255,255,255,0.3); border-radius: 50%; animation: float 4s ease-in-out infinite;"></div>
+                    <div style="position: absolute; top: 20%; right: 20%; width: 6px; height: 6px; background: rgba(255,255,255,0.2); border-radius: 50%; animation: float 5s ease-in-out infinite 1s;"></div>
+                    <div style="position: absolute; bottom: 30%; left: 10%; width: 3px; height: 3px; background: rgba(255,255,255,0.4); border-radius: 50%; animation: float 6s ease-in-out infinite 2s;"></div>
+                    <div style="position: absolute; top: 40%; left: 80%; width: 5px; height: 5px; background: rgba(255,255,255,0.25); border-radius: 50%; animation: float 4.5s ease-in-out infinite 0.5s;"></div>
+                    
+                    <!-- Ripple effect -->
+                    <div style="position: absolute; width: 200px; height: 200px; border: 2px solid rgba(255,255,255,0.1); border-radius: 50%; animation: ripple 2s ease-out infinite;"></div>
+                    <div style="position: absolute; width: 200px; height: 200px; border: 2px solid rgba(255,255,255,0.1); border-radius: 50%; animation: ripple 2s ease-out infinite 0.6s;"></div>
+                    <div style="position: absolute; width: 200px; height: 200px; border: 2px solid rgba(255,255,255,0.1); border-radius: 50%; animation: ripple 2s ease-out infinite 1.2s;"></div>
+                    
+                    <!-- Animated logo -->
+                    <div style="background: rgba(255,255,255,0.15); padding: 30px; border-radius: 30px; box-shadow: 0 10px 30px rgba(0,0,0,0.2); animation: logoScale 2s ease-out;">
+                        <div style="font-size: 60px; animation: logoRotate 3s ease-in-out infinite;">🌊</div>
+                    </div>
+                    
+                    <div style="margin-top: 40px; text-align: center; animation: textSlide 1.5s ease-out 0.5s both;">
+                        <h1 style="font-size: 42px; font-weight: bold; color: white; letter-spacing: 2px; margin: 0; text-shadow: 0 2px 4px rgba(0,0,0,0.3);">Jal Guard</h1>
+                        <p style="color: rgba(255,255,255,0.8); margin: 12px 0; font-size: 16px; letter-spacing: 0.5px;">AI-Powered Public Health Command Center</p>
+                        <div style="display: inline-block; padding: 8px 16px; background: rgba(255,255,255,0.1); border-radius: 20px; border: 1px solid rgba(255,255,255,0.2); margin-top: 8px;">
+                            <span style="color: rgba(255,255,255,0.7); font-size: 12px; font-weight: 500;">Protecting Northeast India</span>
+                        </div>
+                    </div>
+                    
+                    <!-- Progress bar -->
+                    <div style="position: absolute; bottom: 120px; left: 60px; right: 60px; animation: progressFade 1s ease-out 1s both;">
+                        <div style="height: 4px; background: rgba(255,255,255,0.2); border-radius: 2px; overflow: hidden;">
+                            <div style="height: 100%; background: linear-gradient(90deg, #fff, #E8F5E8); border-radius: 2px; box-shadow: 0 0 10px rgba(255,255,255,0.3); animation: progressBar 2.5s ease-in-out 1.2s both;"></div>
+                        </div>
+                        <div style="text-align: center; margin-top: 16px; color: rgba(255,255,255,0.6); font-size: 14px; animation: loadingText 0.5s ease-in-out infinite alternate;">
+                            <span id="loading-text">Initializing system...</span>
+                        </div>
+                    </div>
+                    
+                    <!-- Footer -->
+                    <div style="position: absolute; bottom: 40px; color: rgba(255,255,255,0.4); font-size: 12px; letter-spacing: 1px;">
+                        Secure • Reliable • Community-Focused
+                    </div>
+                </div>
+            </div>
+
+            <!-- Welcome Screen -->
+            <div class="screen hidden" id="welcome">
+                <div class="status-bar">
+                    <span>9:41</span>
+                    <span>Jal Guard</span>
+                    <span>100%</span>
+                </div>
+                <div class="welcome-screen">
+                    <div class="logo">🌊</div>
+                    <h1 class="app-title">Jal Guard</h1>
+                    <p class="app-subtitle">AI-Powered Public Health Command Center</p>
+                    <div class="mission-box">
+                        Protecting communities from water-borne diseases in Northeast India through real-time monitoring, predictive analytics, and automated response coordination.
+                    </div>
+                    <button class="btn btn-primary" onclick="showScreen('aadhaar')">Get Started</button>
+                    <button class="btn btn-secondary" onclick="showScreen('aadhaar')">Login</button>
+                    <div class="footer">Secure • Reliable • Community-Focused</div>
+                </div>
+            </div>
+
+            <!-- Aadhaar Entry Screen -->
+            <div class="screen hidden" id="aadhaar">
+                <div class="status-bar">
+                    <span>9:41</span>
+                    <span>Jal Guard</span>
+                    <span>100%</span>
+                </div>
+                <div class="app-bar">
+                    <button class="back-btn" onclick="showScreen('welcome')">←</button>
+                    <h1>Aadhaar Login</h1>
+                </div>
+                <div class="content">
+                    <h2 style="color: #2E7D32; margin-bottom: 8px;">Enter your 12-digit Aadhaar number</h2>
+                    <p style="color: #666; margin-bottom: 32px;">We'll send you an OTP to verify your identity</p>
+                    
+                    <div class="form-group">
+                        <label class="form-label">Aadhaar Number</label>
+                        <input type="text" class="form-input" placeholder="1234 5678 9012" maxlength="12">
+                    </div>
+                    
+                    <button class="btn btn-primary" onclick="showScreen('otp')">Request OTP</button>
+                    
+                    <div class="info-box">
+                        <span class="info-icon">ℹ️</span>
+                        <div class="info-text">
+                            Demo Mode: Use any 12-digit number to proceed. The system will simulate user roles based on the last digit.
+                        </div>
+                    </div>
+                    
+                    <p style="text-align: center; color: #666; font-size: 12px; margin-top: 32px;">
+                        Your Aadhaar number is secure and encrypted
+                    </p>
+                </div>
+            </div>
+
+            <!-- OTP Verification Screen -->
+            <div class="screen hidden" id="otp">
+                <div class="status-bar">
+                    <span>9:41</span>
+                    <span>Jal Guard</span>
+                    <span>100%</span>
+                </div>
+                <div class="app-bar">
+                    <button class="back-btn" onclick="showScreen('aadhaar')">←</button>
+                    <h1>Verify OTP</h1>
+                </div>
+                <div class="content">
+                    <h2 style="color: #2E7D32; margin-bottom: 8px;">Enter the 6-digit OTP</h2>
+                    <p style="color: #666; margin-bottom: 32px;">We've sent a verification code to your registered mobile number</p>
+                    
+                    <div class="otp-container">
+                        <input type="text" class="otp-input" maxlength="1">
+                        <input type="text" class="otp-input" maxlength="1">
+                        <input type="text" class="otp-input" maxlength="1">
+                        <input type="text" class="otp-input" maxlength="1">
+                        <input type="text" class="otp-input" maxlength="1">
+                        <input type="text" class="otp-input" maxlength="1">
+                    </div>
+                    
+                    <button class="btn btn-primary" onclick="showScreen('professional')">Verify OTP</button>
+                    
+                    <p style="text-align: center; color: #666; margin: 16px 0;">Resend OTP in 30s</p>
+                    
+                    <div class="info-box demo-info">
+                        <span class="info-icon">ℹ️</span>
+                        <div class="info-text">
+                            Demo OTP: 123456<br><br>
+                            User roles are determined by the last digit of your Aadhaar number:<br>
+                            • 0,3,6,9: Health Official<br>
+                            • 1,4,7: ASHA Worker<br>
+                            • 2,5,8: Citizen
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Professional Verification Screen -->
+            <div class="screen hidden" id="professional">
+                <div class="status-bar">
+                    <span>9:41</span>
+                    <span>Jal Guard</span>
+                    <span>100%</span>
+                </div>
+                <div class="app-bar">
+                    <button class="back-btn" onclick="showScreen('otp')">←</button>
+                    <h1>Professional Verification</h1>
+                </div>
+                <div class="content">
+                    <h2 style="color: #2E7D32; margin-bottom: 8px;">Verify Your Medical Credentials</h2>
+                    <p style="color: #666; margin-bottom: 32px;">Please provide your professional identification to complete the verification process</p>
+                    
+                    <div class="form-group">
+                        <label class="form-label">Professional ID</label>
+                        <input type="text" class="form-input" placeholder="Medical License Number">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">Document Type</label>
+                        <select class="form-input">
+                            <option>ID Card</option>
+                            <option>License</option>
+                            <option>Certificate</option>
+                            <option>Registration</option>
+                        </select>
+                    </div>
+                    
+                    <div style="border: 2px dashed #ccc; border-radius: 12px; padding: 20px; text-align: center; margin: 24px 0;">
+                        <div style="font-size: 48px; color: #ccc; margin-bottom: 16px;">📄</div>
+                        <h3>Upload Professional Document</h3>
+                        <p style="color: #666; margin: 8px 0;">Upload a clear photo of your professional ID or certificate</p>
+                        <button class="btn btn-primary" style="width: auto; padding: 8px 24px;">Upload Document</button>
+                    </div>
+                    
+                    <button class="btn btn-primary" onclick="showScreen('command-center')">Submit Verification</button>
+                    
+                    <div class="info-box">
+                        <span class="info-icon">ℹ️</span>
+                        <div class="info-text">
+                            Demo Mode: Professional verification is simulated. In production, this would verify credentials with official databases.
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Command Center Screen -->
+            <div class="screen hidden" id="command-center">
+                <div class="status-bar">
+                    <span>9:41</span>
+                    <span>Jal Guard</span>
+                    <span>100%</span>
+                </div>
+                <div class="app-bar">
+                    <h1>Command Center</h1>
+                    <div style="display: flex; align-items: center; gap: 16px;">
+                        <div style="background: #4CAF50; color: white; padding: 4px 8px; border-radius: 12px; font-size: 12px;">
+                            📶 Online
+                        </div>
+                        <span style="position: relative;">
+                            🔔
+                            <span style="position: absolute; top: -8px; right: -8px; background: red; color: white; border-radius: 50%; width: 16px; height: 16px; font-size: 10px; display: flex; align-items: center; justify-content: center;">3</span>
+                        </span>
+                    </div>
+                </div>
+                <div class="content">
+                    <div class="risk-summary">
+                        <h3 style="margin-bottom: 16px; color: #2E7D32;">Risk Summary</h3>
+                        <div class="risk-item">
+                            <span>Critical Districts</span>
+                            <span class="risk-level" style="background: #9C27B0;">1</span>
+                        </div>
+                        <div class="risk-item">
+                            <span>High Risk</span>
+                            <span class="risk-level" style="background: #F44336;">1</span>
+                        </div>
+                        <div class="risk-item">
+                            <span>Medium Risk</span>
+                            <span class="risk-level" style="background: #FF9800;">2</span>
+                        </div>
+                        <div class="risk-item">
+                            <span>Low Risk</span>
+                            <span class="risk-level" style="background: #4CAF50;">1</span>
+                        </div>
+                    </div>
+                    
+                    <div style="margin: 16px 0;">
+                        <h4 style="margin-bottom: 8px;">Map Layer:</h4>
+                        <div style="display: flex; gap: 8px;">
+                            <button style="flex: 1; padding: 8px; background: #2E7D32; color: white; border: none; border-radius: 8px;">Risk Prediction</button>
+                            <button style="flex: 1; padding: 8px; background: #f0f0f0; color: #666; border: none; border-radius: 8px;">Field Reports</button>
+                        </div>
+                    </div>
+                    
+                    <div class="map-container">
+                        <div class="district low">East Khasi Hills</div>
+                        <div class="district medium">West Khasi Hills</div>
+                        <div class="district critical">Ri Bhoi</div>
+                        <div class="district low">Jaintia Hills</div>
+                        <div class="district medium">Garo Hills</div>
+                    </div>
+                    
+                    <div style="position: fixed; bottom: 100px; right: 20px;">
+                        <button style="background: #2E7D32; color: white; border: none; border-radius: 50%; width: 60px; height: 60px; font-size: 24px; box-shadow: 0 4px 12px rgba(0,0,0,0.3);">🧠</button>
+                    </div>
+                </div>
+                <div class="navigation">
+                    <div class="nav-item active" onclick="showScreen('command-center')">
+                        <div class="nav-icon">🗺️</div>
+                        <div class="nav-label">Map</div>
+                    </div>
+                    <div class="nav-item" onclick="showScreen('broadcast')">
+                        <div class="nav-icon">📡</div>
+                        <div class="nav-label">Broadcast</div>
+                    </div>
+                    <div class="nav-item" onclick="showScreen('settings')">
+                        <div class="nav-icon">⚙️</div>
+                        <div class="nav-label">Settings</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Field Dashboard Screen -->
+            <div class="screen hidden" id="field-dashboard">
+                <div class="status-bar">
+                    <span>9:41</span>
+                    <span>Jal Guard</span>
+                    <span>100%</span>
+                </div>
+                <div class="app-bar">
+                    <h1>Field Dashboard</h1>
+                </div>
+                <div class="content">
+                    <h2 style="color: #2E7D32; margin-bottom: 16px;">Welcome, Meera Devi!</h2>
+                    
+                    <div style="background: white; border-radius: 12px; padding: 16px; margin: 16px 0; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+                        <h3 style="margin-bottom: 12px;">Local Health Status:</h3>
+                        <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+                            <span style="background: #4CAF50; color: white; padding: 4px 12px; border-radius: 12px; font-size: 12px;">🟢 Mawryngkneng</span>
+                            <span style="background: #FF9800; color: white; padding: 4px 12px; border-radius: 12px; font-size: 12px;">🟡 Shillong</span>
+                            <span style="background: #F44336; color: white; padding: 4px 12px; border-radius: 12px; font-size: 12px;">🔴 Cherrapunji</span>
+                        </div>
+                    </div>
+                    
+                    <button class="btn btn-primary" style="margin: 16px 0;">
+                        📝 Submit Report<br>
+                        <small>Quick Health Check</small>
+                    </button>
+                    
+                    <div style="background: white; border-radius: 12px; padding: 16px; margin: 16px 0; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+                        <h3 style="margin-bottom: 12px;">Recent Activity:</h3>
+                        <p>• 3 reports submitted</p>
+                        <p>• 2 pending sync</p>
+                    </div>
+                </div>
+                <div class="navigation">
+                    <div class="nav-item active" onclick="showScreen('field-dashboard')">
+                        <div class="nav-icon">🏠</div>
+                        <div class="nav-label">Home</div>
+                    </div>
+                    <div class="nav-item" onclick="showScreen('report-form')">
+                        <div class="nav-icon">📝</div>
+                        <div class="nav-label">Report</div>
+                    </div>
+                    <div class="nav-item" onclick="showScreen('education')">
+                        <div class="nav-icon">📚</div>
+                        <div class="nav-label">Education</div>
+                    </div>
+                    <div class="nav-item" onclick="showScreen('mcp-card')">
+                        <div class="nav-icon">🔄</div>
+                        <div class="nav-label">MCP</div>
+                    </div>
+                    <div class="nav-item" onclick="showScreen('profile')">
+                        <div class="nav-icon">👤</div>
+                        <div class="nav-label">Profile</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Citizen Dashboard Screen -->
+            <div class="screen hidden" id="citizen-dashboard">
+                <div class="status-bar">
+                    <span>9:41</span>
+                    <span>Jal Guard</span>
+                    <span>100%</span>
+                </div>
+                <div class="app-bar">
+                    <h1>Citizen Dashboard</h1>
+                </div>
+                <div class="content">
+                    <h2 style="color: #2E7D32; margin-bottom: 16px;">Hello, Amit Singh!</h2>
+                    
+                    <div style="background: white; border-radius: 12px; padding: 16px; margin: 16px 0; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+                        <h3 style="margin-bottom: 12px;">Your Area Status:</h3>
+                        <div style="background: #4CAF50; color: white; padding: 12px; border-radius: 8px;">
+                            <strong>🟢 Shillong</strong><br>
+                            <small>Low Risk • Last updated: 2h</small>
+                        </div>
+                    </div>
+                    
+                    <div style="background: white; border-radius: 12px; padding: 16px; margin: 16px 0; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+                        <h3 style="margin-bottom: 12px;">Health Alerts:</h3>
+                        <p>• Water quality good</p>
+                        <p>• No active outbreaks</p>
+                    </div>
+                    
+                    <button class="btn btn-primary" style="margin: 16px 0;">
+                        📝 Report Concern<br>
+                        <small>Community Health</small>
+                    </button>
+                    
+                    <div style="background: white; border-radius: 12px; padding: 16px; margin: 16px 0; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+                        <h3 style="margin-bottom: 12px;">Quick Actions:</h3>
+                        <p>• Health Tips</p>
+                        <p>• Emergency Contacts</p>
+                    </div>
+                </div>
+                <div class="navigation">
+                    <div class="nav-item active" onclick="showScreen('citizen-dashboard')">
+                        <div class="nav-icon">🏠</div>
+                        <div class="nav-label">Home</div>
+                    </div>
+                    <div class="nav-item" onclick="showScreen('concern-report')">
+                        <div class="nav-icon">📝</div>
+                        <div class="nav-label">Report</div>
+                    </div>
+                    <div class="nav-item" onclick="showScreen('education')">
+                        <div class="nav-icon">📚</div>
+                        <div class="nav-label">Learn</div>
+                    </div>
+                    <div class="nav-item" onclick="showScreen('notifications')">
+                        <div class="nav-icon">🔔</div>
+                        <div class="nav-label">Notifications</div>
+                    </div>
+                    <div class="nav-item" onclick="showScreen('profile')">
+                        <div class="nav-icon">👤</div>
+                        <div class="nav-label">Profile</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Notifications Screen -->
+            <div class="screen hidden" id="notifications">
+                <div class="status-bar">
+                    <span>9:41</span>
+                    <span>Jal Guard</span>
+                    <span>100%</span>
+                </div>
+                <div class="app-bar">
+                    <button class="back-btn" onclick="showScreen('citizen-dashboard')">←</button>
+                    <h1>Notifications</h1>
+                    <button style="background: none; border: none; color: white; font-size: 14px;">Mark All Read</button>
+                </div>
+                <div class="content">
+                    <div style="margin-bottom: 12px;">
+                        <div style="display: flex; align-items: center; padding: 12px; background: rgba(255, 152, 0, 0.1); border-radius: 8px; border: 1px solid rgba(255, 152, 0, 0.3);">
+                            <span style="color: #FF9800; margin-right: 12px; font-size: 20px;">⚠️</span>
+                            <div style="flex: 1;">
+                                <div style="font-weight: 600; color: #FF9800; font-size: 14px;">High Risk Alert</div>
+                                <div style="font-size: 12px; color: #666;">Water contamination detected in your area</div>
+                                <div style="font-size: 10px; color: #999; margin-top: 4px;">2 hours ago</div>
+                            </div>
+                            <div style="width: 8px; height: 8px; background: #2196F3; border-radius: 50%;"></div>
+                        </div>
+                    </div>
+                    <div style="margin-bottom: 12px;">
+                        <div style="display: flex; align-items: center; padding: 12px; background: rgba(33, 150, 243, 0.1); border-radius: 8px; border: 1px solid rgba(33, 150, 243, 0.3);">
+                            <span style="color: #2196F3; margin-right: 12px; font-size: 20px;">ℹ️</span>
+                            <div style="flex: 1;">
+                                <div style="font-weight: 600; color: #2196F3; font-size: 14px;">Report Update</div>
+                                <div style="font-size: 12px; color: #666;">Your report has been processed by health officials</div>
+                                <div style="font-size: 10px; color: #999; margin-top: 4px;">1 day ago</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div style="margin-bottom: 12px;">
+                        <div style="display: flex; align-items: center; padding: 12px; background: rgba(76, 175, 80, 0.1); border-radius: 8px; border: 1px solid rgba(76, 175, 80, 0.3);">
+                            <span style="color: #4CAF50; margin-right: 12px; font-size: 20px;">✅</span>
+                            <div style="flex: 1;">
+                                <div style="font-weight: 600; color: #4CAF50; font-size: 14px;">Health Tip</div>
+                                <div style="font-size: 12px; color: #666;">Boil water before drinking to prevent water-borne diseases</div>
+                                <div style="font-size: 10px; color: #999; margin-top: 4px;">3 days ago</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Profile Screen -->
+            <div class="screen hidden" id="profile">
+                <div class="status-bar">
+                    <span>9:41</span>
+                    <span>Jal Guard</span>
+                    <span>100%</span>
+                </div>
+                <div class="app-bar">
+                    <button class="back-btn" onclick="showScreen('citizen-dashboard')">←</button>
+                    <h1>Profile</h1>
+                    <button style="background: none; border: none; color: white; font-size: 20px;">✏️</button>
+                </div>
+                <div class="content">
+                    <div style="background: white; border-radius: 12px; padding: 20px; margin-bottom: 16px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+                        <div style="text-align: center;">
+                            <div style="width: 80px; height: 80px; background: #2E7D32; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 16px; color: white; font-size: 32px; font-weight: bold;">A</div>
+                            <div style="font-size: 24px; font-weight: bold; margin-bottom: 4px;">Amit Singh</div>
+                            <div style="background: rgba(255, 152, 0, 0.1); color: #FF9800; padding: 4px 12px; border-radius: 12px; display: inline-block; font-weight: 600; margin-bottom: 8px;">Citizen</div>
+                            <div style="display: flex; align-items: center; justify-content: center; gap: 4px;">
+                                <span style="color: #4CAF50;">✅</span>
+                                <span style="color: #4CAF50; font-size: 12px; font-weight: 600;">Verified</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div style="background: white; border-radius: 12px; margin-bottom: 16px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+                        <div style="padding: 16px; border-bottom: 1px solid #f0f0f0; display: flex; align-items: center;">
+                            <span style="margin-right: 16px; color: #666;">📱</span>
+                            <div style="flex: 1;">
+                                <div style="font-weight: 600;">Phone Number</div>
+                                <div style="color: #666; font-size: 14px;">+91-9876543210</div>
+                            </div>
+                        </div>
+                        <div style="padding: 16px; border-bottom: 1px solid #f0f0f0; display: flex; align-items: center;">
+                            <span style="margin-right: 16px; color: #666;">📍</span>
+                            <div style="flex: 1;">
+                                <div style="font-weight: 600;">Location</div>
+                                <div style="color: #666; font-size: 14px;">Shillong, East Khasi Hills, Meghalaya</div>
+                            </div>
+                        </div>
+                        <div style="padding: 16px; display: flex; align-items: center;">
+                            <span style="margin-right: 16px; color: #666;">🆔</span>
+                            <div style="flex: 1;">
+                                <div style="font-weight: 600;">Aadhaar Number</div>
+                                <div style="color: #666; font-size: 14px;">**** **** 9012</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div style="background: white; border-radius: 12px; margin-bottom: 16px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+                        <div style="padding: 16px; border-bottom: 1px solid #f0f0f0; display: flex; align-items: center; justify-content: space-between;">
+                            <div style="display: flex; align-items: center;">
+                                <span style="margin-right: 16px; color: #666;">🌐</span>
+                                <div>
+                                    <div style="font-weight: 600;">Language</div>
+                                    <div style="color: #666; font-size: 14px;">English</div>
+                                </div>
+                            </div>
+                            <span style="color: #ccc;">›</span>
+                        </div>
+                        <div style="padding: 16px; border-bottom: 1px solid #f0f0f0; display: flex; align-items: center; justify-content: space-between;">
+                            <div style="display: flex; align-items: center;">
+                                <span style="margin-right: 16px; color: #666;">🔔</span>
+                                <div>
+                                    <div style="font-weight: 600;">Notifications</div>
+                                    <div style="color: #666; font-size: 14px;">Manage notification preferences</div>
+                                </div>
+                            </div>
+                            <span style="color: #ccc;">›</span>
+                        </div>
+                        <div style="padding: 16px; display: flex; align-items: center; justify-content: space-between;">
+                            <div style="display: flex; align-items: center;">
+                                <span style="margin-right: 16px; color: #666;">🔒</span>
+                                <div>
+                                    <div style="font-weight: 600;">Privacy & Security</div>
+                                    <div style="color: #666; font-size: 14px;">Manage your privacy settings</div>
+                                </div>
+                            </div>
+                            <span style="color: #ccc;">›</span>
+                        </div>
+                    </div>
+                    
+                    <div style="background: white; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+                        <div style="padding: 16px; display: flex; align-items: center; justify-content: space-between; color: #F44336;">
+                            <div style="display: flex; align-items: center;">
+                                <span style="margin-right: 16px;">🚪</span>
+                                <div style="font-weight: 600;">Logout</div>
+                            </div>
+                            <span style="color: #ccc;">›</span>
+                        </div>
+                    </div>
+                    
+                    <div style="text-align: center; margin-top: 32px; color: #666; font-size: 12px;">
+                        Jal Guard v1.0.0
+                    </div>
+                </div>
+            </div>
+
+            <!-- Settings Screen -->
+            <div class="screen hidden" id="settings">
+                <div class="status-bar">
+                    <span>9:41</span>
+                    <span>Jal Guard</span>
+                    <span>100%</span>
+                </div>
+                <div class="app-bar">
+                    <button class="back-btn" onclick="showScreen('profile')">←</button>
+                    <h1>Settings</h1>
+                </div>
+                <div class="content">
+                    <div style="background: white; border-radius: 12px; margin-bottom: 16px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+                        <div style="padding: 16px; font-weight: bold; border-bottom: 1px solid #f0f0f0;">Language & Region</div>
+                        <div style="padding: 16px; border-bottom: 1px solid #f0f0f0; display: flex; align-items: center; justify-content: space-between;">
+                            <div>
+                                <div style="font-weight: 600;">English</div>
+                                <div style="color: #666; font-size: 14px;">English (US)</div>
+                            </div>
+                            <div style="width: 20px; height: 20px; border: 2px solid #2E7D32; border-radius: 50%; display: flex; align-items: center; justify-content: center;">
+                                <div style="width: 10px; height: 10px; background: #2E7D32; border-radius: 50%;"></div>
+                            </div>
+                        </div>
+                        <div style="padding: 16px; display: flex; align-items: center; justify-content: space-between;">
+                            <div>
+                                <div style="font-weight: 600;">Khasi</div>
+                                <div style="color: #666; font-size: 14px;">Khasi (Meghalaya)</div>
+                            </div>
+                            <div style="width: 20px; height: 20px; border: 2px solid #ccc; border-radius: 50%;"></div>
+                        </div>
+                    </div>
+                    
+                    <div style="background: white; border-radius: 12px; margin-bottom: 16px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+                        <div style="padding: 16px; font-weight: bold; border-bottom: 1px solid #f0f0f0;">Notifications</div>
+                        <div style="padding: 16px; border-bottom: 1px solid #f0f0f0; display: flex; align-items: center; justify-content: space-between;">
+                            <div>
+                                <div style="font-weight: 600;">Push Notifications</div>
+                                <div style="color: #666; font-size: 14px;">Receive health alerts and updates</div>
+                            </div>
+                            <div style="width: 50px; height: 30px; background: #2E7D32; border-radius: 15px; position: relative;">
+                                <div style="width: 26px; height: 26px; background: white; border-radius: 50%; position: absolute; top: 2px; right: 2px; box-shadow: 0 2px 4px rgba(0,0,0,0.2);"></div>
+                            </div>
+                        </div>
+                        <div style="padding: 16px; border-bottom: 1px solid #f0f0f0; display: flex; align-items: center; justify-content: space-between;">
+                            <div>
+                                <div style="font-weight: 600;">Health Alerts</div>
+                                <div style="color: #666; font-size: 14px;">Critical health situation alerts</div>
+                            </div>
+                            <div style="width: 50px; height: 30px; background: #2E7D32; border-radius: 15px; position: relative;">
+                                <div style="width: 26px; height: 26px; background: white; border-radius: 50%; position: absolute; top: 2px; right: 2px; box-shadow: 0 2px 4px rgba(0,0,0,0.2);"></div>
+                            </div>
+                        </div>
+                        <div style="padding: 16px; display: flex; align-items: center; justify-content: space-between;">
+                            <div>
+                                <div style="font-weight: 600;">System Messages</div>
+                                <div style="color: #666; font-size: 14px;">App updates and maintenance notices</div>
+                            </div>
+                            <div style="width: 50px; height: 30px; background: #ccc; border-radius: 15px; position: relative;">
+                                <div style="width: 26px; height: 26px; background: white; border-radius: 50%; position: absolute; top: 2px; left: 2px; box-shadow: 0 2px 4px rgba(0,0,0,0.2);"></div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div style="background: white; border-radius: 12px; margin-bottom: 16px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+                        <div style="padding: 16px; font-weight: bold; border-bottom: 1px solid #f0f0f0;">Privacy & Security</div>
+                        <div style="padding: 16px; border-bottom: 1px solid #f0f0f0; display: flex; align-items: center; justify-content: space-between;">
+                            <div>
+                                <div style="font-weight: 600;">Location Sharing</div>
+                                <div style="color: #666; font-size: 14px;">Share location for accurate reporting</div>
+                            </div>
+                            <div style="width: 50px; height: 30px; background: #2E7D32; border-radius: 15px; position: relative;">
+                                <div style="width: 26px; height: 26px; background: white; border-radius: 50%; position: absolute; top: 2px; right: 2px; box-shadow: 0 2px 4px rgba(0,0,0,0.2);"></div>
+                            </div>
+                        </div>
+                        <div style="padding: 16px; display: flex; align-items: center; justify-content: space-between;">
+                            <div>
+                                <div style="font-weight: 600;">Data Analytics</div>
+                                <div style="color: #666; font-size: 14px;">Help improve the app with anonymous data</div>
+                            </div>
+                            <div style="width: 50px; height: 30px; background: #2E7D32; border-radius: 15px; position: relative;">
+                                <div style="width: 26px; height: 26px; background: white; border-radius: 50%; position: absolute; top: 2px; right: 2px; box-shadow: 0 2px 4px rgba(0,0,0,0.2);"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- AI Co-pilot Screen -->
+            <div class="screen hidden" id="ai-copilot">
+                <div class="status-bar">
+                    <span>9:41</span>
+                    <span>Jal Guard</span>
+                    <span>100%</span>
+                </div>
+                <div class="app-bar">
+                    <button class="back-btn" onclick="showScreen('command-center')">←</button>
+                    <h1>AI Co-pilot</h1>
+                </div>
+                <div class="content">
+                    <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 20px; border-radius: 12px; margin-bottom: 16px;">
+                        <h3 style="margin-bottom: 8px;">🧠 AI Assistant</h3>
+                        <p style="opacity: 0.9;">Ask me anything about health data, risk analysis, or emergency response</p>
+                    </div>
+                    
+                    <div style="background: white; border-radius: 12px; padding: 16px; margin: 16px 0; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+                        <div style="display: flex; align-items: center; margin-bottom: 12px;">
+                            <div style="width: 30px; height: 30px; background: #2E7D32; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin-right: 12px; color: white;">AI</div>
+                            <div style="flex: 1;">
+                                <div style="font-weight: 600;">Risk Analysis Report</div>
+                                <div style="color: #666; font-size: 12px;">2 minutes ago</div>
+                            </div>
+                        </div>
+                        <p style="color: #666; line-height: 1.4;">Based on current data, East Khasi Hills shows elevated risk due to recent rainfall and increased water contamination reports. Recommend immediate water quality testing in affected areas.</p>
+                    </div>
+                    
+                    <div style="background: white; border-radius: 12px; padding: 16px; margin: 16px 0; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+                        <h4 style="margin-bottom: 12px;">💡 Action Plan Generated</h4>
+                        <div style="background: #f8f9fa; padding: 12px; border-radius: 8px; border-left: 4px solid #2E7D32;">
+                            <p style="margin: 4px 0; font-size: 14px;">1. Deploy water testing teams to high-risk areas</p>
+                            <p style="margin: 4px 0; font-size: 14px;">2. Issue public health advisory for water purification</p>
+                            <p style="margin: 4px 0; font-size: 14px;">3. Coordinate with local ASHA workers for community outreach</p>
+                        </div>
+                    </div>
+                    
+                    <div style="position: fixed; bottom: 100px; left: 20px; right: 20px;">
+                        <div style="display: flex; background: white; border-radius: 25px; padding: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+                            <input type="text" placeholder="Ask AI about health data..." style="flex: 1; border: none; padding: 12px; outline: none; border-radius: 20px;">
+                            <button style="background: #2E7D32; color: white; border: none; border-radius: 50%; width: 40px; height: 40px; margin-left: 8px;">📤</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Broadcast Screen -->
+            <div class="screen hidden" id="broadcast">
+                <div class="status-bar">
+                    <span>9:41</span>
+                    <span>Jal Guard</span>
+                    <span>100%</span>
+                </div>
+                <div class="app-bar">
+                    <button class="back-btn" onclick="showScreen('command-center')">←</button>
+                    <h1>AI Broadcast</h1>
+                </div>
+                <div class="content">
+                    <div style="background: white; border-radius: 12px; padding: 16px; margin: 16px 0; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+                        <h3 style="margin-bottom: 12px;">📢 Create Community Announcement</h3>
+                        <div style="background: #f8f9fa; padding: 12px; border-radius: 8px; margin-bottom: 16px;">
+                            <label style="display: block; font-weight: 600; margin-bottom: 8px;">Message Type:</label>
+                            <select style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 8px;">
+                                <option>Health Alert</option>
+                                <option>Preventive Measures</option>
+                                <option>Emergency Response</option>
+                                <option>General Information</option>
+                            </select>
+                        </div>
+                        
+                        <div style="background: #f8f9fa; padding: 12px; border-radius: 8px; margin-bottom: 16px;">
+                            <label style="display: block; font-weight: 600; margin-bottom: 8px;">Target Audience:</label>
+                            <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+                                <span style="background: #2E7D32; color: white; padding: 4px 12px; border-radius: 12px; font-size: 12px;">All Citizens</span>
+                                <span style="background: #e0e0e0; color: #666; padding: 4px 12px; border-radius: 12px; font-size: 12px;">ASHA Workers</span>
+                                <span style="background: #e0e0e0; color: #666; padding: 4px 12px; border-radius: 12px; font-size: 12px;">Health Officials</span>
+                            </div>
+                        </div>
+                        
+                        <textarea placeholder="Enter your message or let AI generate one..." style="width: 100%; height: 100px; padding: 12px; border: 1px solid #ddd; border-radius: 8px; resize: none; font-family: inherit;"></textarea>
+                        
+                        <button class="btn btn-primary" style="margin: 16px 0 8px;">🤖 Generate with AI</button>
+                        <button class="btn btn-primary" style="background: #4CAF50;">📤 Send Broadcast</button>
+                    </div>
+                    
+                    <div style="background: white; border-radius: 12px; padding: 16px; margin: 16px 0; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+                        <h4 style="margin-bottom: 12px;">📊 Recent Broadcasts</h4>
+                        <div style="border-left: 4px solid #FF9800; padding-left: 12px; margin-bottom: 12px;">
+                            <div style="font-weight: 600; color: #FF9800;">Water Quality Alert</div>
+                            <div style="color: #666; font-size: 12px;">Sent to 15,000 citizens • 2 hours ago</div>
+                        </div>
+                        <div style="border-left: 4px solid #4CAF50; padding-left: 12px;">
+                            <div style="font-weight: 600; color: #4CAF50;">Health Tips Update</div>
+                            <div style="color: #666; font-size: 12px;">Sent to all users • 1 day ago</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- District Details Screen -->
+            <div class="screen hidden" id="district-details">
+                <div class="status-bar">
+                    <span>9:41</span>
+                    <span>Jal Guard</span>
+                    <span>100%</span>
+                </div>
+                <div class="app-bar">
+                    <button class="back-btn" onclick="showScreen('command-center')">←</button>
+                    <h1>East Khasi Hills</h1>
+                </div>
+                <div class="content">
+                    <div style="background: white; border-radius: 12px; padding: 16px; margin: 16px 0; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+                            <h3>Risk Assessment</h3>
+                            <span style="background: #F44336; color: white; padding: 4px 12px; border-radius: 12px; font-size: 12px; font-weight: 600;">HIGH RISK</span>
+                        </div>
+                        <div style="background: #f8f9fa; padding: 12px; border-radius: 8px;">
+                            <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+                                <span>Risk Score:</span>
+                                <span style="font-weight: 600; color: #F44336;">7.8/10</span>
+                            </div>
+                            <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+                                <span>Active Reports:</span>
+                                <span style="font-weight: 600;">23</span>
+                            </div>
+                            <div style="display: flex; justify-content: space-between;">
+                                <span>Critical Reports:</span>
+                                <span style="font-weight: 600; color: #F44336;">3</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div style="background: white; border-radius: 12px; padding: 16px; margin: 16px 0; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+                        <h4 style="margin-bottom: 12px;">📡 IoT Sensor Data</h4>
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+                            <div style="background: #f8f9fa; padding: 12px; border-radius: 8px; text-align: center;">
+                                <div style="font-size: 24px; color: #F44336;">💧</div>
+                                <div style="font-weight: 600;">Water Quality</div>
+                                <div style="color: #F44336; font-size: 14px;">Poor</div>
+                            </div>
+                            <div style="background: #f8f9fa; padding: 12px; border-radius: 8px; text-align: center;">
+                                <div style="font-size: 24px; color: #FF9800;">🌡️</div>
+                                <div style="font-weight: 600;">Temperature</div>
+                                <div style="color: #FF9800; font-size: 14px;">28.5°C</div>
+                            </div>
+                            <div style="background: #f8f9fa; padding: 12px; border-radius: 8px; text-align: center;">
+                                <div style="font-size: 24px; color: #2196F3;">💨</div>
+                                <div style="font-weight: 600;">Humidity</div>
+                                <div style="color: #2196F3; font-size: 14px;">85.2%</div>
+                            </div>
+                            <div style="background: #f8f9fa; padding: 12px; border-radius: 8px; text-align: center;">
+                                <div style="font-size: 24px; color: #4CAF50;">⚗️</div>
+                                <div style="font-weight: 600;">pH Level</div>
+                                <div style="color: #4CAF50; font-size: 14px;">6.2</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div style="background: white; border-radius: 12px; padding: 16px; margin: 16px 0; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+                        <h4 style="margin-bottom: 12px;">📋 Recent Field Reports</h4>
+                        <div style="border-left: 4px solid #F44336; padding-left: 12px; margin-bottom: 12px;">
+                            <div style="font-weight: 600;">Water Contamination</div>
+                            <div style="color: #666; font-size: 12px;">Shillong • 2 hours ago • Critical</div>
+                        </div>
+                        <div style="border-left: 4px solid #FF9800; padding-left: 12px; margin-bottom: 12px;">
+                            <div style="font-weight: 600;">Health Symptoms</div>
+                            <div style="color: #666; font-size: 12px;">Mawryngkneng • 4 hours ago • Medium</div>
+                        </div>
+                        <div style="border-left: 4px solid #4CAF50; padding-left: 12px;">
+                            <div style="font-weight: 600;">Water Quality Good</div>
+                            <div style="color: #666; font-size: 12px;">Pynursla • 6 hours ago • Low</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Resources Screen -->
+            <div class="screen hidden" id="resources">
+                <div class="status-bar">
+                    <span>9:41</span>
+                    <span>Jal Guard</span>
+                    <span>100%</span>
+                </div>
+                <div class="app-bar">
+                    <button class="back-btn" onclick="showScreen('command-center')">←</button>
+                    <h1>Resources</h1>
+                </div>
+                <div class="content">
+                    <div style="background: white; border-radius: 12px; padding: 16px; margin: 16px 0; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+                        <h3 style="margin-bottom: 16px;">🏥 Medical Resources</h3>
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+                            <div style="background: #f8f9fa; padding: 12px; border-radius: 8px; text-align: center;">
+                                <div style="font-size: 24px; margin-bottom: 8px;">🚑</div>
+                                <div style="font-weight: 600; font-size: 14px;">Ambulances</div>
+                                <div style="color: #4CAF50; font-weight: 600;">12 Available</div>
+                            </div>
+                            <div style="background: #f8f9fa; padding: 12px; border-radius: 8px; text-align: center;">
+                                <div style="font-size: 24px; margin-bottom: 8px;">👨‍⚕️</div>
+                                <div style="font-weight: 600; font-size: 14px;">Doctors</div>
+                                <div style="color: #4CAF50; font-weight: 600;">45 On Duty</div>
+                            </div>
+                            <div style="background: #f8f9fa; padding: 12px; border-radius: 8px; text-align: center;">
+                                <div style="font-size: 24px; margin-bottom: 8px;">🏥</div>
+                                <div style="font-weight: 600; font-size: 14px;">Hospital Beds</div>
+                                <div style="color: #FF9800; font-weight: 600;">78% Occupied</div>
+                            </div>
+                            <div style="background: #f8f9fa; padding: 12px; border-radius: 8px; text-align: center;">
+                                <div style="font-size: 24px; margin-bottom: 8px;">💊</div>
+                                <div style="font-weight: 600; font-size: 14px;">Medicines</div>
+                                <div style="color: #4CAF50; font-weight: 600;">Stock Good</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div style="background: white; border-radius: 12px; padding: 16px; margin: 16px 0; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+                        <h4 style="margin-bottom: 12px;">📊 Resource Allocation</h4>
+                        <div style="margin-bottom: 12px;">
+                            <div style="display: flex; justify-content: space-between; margin-bottom: 4px;">
+                                <span>Emergency Response</span>
+                                <span>85%</span>
+                            </div>
+                            <div style="background: #e0e0e0; height: 8px; border-radius: 4px;">
+                                <div style="background: #F44336; height: 100%; width: 85%; border-radius: 4px;"></div>
+                            </div>
+                        </div>
+                        <div style="margin-bottom: 12px;">
+                            <div style="display: flex; justify-content: space-between; margin-bottom: 4px;">
+                                <span>Preventive Care</span>
+                                <span>60%</span>
+                            </div>
+                            <div style="background: #e0e0e0; height: 8px; border-radius: 4px;">
+                                <div style="background: #FF9800; height: 100%; width: 60%; border-radius: 4px;"></div>
+                            </div>
+                        </div>
+                        <div>
+                            <div style="display: flex; justify-content: space-between; margin-bottom: 4px;">
+                                <span>Community Outreach</span>
+                                <span>40%</span>
+                            </div>
+                            <div style="background: #e0e0e0; height: 8px; border-radius: 4px;">
+                                <div style="background: #4CAF50; height: 100%; width: 40%; border-radius: 4px;"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Emergency Escalation Screen -->
+            <div class="screen hidden" id="emergency">
+                <div class="status-bar">
+                    <span>9:41</span>
+                    <span>Jal Guard</span>
+                    <span>100%</span>
+                </div>
+                <div class="app-bar">
+                    <button class="back-btn" onclick="showScreen('command-center')">←</button>
+                    <h1>Emergency Response</h1>
+                </div>
+                <div class="content">
+                    <div style="background: linear-gradient(135deg, #F44336 0%, #FF5722 100%); color: white; padding: 20px; border-radius: 12px; margin-bottom: 16px;">
+                        <h3 style="margin-bottom: 8px;">🚨 Critical Alert</h3>
+                        <p style="opacity: 0.9;">Water contamination outbreak detected in East Khasi Hills</p>
+                    </div>
+                    
+                    <div style="background: white; border-radius: 12px; padding: 16px; margin: 16px 0; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+                        <h4 style="margin-bottom: 12px;">⚡ Immediate Actions</h4>
+                        <div style="background: #fff3e0; border: 1px solid #FF9800; border-radius: 8px; padding: 12px; margin-bottom: 12px;">
+                            <div style="font-weight: 600; color: #FF9800; margin-bottom: 4px;">1. Deploy Emergency Team</div>
+                            <div style="color: #666; font-size: 14px;">Send medical team to affected areas</div>
+                        </div>
+                        <div style="background: #e8f5e8; border: 1px solid #4CAF50; border-radius: 8px; padding: 12px; margin-bottom: 12px;">
+                            <div style="font-weight: 600; color: #4CAF50; margin-bottom: 4px;">2. Issue Public Alert</div>
+                            <div style="color: #666; font-size: 14px;">Notify all citizens in affected areas</div>
+                        </div>
+                        <div style="background: #e3f2fd; border: 1px solid #2196F3; border-radius: 8px; padding: 12px;">
+                            <div style="font-weight: 600; color: #2196F3; margin-bottom: 4px;">3. Coordinate Response</div>
+                            <div style="color: #666; font-size: 14px;">Activate emergency response protocols</div>
+                        </div>
+                    </div>
+                    
+                    <div style="background: white; border-radius: 12px; padding: 16px; margin: 16px 0; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+                        <h4 style="margin-bottom: 12px;">📞 Emergency Contacts</h4>
+                        <div style="display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px solid #f0f0f0;">
+                            <div>
+                                <div style="font-weight: 600;">District Health Officer</div>
+                                <div style="color: #666; font-size: 14px;">Dr. Rajesh Kumar</div>
+                            </div>
+                            <button style="background: #4CAF50; color: white; border: none; padding: 8px 16px; border-radius: 8px;">📞 Call</button>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px solid #f0f0f0;">
+                            <div>
+                                <div style="font-weight: 600;">Emergency Services</div>
+                                <div style="color: #666; font-size: 14px;">108 Ambulance</div>
+                            </div>
+                            <button style="background: #F44336; color: white; border: none; padding: 8px 16px; border-radius: 8px;">📞 Call</button>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; align-items: center; padding: 12px 0;">
+                            <div>
+                                <div style="font-weight: 600;">State Health Department</div>
+                                <div style="color: #666; font-size: 14px;">24/7 Helpline</div>
+                            </div>
+                            <button style="background: #2196F3; color: white; border: none; padding: 8px 16px; border-radius: 8px;">📞 Call</button>
+                        </div>
+                    </div>
+                    
+                    <button class="btn btn-primary" style="background: #F44336; margin: 16px 0;">🚨 Activate Emergency Protocol</button>
+                </div>
+            </div>
+
+            <!-- Report Form Screen -->
+            <div class="screen hidden" id="report-form">
+                <div class="status-bar">
+                    <span>9:41</span>
+                    <span>Jal Guard</span>
+                    <span>100%</span>
+                </div>
+                <div class="app-bar">
+                    <button class="back-btn" onclick="showScreen('field-dashboard')">←</button>
+                    <h1>Health Report</h1>
+                </div>
+                <div class="content">
+                    <div style="background: white; border-radius: 12px; padding: 16px; margin: 16px 0; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+                        <h3 style="margin-bottom: 16px;">📝 Submit Health Report</h3>
+                        
+                        <div style="margin-bottom: 16px;">
+                            <label style="display: block; font-weight: 600; margin-bottom: 8px;">Report Type:</label>
+                            <select style="width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 8px;">
+                                <option>Water Quality Issue</option>
+                                <option>Health Symptoms</option>
+                                <option>Environmental Concern</option>
+                                <option>Infrastructure Problem</option>
+                            </select>
+                        </div>
+                        
+                        <div style="margin-bottom: 16px;">
+                            <label style="display: block; font-weight: 600; margin-bottom: 8px;">Severity:</label>
+                            <div style="display: flex; gap: 8px;">
+                                <button style="flex: 1; padding: 8px; background: #4CAF50; color: white; border: none; border-radius: 8px;">Low</button>
+                                <button style="flex: 1; padding: 8px; background: #FF9800; color: white; border: none; border-radius: 8px;">Medium</button>
+                                <button style="flex: 1; padding: 8px; background: #F44336; color: white; border: none; border-radius: 8px;">High</button>
+                            </div>
+                        </div>
+                        
+                        <div style="margin-bottom: 16px;">
+                            <label style="display: block; font-weight: 600; margin-bottom: 8px;">Location:</label>
+                            <input type="text" placeholder="Enter location details" style="width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 8px;">
+                        </div>
+                        
+                        <div style="margin-bottom: 16px;">
+                            <label style="display: block; font-weight: 600; margin-bottom: 8px;">Description:</label>
+                            <textarea placeholder="Describe the health concern in detail..." style="width: 100%; height: 100px; padding: 12px; border: 1px solid #ddd; border-radius: 8px; resize: none;"></textarea>
+                        </div>
+                        
+                        <div style="border: 2px dashed #ccc; border-radius: 12px; padding: 20px; text-align: center; margin: 16px 0;">
+                            <div style="font-size: 48px; color: #ccc; margin-bottom: 16px;">📷</div>
+                            <h4>Add Photos</h4>
+                            <p style="color: #666; margin: 8px 0;">Take photos to support your report</p>
+                            <button class="btn btn-primary" style="width: auto; padding: 8px 24px;">📷 Take Photo</button>
+                        </div>
+                        
+                        <button class="btn btn-primary">📤 Submit Report</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- MCP Card Screen -->
+            <div class="screen hidden" id="mcp-card">
+                <div class="status-bar">
+                    <span>9:41</span>
+                    <span>Jal Guard</span>
+                    <span>100%</span>
+                </div>
+                <div class="app-bar">
+                    <button class="back-btn" onclick="showScreen('field-dashboard')">←</button>
+                    <h1>MCP Card</h1>
+                </div>
+                <div class="content">
+                    <div style="background: linear-gradient(135deg, #E91E63 0%, #F06292 100%); color: white; padding: 20px; border-radius: 12px; margin-bottom: 16px;">
+                        <h3 style="margin-bottom: 8px;">👶 Digital MCP Card</h3>
+                        <p style="opacity: 0.9;">Mother and Child Protection Tracking</p>
+                    </div>
+                    
+                    <div style="background: white; border-radius: 12px; padding: 16px; margin: 16px 0; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+                        <div style="text-align: center; margin-bottom: 16px;">
+                            <div style="width: 60px; height: 60px; background: #E91E63; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 12px; color: white; font-size: 24px;">👶</div>
+                            <div style="font-size: 18px; font-weight: bold;">Priya Sharma</div>
+                            <div style="color: #666; font-size: 14px;">Age: 2 years 3 months</div>
+                        </div>
+                        
+                        <div style="background: #f8f9fa; padding: 12px; border-radius: 8px; margin-bottom: 12px;">
+                            <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+                                <span>Last Checkup:</span>
+                                <span style="font-weight: 600; color: #4CAF50;">2 weeks ago</span>
+                            </div>
+                            <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+                                <span>Next Due:</span>
+                                <span style="font-weight: 600; color: #FF9800;">In 2 weeks</span>
+                            </div>
+                            <div style="display: flex; justify-content: space-between;">
+                                <span>Vaccination Status:</span>
+                                <span style="font-weight: 600; color: #4CAF50;">Up to date</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div style="background: white; border-radius: 12px; padding: 16px; margin: 16px 0; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+                        <h4 style="margin-bottom: 12px;">📋 Health Records</h4>
+                        <div style="border-left: 4px solid #4CAF50; padding-left: 12px; margin-bottom: 12px;">
+                            <div style="font-weight: 600;">Growth Checkup</div>
+                            <div style="color: #666; font-size: 12px;">Weight: 12.5 kg • Height: 85 cm • 2 weeks ago</div>
+                        </div>
+                        <div style="border-left: 4px solid #2196F3; padding-left: 12px; margin-bottom: 12px;">
+                            <div style="font-weight: 600;">Vaccination</div>
+                            <div style="color: #666; font-size: 12px;">DPT Booster • 1 month ago</div>
+                        </div>
+                        <div style="border-left: 4px solid #FF9800; padding-left: 12px;">
+                            <div style="font-weight: 600;">Nutrition Assessment</div>
+                            <div style="color: #666; font-size: 12px;">Good nutrition status • 1 month ago</div>
+                        </div>
+                    </div>
+                    
+                    <button class="btn btn-primary" style="background: #E91E63;">📝 Add New Record</button>
+                </div>
+            </div>
+
+            <!-- Education Screen -->
+            <div class="screen hidden" id="education">
+                <div class="status-bar">
+                    <span>9:41</span>
+                    <span>Jal Guard</span>
+                    <span>100%</span>
+                </div>
+                <div class="app-bar">
+                    <button class="back-btn" onclick="showScreen('field-dashboard')">←</button>
+                    <h1>Education</h1>
+                </div>
+                <div class="content">
+                    <div style="background: white; border-radius: 12px; padding: 16px; margin: 16px 0; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+                        <h3 style="margin-bottom: 16px;">📚 Health Education Modules</h3>
+                        
+                        <div style="display: flex; gap: 8px; margin-bottom: 16px; flex-wrap: wrap;">
+                            <span style="background: #2E7D32; color: white; padding: 4px 12px; border-radius: 12px; font-size: 12px;">All</span>
+                            <span style="background: #e0e0e0; color: #666; padding: 4px 12px; border-radius: 12px; font-size: 12px;">Water Safety</span>
+                            <span style="background: #e0e0e0; color: #666; padding: 4px 12px; border-radius: 12px; font-size: 12px;">Hygiene</span>
+                            <span style="background: #e0e0e0; color: #666; padding: 4px 12px; border-radius: 12px; font-size: 12px;">Nutrition</span>
+                        </div>
+                        
+                        <div style="border: 1px solid #e0e0e0; border-radius: 8px; padding: 12px; margin-bottom: 12px;">
+                            <div style="display: flex; align-items: center; margin-bottom: 8px;">
+                                <span style="font-size: 24px; margin-right: 12px;">💧</span>
+                                <div style="flex: 1;">
+                                    <div style="font-weight: 600;">Water Purification Methods</div>
+                                    <div style="color: #666; font-size: 12px;">Learn about different water treatment techniques</div>
+                                </div>
+                            </div>
+                            <div style="background: #f8f9fa; padding: 8px; border-radius: 4px; font-size: 12px; color: #666;">
+                                • Boil water for at least 1 minute<br>
+                                • Use water filters or purifiers<br>
+                                • Add chlorine tablets if available
+                            </div>
+                        </div>
+                        
+                        <div style="border: 1px solid #e0e0e0; border-radius: 8px; padding: 12px; margin-bottom: 12px;">
+                            <div style="display: flex; align-items: center; margin-bottom: 8px;">
+                                <span style="font-size: 24px; margin-right: 12px;">🧼</span>
+                                <div style="flex: 1;">
+                                    <div style="font-weight: 600;">Hand Hygiene Best Practices</div>
+                                    <div style="color: #666; font-size: 12px;">Proper handwashing techniques and timing</div>
+                                </div>
+                            </div>
+                            <div style="background: #f8f9fa; padding: 8px; border-radius: 4px; font-size: 12px; color: #666;">
+                                • Wash hands for at least 20 seconds<br>
+                                • Use soap and clean water<br>
+                                • Dry hands thoroughly
+                            </div>
+                        </div>
+                        
+                        <div style="border: 1px solid #e0e0e0; border-radius: 8px; padding: 12px;">
+                            <div style="display: flex; align-items: center; margin-bottom: 8px;">
+                                <span style="font-size: 24px; margin-right: 12px;">🍎</span>
+                                <div style="flex: 1;">
+                                    <div style="font-weight: 600;">Nutrition for Children</div>
+                                    <div style="color: #666; font-size: 12px;">Essential nutrients and feeding guidelines</div>
+                                </div>
+                            </div>
+                            <div style="background: #f8f9fa; padding: 8px; border-radius: 4px; font-size: 12px; color: #666;">
+                                • Include all food groups<br>
+                                • Ensure adequate protein intake<br>
+                                • Monitor growth regularly
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Concern Report Screen -->
+            <div class="screen hidden" id="concern-report">
+                <div class="status-bar">
+                    <span>9:41</span>
+                    <span>Jal Guard</span>
+                    <span>100%</span>
+                </div>
+                <div class="app-bar">
+                    <button class="back-btn" onclick="showScreen('citizen-dashboard')">←</button>
+                    <h1>Report Concern</h1>
+                </div>
+                <div class="content">
+                    <div style="background: white; border-radius: 12px; padding: 16px; margin: 16px 0; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+                        <h3 style="margin-bottom: 16px;">📝 Report Health Concern</h3>
+                        
+                        <div style="margin-bottom: 16px;">
+                            <label style="display: block; font-weight: 600; margin-bottom: 8px;">Concern Type:</label>
+                            <select style="width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 8px;">
+                                <option>Water Quality Issue</option>
+                                <option>Health Symptoms</option>
+                                <option>Environmental Concern</option>
+                                <option>Infrastructure Problem</option>
+                                <option>Other</option>
+                            </select>
+                        </div>
+                        
+                        <div style="margin-bottom: 16px;">
+                            <label style="display: block; font-weight: 600; margin-bottom: 8px;">Description:</label>
+                            <textarea placeholder="Please describe your concern in detail..." style="width: 100%; height: 100px; padding: 12px; border: 1px solid #ddd; border-radius: 8px; resize: none;"></textarea>
+                        </div>
+                        
+                        <div style="margin-bottom: 16px;">
+                            <label style="display: block; font-weight: 600; margin-bottom: 8px;">Location:</label>
+                            <input type="text" placeholder="Enter your location" style="width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 8px;">
+                        </div>
+                        
+                        <div style="margin-bottom: 16px;">
+                            <label style="display: block; font-weight: 600; margin-bottom: 8px;">Contact Information:</label>
+                            <input type="text" placeholder="Phone number (optional)" style="width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 8px; margin-bottom: 8px;">
+                            <input type="email" placeholder="Email (optional)" style="width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 8px;">
+                        </div>
+                        
+                        <div style="border: 2px dashed #ccc; border-radius: 12px; padding: 20px; text-align: center; margin: 16px 0;">
+                            <div style="font-size: 48px; color: #ccc; margin-bottom: 16px;">📷</div>
+                            <h4>Add Photos (Optional)</h4>
+                            <p style="color: #666; margin: 8px 0;">Photos help officials understand the issue better</p>
+                            <button class="btn btn-primary" style="width: auto; padding: 8px 24px;">📷 Take Photo</button>
+                        </div>
+                        
+                        <button class="btn btn-primary">📤 Submit Concern</button>
+                        
+                        <div style="background: #e3f2fd; border: 1px solid #2196F3; border-radius: 8px; padding: 12px; margin-top: 16px;">
+                            <div style="font-weight: 600; color: #2196F3; margin-bottom: 4px;">ℹ️ Privacy Notice</div>
+                            <div style="color: #666; font-size: 12px;">Your report will be reviewed by health officials. Personal information is kept confidential and used only for follow-up if needed.</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function showScreen(screenId) {
+            // Stop splash animations when switching away from splash
+            if (screenId !== 'splash') {
+                stopSplashAnimations();
+            }
+            
+            // Hide all screens
+            const screens = document.querySelectorAll('.screen');
+            screens.forEach(screen => {
+                screen.classList.add('hidden');
+                screen.classList.remove('active');
+            });
+            
+            // Show selected screen
+            const selectedScreen = document.getElementById(screenId);
+            if (selectedScreen) {
+                selectedScreen.classList.remove('hidden');
+                selectedScreen.classList.add('active');
+            }
+            
+            // Update control buttons
+            const buttons = document.querySelectorAll('.control-btn');
+            buttons.forEach(btn => btn.classList.remove('active'));
+            
+            // Simple mapping for button activation
+            const buttonMap = {
+                'splash': 'Splash Screen',
+                'welcome': 'Welcome',
+                'aadhaar': 'Aadhaar Entry',
+                'otp': 'OTP Verification',
+                'professional': 'Professional Verify',
+                'command-center': 'Command Center',
+                'ai-copilot': 'AI Co-pilot',
+                'broadcast': 'Broadcast',
+                'district-details': 'District Details',
+                'resources': 'Resources',
+                'emergency': 'Emergency',
+                'field-dashboard': 'Field Dashboard',
+                'report-form': 'Report Form',
+                'mcp-card': 'MCP Card',
+                'education': 'Education',
+                'citizen-dashboard': 'Citizen Dashboard',
+                'concern-report': 'Concern Report',
+                'notifications': 'Notifications',
+                'profile': 'Profile',
+                'settings': 'Settings'
+            };
+            
+            const targetText = buttonMap[screenId];
+            if (targetText) {
+                const clickedButton = Array.from(buttons).find(btn => 
+                    btn.textContent.trim() === targetText
+                );
+                if (clickedButton) {
+                    clickedButton.classList.add('active');
+                }
+            }
+            
+            // Start splash screen animations if splash is selected
+            if (screenId === 'splash') {
+                startSplashAnimations();
+            }
+        }
+
+        let splashAnimationInterval;
+        
+        function startSplashAnimations() {
+            // Clear any existing animation
+            if (splashAnimationInterval) {
+                clearInterval(splashAnimationInterval);
+            }
+            
+            const loadingTexts = [
+                'Initializing system...',
+                'Loading health data...',
+                'Connecting to servers...',
+                'Almost ready...'
+            ];
+            
+            const loadingTextElement = document.getElementById('loading-text');
+            let textIndex = 0;
+            
+            const updateText = () => {
+                if (loadingTextElement && textIndex < loadingTexts.length) {
+                    loadingTextElement.textContent = loadingTexts[textIndex];
+                    textIndex++;
+                    if (textIndex >= loadingTexts.length) {
+                        textIndex = 0; // Loop back to start
+                    }
+                }
+            };
+            
+            // Start text animation immediately, then repeat every 800ms
+            updateText();
+            splashAnimationInterval = setInterval(updateText, 800);
+        }
+        
+        function stopSplashAnimations() {
+            if (splashAnimationInterval) {
+                clearInterval(splashAnimationInterval);
+                splashAnimationInterval = null;
+            }
+        }
+        
+        function toggleControls() {
+            const controlsContent = document.getElementById('controls-content');
+            const toggleButton = document.getElementById('toggle-controls');
+            const controls = document.getElementById('controls');
+            
+            if (controlsContent.style.display === 'none') {
+                controlsContent.style.display = 'block';
+                toggleButton.textContent = '−';
+                controls.style.maxHeight = 'calc(100vh - 40px)';
+            } else {
+                controlsContent.style.display = 'none';
+                toggleButton.textContent = '+';
+                controls.style.maxHeight = '60px';
+            }
+        }
+
+        // Auto-start splash animations on page load
+        document.addEventListener('DOMContentLoaded', () => {
+            startSplashAnimations();
+        });
+    </script>
+</body>
+</html>
