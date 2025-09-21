@@ -1,32 +1,27 @@
 import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
-import 'dart:convert';
 import 'dart:io';
 
-import '../models/user_model.dart';
-import '../models/health_report_model.dart';
-import '../models/district_model.dart';
-import '../models/notification_model.dart';
 
 class DatabaseService {
   static Database? _database;
   static const String _databaseName = 'jal_guard_enhanced.db';
   static const int _databaseVersion = 2;
 
-  // Table names
-  static const String _usersTable = 'users';
-  static const String _healthReportsTable = 'health_reports';
-  static const String _districtsTable = 'districts';
-  static const String _notificationsTable = 'notifications';
-  static const String _iotSensorDataTable = 'iot_sensor_data';
-  static const String _riskAnalysisTable = 'risk_analysis';
-  static const String _syncQueueTable = 'sync_queue';
-  static const String _userPreferencesTable = 'user_preferences';
-  static const String _cachedDataTable = 'cached_data';
-  static const String _actionPlansTable = 'action_plans';
-  static const String _resourcesTable = 'resources';
-  static const String _mcpCardsTable = 'mcp_cards';
-  static const String _educationalContentTable = 'educational_content';
+  // Table names - Public constants for DAO access
+  static const String usersTable = 'users';
+  static const String healthReportsTable = 'health_reports';
+  static const String districtsTable = 'districts';
+  static const String notificationsTable = 'notifications';
+  static const String iotSensorDataTable = 'iot_sensor_data';
+  static const String riskAnalysisTable = 'risk_analysis';
+  static const String syncQueueTable = 'sync_queue';
+  static const String userPreferencesTable = 'user_preferences';
+  static const String cachedDataTable = 'cached_data';
+  static const String actionPlansTable = 'action_plans';
+  static const String resourcesTable = 'resources';
+  static const String mcpCardsTable = 'mcp_cards';
+  static const String educationalContentTable = 'educational_content';
 
   // Initialize database
   static Future<void> initialize() async {
@@ -55,7 +50,7 @@ class DatabaseService {
     await db.transaction((txn) async {
       // Users table
       await txn.execute('''
-        CREATE TABLE $_usersTable (
+        CREATE TABLE $usersTable (
           id TEXT PRIMARY KEY,
           aadhaar_number TEXT UNIQUE NOT NULL,
           phone_number TEXT NOT NULL,
@@ -76,7 +71,7 @@ class DatabaseService {
 
       // Health reports table
       await txn.execute('''
-        CREATE TABLE $_healthReportsTable (
+        CREATE TABLE $healthReportsTable (
           id TEXT PRIMARY KEY,
           user_id TEXT NOT NULL,
           reporter_name TEXT NOT NULL,
@@ -102,13 +97,13 @@ class DatabaseService {
           last_sync_attempt TEXT,
           created_at TEXT NOT NULL,
           updated_at TEXT NOT NULL,
-          FOREIGN KEY (user_id) REFERENCES $_usersTable (id)
+          FOREIGN KEY (user_id) REFERENCES $usersTable (id)
         )
       ''');
 
       // Districts table
       await txn.execute('''
-        CREATE TABLE $_districtsTable (
+        CREATE TABLE $districtsTable (
           id TEXT PRIMARY KEY,
           name TEXT NOT NULL,
           state TEXT NOT NULL,
@@ -131,7 +126,7 @@ class DatabaseService {
 
       // Notifications table
       await txn.execute('''
-        CREATE TABLE $_notificationsTable (
+        CREATE TABLE $notificationsTable (
           id TEXT PRIMARY KEY,
           user_id TEXT,
           title TEXT NOT NULL,
@@ -146,13 +141,13 @@ class DatabaseService {
           metadata TEXT,
           is_synced INTEGER NOT NULL DEFAULT 0,
           created_at TEXT NOT NULL,
-          FOREIGN KEY (user_id) REFERENCES $_usersTable (id)
+          FOREIGN KEY (user_id) REFERENCES $usersTable (id)
         )
       ''');
 
       // IoT Sensor Data table
       await txn.execute('''
-        CREATE TABLE $_iotSensorDataTable (
+        CREATE TABLE $iotSensorDataTable (
           id TEXT PRIMARY KEY,
           sensor_id TEXT NOT NULL,
           sensor_type TEXT NOT NULL,
@@ -171,7 +166,7 @@ class DatabaseService {
 
       // Risk Analysis table
       await txn.execute('''
-        CREATE TABLE $_riskAnalysisTable (
+        CREATE TABLE $riskAnalysisTable (
           id TEXT PRIMARY KEY,
           district_id TEXT NOT NULL,
           risk_score REAL NOT NULL,
@@ -192,7 +187,7 @@ class DatabaseService {
 
       // Sync Queue table
       await txn.execute('''
-        CREATE TABLE $_syncQueueTable (
+        CREATE TABLE $syncQueueTable (
           id TEXT PRIMARY KEY,
           table_name TEXT NOT NULL,
           record_id TEXT NOT NULL,
@@ -209,7 +204,7 @@ class DatabaseService {
 
       // User Preferences table
       await txn.execute('''
-        CREATE TABLE $_userPreferencesTable (
+        CREATE TABLE $userPreferencesTable (
           user_id TEXT PRIMARY KEY,
           language TEXT NOT NULL DEFAULT 'en',
           notification_settings TEXT NOT NULL DEFAULT '{}',
@@ -221,13 +216,13 @@ class DatabaseService {
           theme_preference TEXT NOT NULL DEFAULT 'system',
           created_at TEXT NOT NULL,
           updated_at TEXT NOT NULL,
-          FOREIGN KEY (user_id) REFERENCES $_usersTable (id)
+          FOREIGN KEY (user_id) REFERENCES $usersTable (id)
         )
       ''');
 
       // Cached Data table
       await txn.execute('''
-        CREATE TABLE $_cachedDataTable (
+        CREATE TABLE $cachedDataTable (
           id TEXT PRIMARY KEY,
           cache_key TEXT UNIQUE NOT NULL,
           data_type TEXT NOT NULL,
@@ -241,7 +236,7 @@ class DatabaseService {
 
       // Action Plans table
       await txn.execute('''
-        CREATE TABLE $_actionPlansTable (
+        CREATE TABLE $actionPlansTable (
           id TEXT PRIMARY KEY,
           district_id TEXT NOT NULL,
           situation TEXT NOT NULL,
@@ -260,7 +255,7 @@ class DatabaseService {
 
       // Resources table
       await txn.execute('''
-        CREATE TABLE $_resourcesTable (
+        CREATE TABLE $resourcesTable (
           id TEXT PRIMARY KEY,
           name TEXT NOT NULL,
           type TEXT NOT NULL,
@@ -278,7 +273,7 @@ class DatabaseService {
 
       // MCP Cards table
       await txn.execute('''
-        CREATE TABLE $_mcpCardsTable (
+        CREATE TABLE $mcpCardsTable (
           id TEXT PRIMARY KEY,
           patient_id TEXT NOT NULL,
           patient_name TEXT NOT NULL,
@@ -302,7 +297,7 @@ class DatabaseService {
 
       // Educational Content table
       await txn.execute('''
-        CREATE TABLE $_educationalContentTable (
+        CREATE TABLE $educationalContentTable (
           id TEXT PRIMARY KEY,
           title TEXT NOT NULL,
           content TEXT NOT NULL,
@@ -337,28 +332,28 @@ class DatabaseService {
     await db.execute('CREATE INDEX idx_health_reports_location ON $_healthReportsTable (latitude, longitude)');
 
     // IoT sensor data indexes
-    await db.execute('CREATE INDEX idx_iot_sensor_data_sensor_id ON $_iotSensorDataTable (sensor_id)');
-    await db.execute('CREATE INDEX idx_iot_sensor_data_district_id ON $_iotSensorDataTable (district_id)');
-    await db.execute('CREATE INDEX idx_iot_sensor_data_recorded_at ON $_iotSensorDataTable (recorded_at)');
-    await db.execute('CREATE INDEX idx_iot_sensor_data_type ON $_iotSensorDataTable (sensor_type)');
+    await db.execute('CREATE INDEX idx_iot_sensor_data_sensor_id ON $iotSensorDataTable (sensor_id)');
+    await db.execute('CREATE INDEX idx_iot_sensor_data_district_id ON $iotSensorDataTable (district_id)');
+    await db.execute('CREATE INDEX idx_iot_sensor_data_recorded_at ON $iotSensorDataTable (recorded_at)');
+    await db.execute('CREATE INDEX idx_iot_sensor_data_type ON $iotSensorDataTable (sensor_type)');
 
     // Notifications indexes
-    await db.execute('CREATE INDEX idx_notifications_user_id ON $_notificationsTable (user_id)');
-    await db.execute('CREATE INDEX idx_notifications_is_read ON $_notificationsTable (is_read)');
-    await db.execute('CREATE INDEX idx_notifications_sent_at ON $_notificationsTable (sent_at)');
+    await db.execute('CREATE INDEX idx_notifications_user_id ON $notificationsTable (user_id)');
+    await db.execute('CREATE INDEX idx_notifications_is_read ON $notificationsTable (is_read)');
+    await db.execute('CREATE INDEX idx_notifications_sent_at ON $notificationsTable (sent_at)');
 
     // Risk analysis indexes
-    await db.execute('CREATE INDEX idx_risk_analysis_district_id ON $_riskAnalysisTable (district_id)');
-    await db.execute('CREATE INDEX idx_risk_analysis_analyzed_at ON $_riskAnalysisTable (analyzed_at)');
+    await db.execute('CREATE INDEX idx_risk_analysis_district_id ON $riskAnalysisTable (district_id)');
+    await db.execute('CREATE INDEX idx_risk_analysis_analyzed_at ON $riskAnalysisTable (analyzed_at)');
 
     // Sync queue indexes
-    await db.execute('CREATE INDEX idx_sync_queue_priority ON $_syncQueueTable (priority)');
-    await db.execute('CREATE INDEX idx_sync_queue_created_at ON $_syncQueueTable (created_at)');
-    await db.execute('CREATE INDEX idx_sync_queue_is_processing ON $_syncQueueTable (is_processing)');
+    await db.execute('CREATE INDEX idx_sync_queue_priority ON $syncQueueTable (priority)');
+    await db.execute('CREATE INDEX idx_sync_queue_created_at ON $syncQueueTable (created_at)');
+    await db.execute('CREATE INDEX idx_sync_queue_is_processing ON $syncQueueTable (is_processing)');
 
     // Cached data indexes
-    await db.execute('CREATE INDEX idx_cached_data_cache_key ON $_cachedDataTable (cache_key)');
-    await db.execute('CREATE INDEX idx_cached_data_expires_at ON $_cachedDataTable (expires_at)');
+    await db.execute('CREATE INDEX idx_cached_data_cache_key ON $cachedDataTable (cache_key)');
+    await db.execute('CREATE INDEX idx_cached_data_expires_at ON $cachedDataTable (expires_at)');
 
     print('Database indexes created successfully');
   }
@@ -398,7 +393,7 @@ class DatabaseService {
   static Future<void> _seedInitialData() async {
     try {
       // Check if data already exists
-      final existingDistricts = await _database!.query(_districtsTable, limit: 1);
+      final existingDistricts = await _database!.query(districtsTable, limit: 1);
       if (existingDistricts.isNotEmpty) return;
 
       // Seed districts
@@ -512,7 +507,7 @@ class DatabaseService {
     ];
 
     for (final district in districts) {
-      await _database!.insert(_districtsTable, district);
+      await _database!.insert(districtsTable, district);
     }
   }
 
@@ -567,7 +562,7 @@ class DatabaseService {
     ];
 
     for (final item in content) {
-      await _database!.insert(_educationalContentTable, item);
+      await _database!.insert(educationalContentTable, item);
     }
   }
 
@@ -619,7 +614,7 @@ class DatabaseService {
     ];
 
     for (final resource in resources) {
-      await _database!.insert(_resourcesTable, resource);
+      await _database!.insert(resourcesTable, resource);
     }
   }
 
@@ -646,19 +641,19 @@ class DatabaseService {
 
     try {
       final tables = [
-        _usersTable,
-        _healthReportsTable,
-        _districtsTable,
-        _notificationsTable,
-        _iotSensorDataTable,
-        _riskAnalysisTable,
-        _syncQueueTable,
-        _userPreferencesTable,
-        _cachedDataTable,
-        _actionPlansTable,
-        _resourcesTable,
-        _mcpCardsTable,
-        _educationalContentTable,
+        usersTable,
+        healthReportsTable,
+        districtsTable,
+        notificationsTable,
+        iotSensorDataTable,
+        riskAnalysisTable,
+        syncQueueTable,
+        userPreferencesTable,
+        cachedDataTable,
+        actionPlansTable,
+        resourcesTable,
+        mcpCardsTable,
+        educationalContentTable,
       ];
 
       final tableStats = <String, int>{};
@@ -688,19 +683,19 @@ class DatabaseService {
     if (_database == null) return;
 
     final tables = [
-      _usersTable,
-      _healthReportsTable,
-      _districtsTable,
-      _notificationsTable,
-      _iotSensorDataTable,
-      _riskAnalysisTable,
-      _syncQueueTable,
-      _userPreferencesTable,
-      _cachedDataTable,
-      _actionPlansTable,
-      _resourcesTable,
-      _mcpCardsTable,
-      _educationalContentTable,
+      usersTable,
+      healthReportsTable,
+      districtsTable,
+      notificationsTable,
+      iotSensorDataTable,
+      riskAnalysisTable,
+      syncQueueTable,
+      userPreferencesTable,
+      cachedDataTable,
+      actionPlansTable,
+      resourcesTable,
+      mcpCardsTable,
+      educationalContentTable,
     ];
 
     await _database!.transaction((txn) async {

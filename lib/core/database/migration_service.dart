@@ -1,5 +1,4 @@
 import 'package:sqflite/sqflite.dart';
-import 'dart:convert';
 
 import 'database_service.dart';
 
@@ -15,7 +14,7 @@ class MigrationService {
     return [
       // Users table
       '''
-        CREATE TABLE ${DatabaseService._usersTable} (
+        CREATE TABLE ${DatabaseService.usersTable} (
           id TEXT PRIMARY KEY,
           aadhaar_number TEXT UNIQUE NOT NULL,
           phone_number TEXT NOT NULL,
@@ -34,7 +33,7 @@ class MigrationService {
       
       // Health reports table
       '''
-        CREATE TABLE ${DatabaseService._healthReportsTable} (
+        CREATE TABLE ${DatabaseService.healthReportsTable} (
           id TEXT PRIMARY KEY,
           user_id TEXT NOT NULL,
           reporter_name TEXT NOT NULL,
@@ -56,13 +55,13 @@ class MigrationService {
           is_synced INTEGER NOT NULL DEFAULT 0,
           created_at TEXT NOT NULL,
           updated_at TEXT NOT NULL,
-          FOREIGN KEY (user_id) REFERENCES ${DatabaseService._usersTable} (id)
+          FOREIGN KEY (user_id) REFERENCES ${DatabaseService.usersTable} (id)
         )
       ''',
       
       // Districts table
       '''
-        CREATE TABLE ${DatabaseService._districtsTable} (
+        CREATE TABLE ${DatabaseService.districtsTable} (
           id TEXT PRIMARY KEY,
           name TEXT NOT NULL,
           state TEXT NOT NULL,
@@ -82,7 +81,7 @@ class MigrationService {
       
       // Notifications table
       '''
-        CREATE TABLE ${DatabaseService._notificationsTable} (
+        CREATE TABLE ${DatabaseService.notificationsTable} (
           id TEXT PRIMARY KEY,
           user_id TEXT,
           title TEXT NOT NULL,
@@ -97,13 +96,13 @@ class MigrationService {
           metadata TEXT,
           is_synced INTEGER NOT NULL DEFAULT 0,
           created_at TEXT NOT NULL,
-          FOREIGN KEY (user_id) REFERENCES ${DatabaseService._usersTable} (id)
+          FOREIGN KEY (user_id) REFERENCES ${DatabaseService.usersTable} (id)
         )
       ''',
       
       // IoT Sensor Data table
       '''
-        CREATE TABLE ${DatabaseService._iotSensorDataTable} (
+        CREATE TABLE ${DatabaseService.iotSensorDataTable} (
           id TEXT PRIMARY KEY,
           sensor_id TEXT NOT NULL,
           sensor_type TEXT NOT NULL,
@@ -122,7 +121,7 @@ class MigrationService {
       
       // Risk Analysis table
       '''
-        CREATE TABLE ${DatabaseService._riskAnalysisTable} (
+        CREATE TABLE ${DatabaseService.riskAnalysisTable} (
           id TEXT PRIMARY KEY,
           district_id TEXT NOT NULL,
           risk_score REAL NOT NULL,
@@ -137,13 +136,13 @@ class MigrationService {
           valid_until TEXT NOT NULL,
           is_synced INTEGER NOT NULL DEFAULT 0,
           created_at TEXT NOT NULL,
-          FOREIGN KEY (district_id) REFERENCES ${DatabaseService._districtsTable} (id)
+          FOREIGN KEY (district_id) REFERENCES ${DatabaseService.districtsTable} (id)
         )
       ''',
       
       // Sync Queue table
       '''
-        CREATE TABLE ${DatabaseService._syncQueueTable} (
+        CREATE TABLE ${DatabaseService.syncQueueTable} (
           id TEXT PRIMARY KEY,
           table_name TEXT NOT NULL,
           record_id TEXT NOT NULL,
@@ -160,7 +159,7 @@ class MigrationService {
       
       // User Preferences table
       '''
-        CREATE TABLE ${DatabaseService._userPreferencesTable} (
+        CREATE TABLE ${DatabaseService.userPreferencesTable} (
           user_id TEXT PRIMARY KEY,
           language TEXT NOT NULL DEFAULT 'en',
           notification_settings TEXT NOT NULL DEFAULT '{}',
@@ -172,13 +171,13 @@ class MigrationService {
           theme_preference TEXT NOT NULL DEFAULT 'system',
           created_at TEXT NOT NULL,
           updated_at TEXT NOT NULL,
-          FOREIGN KEY (user_id) REFERENCES ${DatabaseService._usersTable} (id)
+          FOREIGN KEY (user_id) REFERENCES ${DatabaseService.usersTable} (id)
         )
       ''',
       
       // Cached Data table
       '''
-        CREATE TABLE ${DatabaseService._cachedDataTable} (
+        CREATE TABLE ${DatabaseService.cachedDataTable} (
           id TEXT PRIMARY KEY,
           cache_key TEXT UNIQUE NOT NULL,
           data_type TEXT NOT NULL,
@@ -192,7 +191,7 @@ class MigrationService {
       
       // Action Plans table
       '''
-        CREATE TABLE ${DatabaseService._actionPlansTable} (
+        CREATE TABLE ${DatabaseService.actionPlansTable} (
           id TEXT PRIMARY KEY,
           district_id TEXT NOT NULL,
           situation TEXT NOT NULL,
@@ -205,13 +204,13 @@ class MigrationService {
           is_synced INTEGER NOT NULL DEFAULT 0,
           created_at TEXT NOT NULL,
           updated_at TEXT NOT NULL,
-          FOREIGN KEY (district_id) REFERENCES ${DatabaseService._districtsTable} (id)
+          FOREIGN KEY (district_id) REFERENCES ${DatabaseService.districtsTable} (id)
         )
       ''',
       
       // Resources table
       '''
-        CREATE TABLE ${DatabaseService._resourcesTable} (
+        CREATE TABLE ${DatabaseService.resourcesTable} (
           id TEXT PRIMARY KEY,
           name TEXT NOT NULL,
           type TEXT NOT NULL,
@@ -229,7 +228,7 @@ class MigrationService {
       
       // MCP Cards table
       '''
-        CREATE TABLE ${DatabaseService._mcpCardsTable} (
+        CREATE TABLE ${DatabaseService.mcpCardsTable} (
           id TEXT PRIMARY KEY,
           patient_id TEXT NOT NULL,
           patient_name TEXT NOT NULL,
@@ -247,13 +246,13 @@ class MigrationService {
           is_synced INTEGER NOT NULL DEFAULT 0,
           created_at TEXT NOT NULL,
           updated_at TEXT NOT NULL,
-          FOREIGN KEY (asha_worker_id) REFERENCES ${DatabaseService._usersTable} (id)
+          FOREIGN KEY (asha_worker_id) REFERENCES ${DatabaseService.usersTable} (id)
         )
       ''',
       
       // Educational Content table
       '''
-        CREATE TABLE ${DatabaseService._educationalContentTable} (
+        CREATE TABLE ${DatabaseService.educationalContentTable} (
           id TEXT PRIMARY KEY,
           title TEXT NOT NULL,
           content TEXT NOT NULL,
@@ -276,26 +275,26 @@ class MigrationService {
   static List<String> _getV2Migrations() {
     return [
       // Add new columns to users table
-      'ALTER TABLE ${DatabaseService._usersTable} ADD COLUMN last_login TEXT',
-      'ALTER TABLE ${DatabaseService._usersTable} ADD COLUMN verification_documents TEXT',
+      'ALTER TABLE ${DatabaseService.usersTable} ADD COLUMN last_login TEXT',
+      'ALTER TABLE ${DatabaseService.usersTable} ADD COLUMN verification_documents TEXT',
       
       // Add new columns to health reports table
-      'ALTER TABLE ${DatabaseService._healthReportsTable} ADD COLUMN block_id TEXT',
-      'ALTER TABLE ${DatabaseService._healthReportsTable} ADD COLUMN village_id TEXT',
-      'ALTER TABLE ${DatabaseService._healthReportsTable} ADD COLUMN sync_attempts INTEGER NOT NULL DEFAULT 0',
-      'ALTER TABLE ${DatabaseService._healthReportsTable} ADD COLUMN last_sync_attempt TEXT',
+      'ALTER TABLE ${DatabaseService.healthReportsTable} ADD COLUMN block_id TEXT',
+      'ALTER TABLE ${DatabaseService.healthReportsTable} ADD COLUMN village_id TEXT',
+      'ALTER TABLE ${DatabaseService.healthReportsTable} ADD COLUMN sync_attempts INTEGER NOT NULL DEFAULT 0',
+      'ALTER TABLE ${DatabaseService.healthReportsTable} ADD COLUMN last_sync_attempt TEXT',
       
       // Add new columns to districts table
-      'ALTER TABLE ${DatabaseService._districtsTable} ADD COLUMN iot_sensor_count INTEGER NOT NULL DEFAULT 0',
-      'ALTER TABLE ${DatabaseService._districtsTable} ADD COLUMN health_centers_count INTEGER NOT NULL DEFAULT 0',
-      'ALTER TABLE ${DatabaseService._districtsTable} ADD COLUMN asha_workers_count INTEGER NOT NULL DEFAULT 0',
+      'ALTER TABLE ${DatabaseService.districtsTable} ADD COLUMN iot_sensor_count INTEGER NOT NULL DEFAULT 0',
+      'ALTER TABLE ${DatabaseService.districtsTable} ADD COLUMN health_centers_count INTEGER NOT NULL DEFAULT 0',
+      'ALTER TABLE ${DatabaseService.districtsTable} ADD COLUMN asha_workers_count INTEGER NOT NULL DEFAULT 0',
       
       // Create new indexes for performance
-      'CREATE INDEX IF NOT EXISTS idx_health_reports_block_id ON ${DatabaseService._healthReportsTable} (block_id)',
-      'CREATE INDEX IF NOT EXISTS idx_health_reports_village_id ON ${DatabaseService._healthReportsTable} (village_id)',
-      'CREATE INDEX IF NOT EXISTS idx_health_reports_sync_attempts ON ${DatabaseService._healthReportsTable} (sync_attempts)',
-      'CREATE INDEX IF NOT EXISTS idx_users_last_login ON ${DatabaseService._usersTable} (last_login)',
-      'CREATE INDEX IF NOT EXISTS idx_districts_sensor_count ON ${DatabaseService._districtsTable} (iot_sensor_count)',
+      'CREATE INDEX IF NOT EXISTS idx_health_reports_block_id ON ${DatabaseService.healthReportsTable} (block_id)',
+      'CREATE INDEX IF NOT EXISTS idx_health_reports_village_id ON ${DatabaseService.healthReportsTable} (village_id)',
+      'CREATE INDEX IF NOT EXISTS idx_health_reports_sync_attempts ON ${DatabaseService.healthReportsTable} (sync_attempts)',
+      'CREATE INDEX IF NOT EXISTS idx_users_last_login ON ${DatabaseService.usersTable} (last_login)',
+      'CREATE INDEX IF NOT EXISTS idx_districts_sensor_count ON ${DatabaseService.districtsTable} (iot_sensor_count)',
     ];
   }
 
@@ -417,19 +416,19 @@ class MigrationService {
 
       // Check for required tables
       final requiredTables = [
-        DatabaseService._usersTable,
-        DatabaseService._healthReportsTable,
-        DatabaseService._districtsTable,
-        DatabaseService._notificationsTable,
-        DatabaseService._iotSensorDataTable,
-        DatabaseService._riskAnalysisTable,
-        DatabaseService._syncQueueTable,
-        DatabaseService._userPreferencesTable,
-        DatabaseService._cachedDataTable,
-        DatabaseService._actionPlansTable,
-        DatabaseService._resourcesTable,
-        DatabaseService._mcpCardsTable,
-        DatabaseService._educationalContentTable,
+        DatabaseService.usersTable,
+        DatabaseService.healthReportsTable,
+        DatabaseService.districtsTable,
+        DatabaseService.notificationsTable,
+        DatabaseService.iotSensorDataTable,
+        DatabaseService.riskAnalysisTable,
+        DatabaseService.syncQueueTable,
+        DatabaseService.userPreferencesTable,
+        DatabaseService.cachedDataTable,
+        DatabaseService.actionPlansTable,
+        DatabaseService.resourcesTable,
+        DatabaseService.mcpCardsTable,
+        DatabaseService.educationalContentTable,
       ];
 
       for (final requiredTable in requiredTables) {

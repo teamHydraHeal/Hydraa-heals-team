@@ -314,6 +314,8 @@ class MapService {
         severity: ReportSeverity.high,
         status: ReportStatus.pending,
         reportedAt: DateTime.now().subtract(const Duration(hours: 2)),
+        createdAt: DateTime.now().subtract(const Duration(hours: 2)),
+        updatedAt: DateTime.now().subtract(const Duration(hours: 2)),
       ),
       HealthReport(
         id: '2',
@@ -327,6 +329,8 @@ class MapService {
         severity: ReportSeverity.critical,
         status: ReportStatus.pending,
         reportedAt: DateTime.now().subtract(const Duration(hours: 1)),
+        createdAt: DateTime.now().subtract(const Duration(hours: 1)),
+        updatedAt: DateTime.now().subtract(const Duration(hours: 1)),
       ),
     ];
   }

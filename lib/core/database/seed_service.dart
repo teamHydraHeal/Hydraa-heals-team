@@ -4,7 +4,6 @@ import 'dart:math';
 import '../models/user_model.dart';
 import '../models/health_report_model.dart';
 import '../models/district_model.dart';
-import '../models/notification_model.dart';
 import 'database_service.dart';
 import 'dao/user_dao.dart';
 import 'dao/health_report_dao.dart';
@@ -495,7 +494,7 @@ class SeedService {
     ];
 
     for (final notification in notifications) {
-      await db.insert(DatabaseService._notificationsTable, notification);
+      await db.insert(DatabaseService.notificationsTable, notification);
     }
   }
 
@@ -555,7 +554,7 @@ class SeedService {
     ];
 
     for (final data in sensorData) {
-      await db.insert(DatabaseService._iotSensorDataTable, data);
+      await db.insert(DatabaseService.iotSensorDataTable, data);
     }
   }
 
@@ -612,7 +611,7 @@ class SeedService {
     ];
 
     for (final analysis in riskAnalysis) {
-      await db.insert(DatabaseService._riskAnalysisTable, analysis);
+      await db.insert(DatabaseService.riskAnalysisTable, analysis);
     }
   }
 
@@ -669,7 +668,7 @@ class SeedService {
     ];
 
     for (final resource in resources) {
-      await db.insert(DatabaseService._resourcesTable, resource);
+      await db.insert(DatabaseService.resourcesTable, resource);
     }
   }
 
@@ -729,7 +728,7 @@ class SeedService {
     ];
 
     for (final item in content) {
-      await db.insert(DatabaseService._educationalContentTable, item);
+      await db.insert(DatabaseService.educationalContentTable, item);
     }
   }
 
@@ -772,7 +771,7 @@ class SeedService {
     ];
 
     for (final card in mcpCards) {
-      await db.insert(DatabaseService._mcpCardsTable, card);
+      await db.insert(DatabaseService.mcpCardsTable, card);
     }
   }
 
@@ -809,7 +808,7 @@ class SeedService {
     ];
 
     for (final plan in actionPlans) {
-      await db.insert(DatabaseService._actionPlansTable, plan);
+      await db.insert(DatabaseService.actionPlansTable, plan);
     }
   }
 

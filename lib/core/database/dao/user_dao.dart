@@ -5,12 +5,11 @@ import '../../models/user_model.dart';
 import '../database_service.dart';
 
 class UserDAO {
-  static const String _tableName = DatabaseService._usersTable;
+  static String get _tableName => DatabaseService.usersTable;
 
   // Create user
   static Future<String> createUser(User user) async {
-    final db = DatabaseService.database;
-    if (db == null) throw Exception('Database not initialized');
+    final db = DatabaseService.database!;
 
     try {
       await db.insert(_tableName, _userToMap(user));
@@ -23,8 +22,7 @@ class UserDAO {
 
   // Get user by ID
   static Future<User?> getUserById(String id) async {
-    final db = DatabaseService.database;
-    if (db == null) throw Exception('Database not initialized');
+    final db = DatabaseService.database!;
 
     try {
       final List<Map<String, dynamic>> maps = await db.query(
@@ -46,8 +44,7 @@ class UserDAO {
 
   // Get user by Aadhaar number
   static Future<User?> getUserByAadhaar(String aadhaarNumber) async {
-    final db = DatabaseService.database;
-    if (db == null) throw Exception('Database not initialized');
+    final db = DatabaseService.database!;
 
     try {
       final List<Map<String, dynamic>> maps = await db.query(
@@ -69,8 +66,7 @@ class UserDAO {
 
   // Get user by phone number
   static Future<User?> getUserByPhone(String phoneNumber) async {
-    final db = DatabaseService.database;
-    if (db == null) throw Exception('Database not initialized');
+    final db = DatabaseService.database!;
 
     try {
       final List<Map<String, dynamic>> maps = await db.query(
@@ -92,8 +88,7 @@ class UserDAO {
 
   // Get users by role
   static Future<List<User>> getUsersByRole(UserRole role) async {
-    final db = DatabaseService.database;
-    if (db == null) throw Exception('Database not initialized');
+    final db = DatabaseService.database!;
 
     try {
       final List<Map<String, dynamic>> maps = await db.query(
@@ -112,8 +107,7 @@ class UserDAO {
 
   // Get users by district
   static Future<List<User>> getUsersByDistrict(String districtId) async {
-    final db = DatabaseService.database;
-    if (db == null) throw Exception('Database not initialized');
+    final db = DatabaseService.database!;
 
     try {
       final List<Map<String, dynamic>> maps = await db.query(
@@ -132,8 +126,7 @@ class UserDAO {
 
   // Get ASHA workers by district
   static Future<List<User>> getAshaWorkersByDistrict(String districtId) async {
-    final db = DatabaseService.database;
-    if (db == null) throw Exception('Database not initialized');
+    final db = DatabaseService.database!;
 
     try {
       final List<Map<String, dynamic>> maps = await db.query(
@@ -152,8 +145,7 @@ class UserDAO {
 
   // Update user
   static Future<bool> updateUser(User user) async {
-    final db = DatabaseService.database;
-    if (db == null) throw Exception('Database not initialized');
+    final db = DatabaseService.database!;
 
     try {
       final updatedUser = user.copyWith(updatedAt: DateTime.now());
@@ -172,8 +164,7 @@ class UserDAO {
 
   // Update user last login
   static Future<bool> updateLastLogin(String userId) async {
-    final db = DatabaseService.database;
-    if (db == null) throw Exception('Database not initialized');
+    final db = DatabaseService.database!;
 
     try {
       final result = await db.update(
@@ -194,8 +185,7 @@ class UserDAO {
 
   // Update user verification status
   static Future<bool> updateVerificationStatus(String userId, bool isVerified) async {
-    final db = DatabaseService.database;
-    if (db == null) throw Exception('Database not initialized');
+    final db = DatabaseService.database!;
 
     try {
       final result = await db.update(
@@ -216,8 +206,7 @@ class UserDAO {
 
   // Deactivate user
   static Future<bool> deactivateUser(String userId) async {
-    final db = DatabaseService.database;
-    if (db == null) throw Exception('Database not initialized');
+    final db = DatabaseService.database!;
 
     try {
       final result = await db.update(
@@ -247,8 +236,7 @@ class UserDAO {
     int offset = 0,
     String? orderBy,
   }) async {
-    final db = DatabaseService.database;
-    if (db == null) throw Exception('Database not initialized');
+    final db = DatabaseService.database!;
 
     try {
       final List<Map<String, dynamic>> maps = await db.query(
@@ -269,8 +257,7 @@ class UserDAO {
 
   // Search users
   static Future<List<User>> searchUsers(String query) async {
-    final db = DatabaseService.database;
-    if (db == null) throw Exception('Database not initialized');
+    final db = DatabaseService.database!;
 
     try {
       final List<Map<String, dynamic>> maps = await db.query(
@@ -295,8 +282,7 @@ class UserDAO {
 
   // Get user statistics
   static Future<Map<String, int>> getUserStatistics() async {
-    final db = DatabaseService.database;
-    if (db == null) throw Exception('Database not initialized');
+    final db = DatabaseService.database!;
 
     try {
       final totalUsers = Sqflite.firstIntValue(await db.rawQuery(
@@ -339,8 +325,7 @@ class UserDAO {
 
   // Check if Aadhaar exists
   static Future<bool> aadhaarExists(String aadhaarNumber) async {
-    final db = DatabaseService.database;
-    if (db == null) throw Exception('Database not initialized');
+    final db = DatabaseService.database!;
 
     try {
       final count = Sqflite.firstIntValue(await db.rawQuery(
@@ -356,8 +341,7 @@ class UserDAO {
 
   // Check if phone exists
   static Future<bool> phoneExists(String phoneNumber) async {
-    final db = DatabaseService.database;
-    if (db == null) throw Exception('Database not initialized');
+    final db = DatabaseService.database!;
 
     try {
       final count = Sqflite.firstIntValue(await db.rawQuery(

@@ -5,12 +5,11 @@ import '../../models/health_report_model.dart';
 import '../database_service.dart';
 
 class HealthReportDAO {
-  static const String _tableName = DatabaseService._healthReportsTable;
+  static String get _tableName => DatabaseService.healthReportsTable;
 
   // Create health report
   static Future<String> createHealthReport(HealthReport report) async {
-    final db = DatabaseService.database;
-    if (db == null) throw Exception('Database not initialized');
+    final db = DatabaseService.database!;
 
     try {
       await db.insert(_tableName, _healthReportToMap(report));
@@ -23,8 +22,7 @@ class HealthReportDAO {
 
   // Get health report by ID
   static Future<HealthReport?> getHealthReportById(String id) async {
-    final db = DatabaseService.database;
-    if (db == null) throw Exception('Database not initialized');
+    final db = DatabaseService.database!;
 
     try {
       final List<Map<String, dynamic>> maps = await db.query(
@@ -46,8 +44,7 @@ class HealthReportDAO {
 
   // Get health reports by user ID
   static Future<List<HealthReport>> getHealthReportsByUserId(String userId) async {
-    final db = DatabaseService.database;
-    if (db == null) throw Exception('Database not initialized');
+    final db = DatabaseService.database!;
 
     try {
       final List<Map<String, dynamic>> maps = await db.query(
@@ -66,8 +63,7 @@ class HealthReportDAO {
 
   // Get health reports by district
   static Future<List<HealthReport>> getHealthReportsByDistrict(String districtId) async {
-    final db = DatabaseService.database;
-    if (db == null) throw Exception('Database not initialized');
+    final db = DatabaseService.database!;
 
     try {
       final List<Map<String, dynamic>> maps = await db.query(
@@ -86,8 +82,7 @@ class HealthReportDAO {
 
   // Get health reports by severity
   static Future<List<HealthReport>> getHealthReportsBySeverity(ReportSeverity severity) async {
-    final db = DatabaseService.database;
-    if (db == null) throw Exception('Database not initialized');
+    final db = DatabaseService.database!;
 
     try {
       final List<Map<String, dynamic>> maps = await db.query(
@@ -106,8 +101,7 @@ class HealthReportDAO {
 
   // Get health reports by status
   static Future<List<HealthReport>> getHealthReportsByStatus(ReportStatus status) async {
-    final db = DatabaseService.database;
-    if (db == null) throw Exception('Database not initialized');
+    final db = DatabaseService.database!;
 
     try {
       final List<Map<String, dynamic>> maps = await db.query(
@@ -126,8 +120,7 @@ class HealthReportDAO {
 
   // Get critical health reports
   static Future<List<HealthReport>> getCriticalHealthReports() async {
-    final db = DatabaseService.database;
-    if (db == null) throw Exception('Database not initialized');
+    final db = DatabaseService.database!;
 
     try {
       final List<Map<String, dynamic>> maps = await db.query(
@@ -146,8 +139,7 @@ class HealthReportDAO {
 
   // Get pending health reports
   static Future<List<HealthReport>> getPendingHealthReports() async {
-    final db = DatabaseService.database;
-    if (db == null) throw Exception('Database not initialized');
+    final db = DatabaseService.database!;
 
     try {
       final List<Map<String, dynamic>> maps = await db.query(
@@ -166,8 +158,7 @@ class HealthReportDAO {
 
   // Get offline health reports
   static Future<List<HealthReport>> getOfflineHealthReports() async {
-    final db = DatabaseService.database;
-    if (db == null) throw Exception('Database not initialized');
+    final db = DatabaseService.database!;
 
     try {
       final List<Map<String, dynamic>> maps = await db.query(
@@ -191,8 +182,7 @@ class HealthReportDAO {
     String? districtId,
     ReportSeverity? severity,
   }) async {
-    final db = DatabaseService.database;
-    if (db == null) throw Exception('Database not initialized');
+    final db = DatabaseService.database!;
 
     try {
       String whereClause = 'reported_at >= ? AND reported_at <= ?';
@@ -231,8 +221,7 @@ class HealthReportDAO {
     double longitude,
     double radiusKm,
   ) async {
-    final db = DatabaseService.database;
-    if (db == null) throw Exception('Database not initialized');
+    final db = DatabaseService.database!;
 
     try {
       // Using Haversine formula for distance calculation
@@ -257,8 +246,7 @@ class HealthReportDAO {
 
   // Update health report
   static Future<bool> updateHealthReport(HealthReport report) async {
-    final db = DatabaseService.database;
-    if (db == null) throw Exception('Database not initialized');
+    final db = DatabaseService.database!;
 
     try {
       final updatedReport = report.copyWith(updatedAt: DateTime.now());
@@ -277,8 +265,7 @@ class HealthReportDAO {
 
   // Update health report status
   static Future<bool> updateHealthReportStatus(String reportId, ReportStatus status) async {
-    final db = DatabaseService.database;
-    if (db == null) throw Exception('Database not initialized');
+    final db = DatabaseService.database!;
 
     try {
       final result = await db.update(
@@ -305,8 +292,7 @@ class HealthReportDAO {
     Map<String, dynamic>? aiEntities,
     String? triageResponse,
   ) async {
-    final db = DatabaseService.database;
-    if (db == null) throw Exception('Database not initialized');
+    final db = DatabaseService.database!;
 
     try {
       final result = await db.update(
@@ -329,8 +315,7 @@ class HealthReportDAO {
 
   // Mark as synced
   static Future<bool> markAsSynced(String reportId) async {
-    final db = DatabaseService.database;
-    if (db == null) throw Exception('Database not initialized');
+    final db = DatabaseService.database!;
 
     try {
       final result = await db.update(
@@ -351,8 +336,7 @@ class HealthReportDAO {
 
   // Increment sync attempts
   static Future<bool> incrementSyncAttempts(String reportId) async {
-    final db = DatabaseService.database;
-    if (db == null) throw Exception('Database not initialized');
+    final db = DatabaseService.database!;
 
     try {
       final result = await db.update(
@@ -374,8 +358,7 @@ class HealthReportDAO {
 
   // Delete health report
   static Future<bool> deleteHealthReport(String reportId) async {
-    final db = DatabaseService.database;
-    if (db == null) throw Exception('Database not initialized');
+    final db = DatabaseService.database!;
 
     try {
       final result = await db.delete(
@@ -396,8 +379,7 @@ class HealthReportDAO {
     int offset = 0,
     String? orderBy,
   }) async {
-    final db = DatabaseService.database;
-    if (db == null) throw Exception('Database not initialized');
+    final db = DatabaseService.database!;
 
     try {
       final List<Map<String, dynamic>> maps = await db.query(
@@ -416,8 +398,7 @@ class HealthReportDAO {
 
   // Search health reports
   static Future<List<HealthReport>> searchHealthReports(String query) async {
-    final db = DatabaseService.database;
-    if (db == null) throw Exception('Database not initialized');
+    final db = DatabaseService.database!;
 
     try {
       final List<Map<String, dynamic>> maps = await db.query(
@@ -441,8 +422,7 @@ class HealthReportDAO {
 
   // Get health report statistics
   static Future<Map<String, int>> getHealthReportStatistics() async {
-    final db = DatabaseService.database;
-    if (db == null) throw Exception('Database not initialized');
+    final db = DatabaseService.database!;
 
     try {
       final totalReports = Sqflite.firstIntValue(await db.rawQuery(
@@ -484,8 +464,7 @@ class HealthReportDAO {
 
   // Get district health report statistics
   static Future<Map<String, int>> getDistrictHealthReportStatistics(String districtId) async {
-    final db = DatabaseService.database;
-    if (db == null) throw Exception('Database not initialized');
+    final db = DatabaseService.database!;
 
     try {
       final totalReports = Sqflite.firstIntValue(await db.rawQuery(
@@ -568,7 +547,7 @@ class HealthReportDAO {
       status: ReportStatus.values.firstWhere(
         (e) => e.toString() == 'ReportStatus.${map['status']}',
       ),
-      photoUrls: map['photo_urls'] != null ? List<String>.from(json.decode(map['photo_urls'] as String)) : null,
+      photoUrls: map['photo_urls'] != null ? List<String>.from(json.decode(map['photo_urls'] as String) as List) : null,
       reportedAt: DateTime.parse(map['reported_at'] as String),
       processedAt: map['processed_at'] != null ? DateTime.parse(map['processed_at'] as String) : null,
       aiAnalysis: map['ai_analysis'] as String?,

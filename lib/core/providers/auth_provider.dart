@@ -203,14 +203,16 @@ class AuthProvider extends ChangeNotifier {
       phoneNumber: phoneNumber,
       role: role,
       isVerified: role == UserRole.citizen,
-      district: district,
-      block: block,
-      village: village,
+      districtId: district,
+      state: 'Meghalaya',
       createdAt: DateTime.now(),
-      preferences: {
+      updatedAt: DateTime.now(),
+      profileData: {
         'language': 'en',
         'notifications': true,
         'location_sharing': true,
+        'block': block,
+        'village': village,
       },
     );
   }

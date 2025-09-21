@@ -5,12 +5,11 @@ import '../../models/district_model.dart';
 import '../database_service.dart';
 
 class DistrictDAO {
-  static const String _tableName = DatabaseService._districtsTable;
+  static String get _tableName => DatabaseService.districtsTable;
 
   // Create district
   static Future<String> createDistrict(District district) async {
-    final db = DatabaseService.database;
-    if (db == null) throw Exception('Database not initialized');
+    final db = DatabaseService.database!;
 
     try {
       await db.insert(_tableName, _districtToMap(district));
@@ -23,8 +22,7 @@ class DistrictDAO {
 
   // Get district by ID
   static Future<District?> getDistrictById(String id) async {
-    final db = DatabaseService.database;
-    if (db == null) throw Exception('Database not initialized');
+    final db = DatabaseService.database!;
 
     try {
       final List<Map<String, dynamic>> maps = await db.query(
@@ -46,8 +44,7 @@ class DistrictDAO {
 
   // Get all districts
   static Future<List<District>> getAllDistricts() async {
-    final db = DatabaseService.database;
-    if (db == null) throw Exception('Database not initialized');
+    final db = DatabaseService.database!;
 
     try {
       final List<Map<String, dynamic>> maps = await db.query(
@@ -64,8 +61,7 @@ class DistrictDAO {
 
   // Get districts by state
   static Future<List<District>> getDistrictsByState(String state) async {
-    final db = DatabaseService.database;
-    if (db == null) throw Exception('Database not initialized');
+    final db = DatabaseService.database!;
 
     try {
       final List<Map<String, dynamic>> maps = await db.query(
@@ -84,8 +80,7 @@ class DistrictDAO {
 
   // Get districts by risk level
   static Future<List<District>> getDistrictsByRiskLevel(RiskLevel riskLevel) async {
-    final db = DatabaseService.database;
-    if (db == null) throw Exception('Database not initialized');
+    final db = DatabaseService.database!;
 
     try {
       final List<Map<String, dynamic>> maps = await db.query(
@@ -104,8 +99,7 @@ class DistrictDAO {
 
   // Get high risk districts
   static Future<List<District>> getHighRiskDistricts() async {
-    final db = DatabaseService.database;
-    if (db == null) throw Exception('Database not initialized');
+    final db = DatabaseService.database!;
 
     try {
       final List<Map<String, dynamic>> maps = await db.query(
@@ -124,8 +118,7 @@ class DistrictDAO {
 
   // Get critical districts
   static Future<List<District>> getCriticalDistricts() async {
-    final db = DatabaseService.database;
-    if (db == null) throw Exception('Database not initialized');
+    final db = DatabaseService.database!;
 
     try {
       final List<Map<String, dynamic>> maps = await db.query(
@@ -144,8 +137,7 @@ class DistrictDAO {
 
   // Get districts with active reports
   static Future<List<District>> getDistrictsWithActiveReports() async {
-    final db = DatabaseService.database;
-    if (db == null) throw Exception('Database not initialized');
+    final db = DatabaseService.database!;
 
     try {
       final List<Map<String, dynamic>> maps = await db.query(
@@ -164,8 +156,7 @@ class DistrictDAO {
 
   // Get districts with critical reports
   static Future<List<District>> getDistrictsWithCriticalReports() async {
-    final db = DatabaseService.database;
-    if (db == null) throw Exception('Database not initialized');
+    final db = DatabaseService.database!;
 
     try {
       final List<Map<String, dynamic>> maps = await db.query(
@@ -184,8 +175,7 @@ class DistrictDAO {
 
   // Update district
   static Future<bool> updateDistrict(District district) async {
-    final db = DatabaseService.database;
-    if (db == null) throw Exception('Database not initialized');
+    final db = DatabaseService.database!;
 
     try {
       final updatedDistrict = district.copyWith(lastUpdated: DateTime.now());
@@ -204,8 +194,7 @@ class DistrictDAO {
 
   // Update district risk score
   static Future<bool> updateDistrictRiskScore(String districtId, double riskScore, RiskLevel riskLevel) async {
-    final db = DatabaseService.database;
-    if (db == null) throw Exception('Database not initialized');
+    final db = DatabaseService.database!;
 
     try {
       final result = await db.update(
@@ -232,8 +221,7 @@ class DistrictDAO {
     int activeReports,
     int criticalReports,
   ) async {
-    final db = DatabaseService.database;
-    if (db == null) throw Exception('Database not initialized');
+    final db = DatabaseService.database!;
 
     try {
       final result = await db.update(
@@ -256,8 +244,7 @@ class DistrictDAO {
 
   // Update district IoT sensor count
   static Future<bool> updateDistrictIotSensorCount(String districtId, int sensorCount) async {
-    final db = DatabaseService.database;
-    if (db == null) throw Exception('Database not initialized');
+    final db = DatabaseService.database!;
 
     try {
       final result = await db.update(
@@ -283,8 +270,7 @@ class DistrictDAO {
     int healthCentersCount,
     int ashaWorkersCount,
   ) async {
-    final db = DatabaseService.database;
-    if (db == null) throw Exception('Database not initialized');
+    final db = DatabaseService.database!;
 
     try {
       final result = await db.update(
@@ -307,8 +293,7 @@ class DistrictDAO {
 
   // Delete district
   static Future<bool> deleteDistrict(String districtId) async {
-    final db = DatabaseService.database;
-    if (db == null) throw Exception('Database not initialized');
+    final db = DatabaseService.database!;
 
     try {
       final result = await db.delete(
@@ -325,8 +310,7 @@ class DistrictDAO {
 
   // Search districts
   static Future<List<District>> searchDistricts(String query) async {
-    final db = DatabaseService.database;
-    if (db == null) throw Exception('Database not initialized');
+    final db = DatabaseService.database!;
 
     try {
       final List<Map<String, dynamic>> maps = await db.query(
@@ -345,8 +329,7 @@ class DistrictDAO {
 
   // Get district statistics
   static Future<Map<String, dynamic>> getDistrictStatistics() async {
-    final db = DatabaseService.database;
-    if (db == null) throw Exception('Database not initialized');
+    final db = DatabaseService.database!;
 
     try {
       final totalDistricts = Sqflite.firstIntValue(await db.rawQuery(
@@ -412,8 +395,7 @@ class DistrictDAO {
 
   // Get district risk distribution
   static Future<Map<String, int>> getDistrictRiskDistribution() async {
-    final db = DatabaseService.database;
-    if (db == null) throw Exception('Database not initialized');
+    final db = DatabaseService.database!;
 
     try {
       final lowRisk = Sqflite.firstIntValue(await db.rawQuery(
@@ -450,8 +432,7 @@ class DistrictDAO {
 
   // Get top districts by risk score
   static Future<List<District>> getTopDistrictsByRiskScore({int limit = 10}) async {
-    final db = DatabaseService.database;
-    if (db == null) throw Exception('Database not initialized');
+    final db = DatabaseService.database!;
 
     try {
       final List<Map<String, dynamic>> maps = await db.query(
@@ -469,8 +450,7 @@ class DistrictDAO {
 
   // Get districts by population range
   static Future<List<District>> getDistrictsByPopulationRange(int minPopulation, int maxPopulation) async {
-    final db = DatabaseService.database;
-    if (db == null) throw Exception('Database not initialized');
+    final db = DatabaseService.database!;
 
     try {
       final List<Map<String, dynamic>> maps = await db.query(

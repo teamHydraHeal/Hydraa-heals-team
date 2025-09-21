@@ -488,6 +488,34 @@
             0% { opacity: 0.6; }
             100% { opacity: 1; }
         }
+
+        /* Heatmap Animations */
+        @keyframes pulse {
+            0% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.1); opacity: 0.7; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
+        @keyframes heatmapGlow {
+            0% { box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
+            50% { box-shadow: 0 4px 20px rgba(0,0,0,0.2); }
+            100% { box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
+        }
+
+        @keyframes dataFlow {
+            0% { transform: translateX(-100%); opacity: 0; }
+            50% { opacity: 1; }
+            100% { transform: translateX(100%); opacity: 0; }
+        }
+
+        .district:hover {
+            transform: scale(1.05);
+            animation: heatmapGlow 0.5s ease-in-out;
+        }
+
+        .heatmap-animated {
+            animation: dataFlow 3s ease-in-out infinite;
+        }
     </style>
 </head>
 <body>
@@ -513,16 +541,24 @@
         <button class="control-btn" onclick="showScreen('district-details')">District Details</button>
         <button class="control-btn" onclick="showScreen('resources')">Resources</button>
         <button class="control-btn" onclick="showScreen('emergency')">Emergency</button>
+        <button class="control-btn" onclick="showScreen('heatmap-official')">Heatmap View</button>
+        <button class="control-btn" onclick="showScreen('database-manager')">Database</button>
         
         <div style="margin: 12px 0 8px; font-weight: bold; color: #2E7D32;">👩‍⚕️ ASHA Worker</div>
         <button class="control-btn" onclick="showScreen('field-dashboard')">Field Dashboard</button>
+        <button class="control-btn" onclick="showScreen('field-ai-copilot')">AI Assistant</button>
         <button class="control-btn" onclick="showScreen('report-form')">Report Form</button>
         <button class="control-btn" onclick="showScreen('mcp-card')">MCP Card</button>
         <button class="control-btn" onclick="showScreen('education')">Education</button>
+        <button class="control-btn" onclick="showScreen('heatmap-worker')">Local Heatmap</button>
+        <button class="control-btn" onclick="showScreen('offline-sync')">Offline Sync</button>
         
         <div style="margin: 12px 0 8px; font-weight: bold; color: #2E7D32;">👤 Citizen</div>
         <button class="control-btn" onclick="showScreen('citizen-dashboard')">Citizen Dashboard</button>
+        <button class="control-btn" onclick="showScreen('citizen-ai-copilot')">AI Health</button>
         <button class="control-btn" onclick="showScreen('concern-report')">Concern Report</button>
+        <button class="control-btn" onclick="showScreen('heatmap-citizen')">Community Map</button>
+        <button class="control-btn" onclick="showScreen('health-tips')">Health Tips</button>
         
         <div style="margin: 12px 0 8px; font-weight: bold; color: #2E7D32;">⚙️ Shared</div>
         <button class="control-btn" onclick="showScreen('notifications')">Notifications</button>
@@ -792,9 +828,17 @@
                         <div class="nav-icon">🗺️</div>
                         <div class="nav-label">Map</div>
                     </div>
+                    <div class="nav-item" onclick="showScreen('ai-copilot')">
+                        <div class="nav-icon">🧠</div>
+                        <div class="nav-label">AI Co-pilot</div>
+                    </div>
                     <div class="nav-item" onclick="showScreen('broadcast')">
                         <div class="nav-icon">📡</div>
                         <div class="nav-label">Broadcast</div>
+                    </div>
+                    <div class="nav-item" onclick="showScreen('heatmap-official')">
+                        <div class="nav-icon">🔥</div>
+                        <div class="nav-label">Heatmap</div>
                     </div>
                     <div class="nav-item" onclick="showScreen('settings')">
                         <div class="nav-icon">⚙️</div>
@@ -841,17 +885,17 @@
                         <div class="nav-icon">🏠</div>
                         <div class="nav-label">Home</div>
                     </div>
+                    <div class="nav-item" onclick="showScreen('field-ai-copilot')">
+                        <div class="nav-icon">🤖</div>
+                        <div class="nav-label">AI Assistant</div>
+                    </div>
                     <div class="nav-item" onclick="showScreen('report-form')">
                         <div class="nav-icon">📝</div>
                         <div class="nav-label">Report</div>
                     </div>
-                    <div class="nav-item" onclick="showScreen('education')">
-                        <div class="nav-icon">📚</div>
-                        <div class="nav-label">Education</div>
-                    </div>
-                    <div class="nav-item" onclick="showScreen('mcp-card')">
-                        <div class="nav-icon">🔄</div>
-                        <div class="nav-label">MCP</div>
+                    <div class="nav-item" onclick="showScreen('heatmap-worker')">
+                        <div class="nav-icon">🔥</div>
+                        <div class="nav-label">Heatmap</div>
                     </div>
                     <div class="nav-item" onclick="showScreen('profile')">
                         <div class="nav-icon">👤</div>
@@ -903,17 +947,17 @@
                         <div class="nav-icon">🏠</div>
                         <div class="nav-label">Home</div>
                     </div>
+                    <div class="nav-item" onclick="showScreen('citizen-ai-copilot')">
+                        <div class="nav-icon">🏥</div>
+                        <div class="nav-label">AI Health</div>
+                    </div>
                     <div class="nav-item" onclick="showScreen('concern-report')">
                         <div class="nav-icon">📝</div>
                         <div class="nav-label">Report</div>
                     </div>
-                    <div class="nav-item" onclick="showScreen('education')">
-                        <div class="nav-icon">📚</div>
-                        <div class="nav-label">Learn</div>
-                    </div>
-                    <div class="nav-item" onclick="showScreen('notifications')">
-                        <div class="nav-icon">🔔</div>
-                        <div class="nav-label">Notifications</div>
+                    <div class="nav-item" onclick="showScreen('heatmap-citizen')">
+                        <div class="nav-icon">🔥</div>
+                        <div class="nav-label">Community</div>
                     </div>
                     <div class="nav-item" onclick="showScreen('profile')">
                         <div class="nav-icon">👤</div>
@@ -1707,6 +1751,571 @@
                     </div>
                 </div>
             </div>
+
+            <!-- Field Worker AI Co-pilot Screen -->
+            <div class="screen hidden" id="field-ai-copilot">
+                <div class="status-bar">
+                    <span>9:41</span>
+                    <span>Jal Guard</span>
+                    <span>100%</span>
+                </div>
+                <div class="app-bar">
+                    <button class="back-btn" onclick="showScreen('field-dashboard')">←</button>
+                    <h1>AI Field Assistant</h1>
+                </div>
+                <div class="content">
+                    <div style="background: linear-gradient(135deg, #4CAF50 0%, #8BC34A 100%); color: white; padding: 20px; border-radius: 12px; margin-bottom: 16px;">
+                        <h3 style="margin-bottom: 8px;">🤖 AI Field Assistant</h3>
+                        <p style="opacity: 0.9;">Your intelligent companion for field work and health reporting</p>
+                    </div>
+                    
+                    <div style="background: white; border-radius: 12px; padding: 16px; margin: 16px 0; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+                        <div style="display: flex; align-items: center; margin-bottom: 12px;">
+                            <div style="width: 30px; height: 30px; background: #4CAF50; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin-right: 12px; color: white;">AI</div>
+                            <div style="flex: 1;">
+                                <div style="font-weight: 600;">Field Work Guidance</div>
+                                <div style="color: #666; font-size: 12px;">1 minute ago</div>
+                            </div>
+                        </div>
+                        <p style="color: #666; line-height: 1.4;">Based on your location in Mawryngkneng, I recommend checking water sources near the community center. Recent reports suggest potential contamination in that area.</p>
+                    </div>
+                    
+                    <div style="background: white; border-radius: 12px; padding: 16px; margin: 16px 0; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+                        <h4 style="margin-bottom: 12px;">📋 Quick Actions</h4>
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+                            <button style="background: #f8f9fa; border: 1px solid #ddd; border-radius: 8px; padding: 12px; text-align: center;">
+                                <div style="font-size: 24px; margin-bottom: 8px;">📝</div>
+                                <div style="font-weight: 600; font-size: 14px;">Quick Report</div>
+                            </button>
+                            <button style="background: #f8f9fa; border: 1px solid #ddd; border-radius: 8px; padding: 12px; text-align: center;">
+                                <div style="font-size: 24px; margin-bottom: 8px;">🗺️</div>
+                                <div style="font-weight: 600; font-size: 14px;">Area Check</div>
+                            </button>
+                            <button style="background: #f8f9fa; border: 1px solid #ddd; border-radius: 8px; padding: 12px; text-align: center;">
+                                <div style="font-size: 24px; margin-bottom: 8px;">👶</div>
+                                <div style="font-weight: 600; font-size: 14px;">MCP Update</div>
+                            </button>
+                            <button style="background: #f8f9fa; border: 1px solid #ddd; border-radius: 8px; padding: 12px; text-align: center;">
+                                <div style="font-size: 24px; margin-bottom: 8px;">📚</div>
+                                <div style="font-weight: 600; font-size: 14px;">Health Tips</div>
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div style="position: fixed; bottom: 100px; left: 20px; right: 20px;">
+                        <div style="display: flex; background: white; border-radius: 25px; padding: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+                            <input type="text" placeholder="Ask AI about field work..." style="flex: 1; border: none; padding: 12px; outline: none; border-radius: 20px;">
+                            <button style="background: #4CAF50; color: white; border: none; border-radius: 50%; width: 40px; height: 40px; margin-left: 8px;">📤</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Citizen AI Co-pilot Screen -->
+            <div class="screen hidden" id="citizen-ai-copilot">
+                <div class="status-bar">
+                    <span>9:41</span>
+                    <span>Jal Guard</span>
+                    <span>100%</span>
+                </div>
+                <div class="app-bar">
+                    <button class="back-btn" onclick="showScreen('citizen-dashboard')">←</button>
+                    <h1>AI Health Assistant</h1>
+                </div>
+                <div class="content">
+                    <div style="background: linear-gradient(135deg, #2196F3 0%, #03DAC6 100%); color: white; padding: 20px; border-radius: 12px; margin-bottom: 16px;">
+                        <h3 style="margin-bottom: 8px;">🏥 AI Health Assistant</h3>
+                        <p style="opacity: 0.9;">Your personal health companion for daily wellness</p>
+                    </div>
+                    
+                    <div style="background: white; border-radius: 12px; padding: 16px; margin: 16px 0; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+                        <div style="display: flex; align-items: center; margin-bottom: 12px;">
+                            <div style="width: 30px; height: 30px; background: #2196F3; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin-right: 12px; color: white;">AI</div>
+                            <div style="flex: 1;">
+                                <div style="font-weight: 600;">Health Tip of the Day</div>
+                                <div style="color: #666; font-size: 12px;">Just now</div>
+                            </div>
+                        </div>
+                        <p style="color: #666; line-height: 1.4;">Your area shows good water quality today! Remember to boil water for at least 1 minute before drinking, especially during monsoon season.</p>
+                    </div>
+                    
+                    <div style="background: white; border-radius: 12px; padding: 16px; margin: 16px 0; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+                        <h4 style="margin-bottom: 12px;">💡 Health Insights</h4>
+                        <div style="background: #e8f5e8; border: 1px solid #4CAF50; border-radius: 8px; padding: 12px; margin-bottom: 12px;">
+                            <div style="font-weight: 600; color: #4CAF50; margin-bottom: 4px;">✅ Water Quality: Good</div>
+                            <div style="color: #666; font-size: 14px;">Last tested: 2 hours ago</div>
+                        </div>
+                        <div style="background: #fff3e0; border: 1px solid #FF9800; border-radius: 8px; padding: 12px;">
+                            <div style="font-weight: 600; color: #FF9800; margin-bottom: 4px;">⚠️ Weather Alert</div>
+                            <div style="color: #666; font-size: 14px;">Heavy rain expected - avoid stagnant water</div>
+                        </div>
+                    </div>
+                    
+                    <div style="position: fixed; bottom: 100px; left: 20px; right: 20px;">
+                        <div style="display: flex; background: white; border-radius: 25px; padding: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+                            <input type="text" placeholder="Ask about health concerns..." style="flex: 1; border: none; padding: 12px; outline: none; border-radius: 20px;">
+                            <button style="background: #2196F3; color: white; border: none; border-radius: 50%; width: 40px; height: 40px; margin-left: 8px;">📤</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Health Official Heatmap Screen -->
+            <div class="screen hidden" id="heatmap-official">
+                <div class="status-bar">
+                    <span>9:41</span>
+                    <span>Jal Guard</span>
+                    <span>100%</span>
+                </div>
+                <div class="app-bar">
+                    <button class="back-btn" onclick="showScreen('command-center')">←</button>
+                    <h1>District Heatmap</h1>
+                    <button style="background: none; border: none; color: white; font-size: 20px;">⚙️</button>
+                </div>
+                <div class="content">
+                    <div style="background: white; border-radius: 12px; padding: 16px; margin: 16px 0; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+                        <h3 style="margin-bottom: 16px;">🗺️ Real-time Risk Heatmap</h3>
+                        <div style="display: flex; gap: 8px; margin-bottom: 16px;">
+                            <button style="flex: 1; padding: 8px; background: #2E7D32; color: white; border: none; border-radius: 8px;" onclick="toggleHeatmapLayer('risk')">Risk Level</button>
+                            <button style="flex: 1; padding: 8px; background: #f0f0f0; color: #666; border: none; border-radius: 8px;" onclick="toggleHeatmapLayer('reports')">Reports</button>
+                            <button style="flex: 1; padding: 8px; background: #f0f0f0; color: #666; border: none; border-radius: 8px;" onclick="toggleHeatmapLayer('iot')">IoT Data</button>
+                        </div>
+                        
+                        <!-- Enhanced Interactive Heatmap -->
+                        <div class="map-container" style="height: 280px; position: relative; background: linear-gradient(45deg, #4CAF50, #8BC34A, #FFC107, #FF9800, #F44336, #9C27B0); border-radius: 12px; overflow: hidden;">
+                            <!-- Heatmap Overlay -->
+                            <div id="heatmap-overlay" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.1); border-radius: 12px;"></div>
+                            
+                            <!-- Interactive Districts with Enhanced Styling -->
+                            <div class="district critical" style="top: 15%; left: 25%; cursor: pointer; transition: all 0.3s ease; box-shadow: 0 4px 12px rgba(156, 39, 176, 0.4);" onclick="showDistrictDetails('Ri Bhoi')">
+                                <div style="font-weight: bold; font-size: 14px;">Ri Bhoi</div>
+                                <div style="font-size: 10px; opacity: 0.8;">Critical Risk</div>
+                                <div style="font-size: 9px; margin-top: 2px;">Score: 9.2/10</div>
+                            </div>
+                            
+                            <div class="district high" style="top: 35%; left: 45%; cursor: pointer; transition: all 0.3s ease; box-shadow: 0 4px 12px rgba(244, 67, 54, 0.4);" onclick="showDistrictDetails('East Khasi')">
+                                <div style="font-weight: bold; font-size: 14px;">East Khasi</div>
+                                <div style="font-size: 10px; opacity: 0.8;">High Risk</div>
+                                <div style="font-size: 9px; margin-top: 2px;">Score: 7.8/10</div>
+                            </div>
+                            
+                            <div class="district medium" style="top: 55%; left: 20%; cursor: pointer; transition: all 0.3s ease; box-shadow: 0 4px 12px rgba(255, 152, 0, 0.4);" onclick="showDistrictDetails('West Khasi')">
+                                <div style="font-weight: bold; font-size: 14px;">West Khasi</div>
+                                <div style="font-size: 10px; opacity: 0.8;">Medium Risk</div>
+                                <div style="font-size: 9px; margin-top: 2px;">Score: 5.4/10</div>
+                            </div>
+                            
+                            <div class="district low" style="top: 25%; left: 70%; cursor: pointer; transition: all 0.3s ease; box-shadow: 0 4px 12px rgba(76, 175, 80, 0.4);" onclick="showDistrictDetails('Jaintia')">
+                                <div style="font-weight: bold; font-size: 14px;">Jaintia</div>
+                                <div style="font-size: 10px; opacity: 0.8;">Low Risk</div>
+                                <div style="font-size: 9px; margin-top: 2px;">Score: 2.1/10</div>
+                            </div>
+                            
+                            <div class="district medium" style="top: 65%; left: 60%; cursor: pointer; transition: all 0.3s ease; box-shadow: 0 4px 12px rgba(255, 152, 0, 0.4);" onclick="showDistrictDetails('Garo Hills')">
+                                <div style="font-weight: bold; font-size: 14px;">Garo Hills</div>
+                                <div style="font-size: 10px; opacity: 0.8;">Medium Risk</div>
+                                <div style="font-size: 9px; margin-top: 2px;">Score: 4.7/10</div>
+                            </div>
+                            
+                            <!-- IoT Sensor Indicators -->
+                            <div style="position: absolute; top: 20%; right: 10%; background: rgba(33, 150, 243, 0.9); color: white; padding: 4px 8px; border-radius: 12px; font-size: 10px; font-weight: bold;">
+                                📡 23 IoT Sensors
+                            </div>
+                            
+                            <!-- Real-time Update Indicator -->
+                            <div style="position: absolute; bottom: 10px; left: 10px; background: rgba(76, 175, 80, 0.9); color: white; padding: 4px 8px; border-radius: 12px; font-size: 10px; font-weight: bold;">
+                                🔄 Live Data
+                            </div>
+                        </div>
+                        
+                        <!-- Enhanced Legend with Statistics -->
+                        <div style="margin-top: 16px;">
+                            <div style="display: flex; justify-content: space-between; margin-bottom: 8px; font-size: 12px;">
+                                <div style="display: flex; align-items: center;">
+                                    <div style="width: 12px; height: 12px; background: #4CAF50; border-radius: 50%; margin-right: 4px;"></div>
+                                    <span>Low Risk (1)</span>
+                                </div>
+                                <div style="display: flex; align-items: center;">
+                                    <div style="width: 12px; height: 12px; background: #FF9800; border-radius: 50%; margin-right: 4px;"></div>
+                                    <span>Medium Risk (2)</span>
+                                </div>
+                                <div style="display: flex; align-items: center;">
+                                    <div style="width: 12px; height: 12px; background: #F44336; border-radius: 50%; margin-right: 4px;"></div>
+                                    <span>High Risk (1)</span>
+                                </div>
+                                <div style="display: flex; align-items: center;">
+                                    <div style="width: 12px; height: 12px; background: #9C27B0; border-radius: 50%; margin-right: 4px;"></div>
+                                    <span>Critical (1)</span>
+                                </div>
+                            </div>
+                            
+                            <!-- Heatmap Statistics -->
+                            <div style="background: #f8f9fa; padding: 12px; border-radius: 8px; margin-top: 12px;">
+                                <h4 style="margin-bottom: 8px; font-size: 14px;">📊 Heatmap Analytics</h4>
+                                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; font-size: 12px;">
+                                    <div>Total Reports: <strong>1,234</strong></div>
+                                    <div>Active Alerts: <strong>23</strong></div>
+                                    <div>Avg Risk Score: <strong>5.2/10</strong></div>
+                                    <div>Last Update: <strong>2 min ago</strong></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Heatmap Controls -->
+                    <div style="background: white; border-radius: 12px; padding: 16px; margin: 16px 0; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+                        <h4 style="margin-bottom: 12px;">🎛️ Heatmap Controls</h4>
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+                            <button style="background: #e3f2fd; border: 1px solid #2196F3; color: #2196F3; padding: 8px; border-radius: 8px; font-size: 12px;" onclick="exportHeatmap()">📤 Export</button>
+                            <button style="background: #e8f5e8; border: 1px solid #4CAF50; color: #4CAF50; padding: 8px; border-radius: 8px; font-size: 12px;" onclick="refreshHeatmap()">🔄 Refresh</button>
+                            <button style="background: #fff3e0; border: 1px solid #FF9800; color: #FF9800; padding: 8px; border-radius: 8px; font-size: 12px;" onclick="toggleHeatmapAnimation()">🎬 Animate</button>
+                            <button style="background: #f3e5f5; border: 1px solid #9C27B0; color: #9C27B0; padding: 8px; border-radius: 8px; font-size: 12px;" onclick="showHeatmapSettings()">⚙️ Settings</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ASHA Worker Heatmap Screen -->
+            <div class="screen hidden" id="heatmap-worker">
+                <div class="status-bar">
+                    <span>9:41</span>
+                    <span>Jal Guard</span>
+                    <span>100%</span>
+                </div>
+                <div class="app-bar">
+                    <button class="back-btn" onclick="showScreen('field-dashboard')">←</button>
+                    <h1>Local Heatmap</h1>
+                    <button style="background: none; border: none; color: white; font-size: 20px;">📍</button>
+                </div>
+                <div class="content">
+                    <div style="background: white; border-radius: 12px; padding: 16px; margin: 16px 0; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+                        <h3 style="margin-bottom: 16px;">📍 Your Coverage Area</h3>
+                        
+                        <!-- Enhanced Local Heatmap -->
+                        <div class="map-container" style="height: 250px; position: relative; background: linear-gradient(135deg, #4CAF50, #8BC34A, #FFC107, #FF9800, #F44336); border-radius: 12px; overflow: hidden;">
+                            <!-- Coverage Area Overlay -->
+                            <div style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: radial-gradient(circle at 30% 30%, rgba(76, 175, 80, 0.3) 0%, transparent 50%), radial-gradient(circle at 70% 70%, rgba(255, 152, 0, 0.3) 0%, transparent 50%); border-radius: 12px;"></div>
+                            
+                            <!-- Interactive Local Areas -->
+                            <div class="district low" style="top: 20%; left: 30%; cursor: pointer; transition: all 0.3s ease; box-shadow: 0 4px 12px rgba(76, 175, 80, 0.4);" onclick="showAreaDetails('Mawryngkneng')">
+                                <div style="font-weight: bold; font-size: 12px;">Mawryngkneng</div>
+                                <div style="font-size: 9px; opacity: 0.8;">Your Base</div>
+                                <div style="font-size: 8px; margin-top: 2px;">✅ Safe</div>
+                            </div>
+                            
+                            <div class="district medium" style="top: 40%; left: 50%; cursor: pointer; transition: all 0.3s ease; box-shadow: 0 4px 12px rgba(255, 152, 0, 0.4);" onclick="showAreaDetails('Shillong')">
+                                <div style="font-weight: bold; font-size: 12px;">Shillong</div>
+                                <div style="font-size: 9px; opacity: 0.8;">Medium Risk</div>
+                                <div style="font-size: 8px; margin-top: 2px;">⚠️ Monitor</div>
+                            </div>
+                            
+                            <div class="district high" style="top: 60%; left: 25%; cursor: pointer; transition: all 0.3s ease; box-shadow: 0 4px 12px rgba(244, 67, 54, 0.4);" onclick="showAreaDetails('Cherrapunji')">
+                                <div style="font-weight: bold; font-size: 12px;">Cherrapunji</div>
+                                <div style="font-size: 9px; opacity: 0.8;">High Risk</div>
+                                <div style="font-size: 8px; margin-top: 2px;">🚨 Alert</div>
+                            </div>
+                            
+                            <div class="district low" style="top: 30%; left: 70%; cursor: pointer; transition: all 0.3s ease; box-shadow: 0 4px 12px rgba(76, 175, 80, 0.4);" onclick="showAreaDetails('Pynursla')">
+                                <div style="font-weight: bold; font-size: 12px;">Pynursla</div>
+                                <div style="font-size: 9px; opacity: 0.8;">Low Risk</div>
+                                <div style="font-size: 8px; margin-top: 2px;">✅ Safe</div>
+                            </div>
+                            
+                            <!-- Your Location Indicator -->
+                            <div style="position: absolute; top: 20%; left: 30%; width: 20px; height: 20px; background: #2196F3; border: 3px solid white; border-radius: 50%; animation: pulse 2s infinite;"></div>
+                            
+                            <!-- Coverage Radius -->
+                            <div style="position: absolute; top: 10%; left: 20%; width: 60%; height: 60%; border: 2px dashed rgba(33, 150, 243, 0.5); border-radius: 50%; pointer-events: none;"></div>
+                            
+                            <!-- Field Work Status -->
+                            <div style="position: absolute; top: 10px; right: 10px; background: rgba(76, 175, 80, 0.9); color: white; padding: 4px 8px; border-radius: 12px; font-size: 10px; font-weight: bold;">
+                                🚶‍♀️ Field Active
+                            </div>
+                        </div>
+                        
+                        <!-- Enhanced Field Summary -->
+                        <div style="background: #f8f9fa; padding: 12px; border-radius: 8px; margin-top: 16px;">
+                            <h4 style="margin-bottom: 8px;">📊 Today's Field Summary</h4>
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; font-size: 12px;">
+                                <div>Reports Submitted: <strong>3</strong></div>
+                                <div>Areas Visited: <strong>4</strong></div>
+                                <div>Pending Sync: <strong style="color: #FF9800;">2</strong></div>
+                                <div>Distance Covered: <strong>12.5 km</strong></div>
+                            </div>
+                        </div>
+                        
+                        <!-- Quick Actions for Field Work -->
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 12px;">
+                            <button style="background: #e8f5e8; border: 1px solid #4CAF50; color: #4CAF50; padding: 8px; border-radius: 8px; font-size: 12px;" onclick="startFieldWork()">🚶‍♀️ Start Field Work</button>
+                            <button style="background: #fff3e0; border: 1px solid #FF9800; color: #FF9800; padding: 8px; border-radius: 8px; font-size: 12px;" onclick="syncReports()">🔄 Sync Reports</button>
+                        </div>
+                    </div>
+                    
+                    <!-- Field Work Progress -->
+                    <div style="background: white; border-radius: 12px; padding: 16px; margin: 16px 0; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+                        <h4 style="margin-bottom: 12px;">📈 Field Work Progress</h4>
+                        <div style="margin-bottom: 12px;">
+                            <div style="display: flex; justify-content: space-between; margin-bottom: 4px;">
+                                <span style="font-size: 12px;">Today's Target</span>
+                                <span style="font-size: 12px; font-weight: 600;">75%</span>
+                            </div>
+                            <div style="background: #e0e0e0; height: 8px; border-radius: 4px;">
+                                <div style="background: #4CAF50; height: 100%; width: 75%; border-radius: 4px;"></div>
+                            </div>
+                        </div>
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; font-size: 12px;">
+                            <div>✅ Completed: <strong>3/4</strong></div>
+                            <div>⏳ Remaining: <strong>1 area</strong></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Citizen Heatmap Screen -->
+            <div class="screen hidden" id="heatmap-citizen">
+                <div class="status-bar">
+                    <span>9:41</span>
+                    <span>Jal Guard</span>
+                    <span>100%</span>
+                </div>
+                <div class="app-bar">
+                    <button class="back-btn" onclick="showScreen('citizen-dashboard')">←</button>
+                    <h1>Community Map</h1>
+                    <button style="background: none; border: none; color: white; font-size: 20px;">🏘️</button>
+                </div>
+                <div class="content">
+                    <div style="background: white; border-radius: 12px; padding: 16px; margin: 16px 0; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+                        <h3 style="margin-bottom: 16px;">🏘️ Community Health Status</h3>
+                        
+                        <!-- Enhanced Community Heatmap -->
+                        <div class="map-container" style="height: 250px; position: relative; background: linear-gradient(135deg, #4CAF50, #8BC34A, #FFC107, #FF9800, #F44336); border-radius: 12px; overflow: hidden;">
+                            <!-- Community Health Overlay -->
+                            <div style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: radial-gradient(circle at 40% 40%, rgba(76, 175, 80, 0.4) 0%, transparent 60%), radial-gradient(circle at 60% 60%, rgba(255, 152, 0, 0.3) 0%, transparent 50%); border-radius: 12px;"></div>
+                            
+                            <!-- Interactive Community Areas -->
+                            <div class="district low" style="top: 25%; left: 40%; cursor: pointer; transition: all 0.3s ease; box-shadow: 0 4px 12px rgba(76, 175, 80, 0.4);" onclick="showCommunityDetails('Your Area')">
+                                <div style="font-weight: bold; font-size: 12px;">Your Area</div>
+                                <div style="font-size: 9px; opacity: 0.8;">Shillong - Safe</div>
+                                <div style="font-size: 8px; margin-top: 2px;">✅ Good</div>
+                            </div>
+                            
+                            <div class="district medium" style="top: 45%; left: 60%; cursor: pointer; transition: all 0.3s ease; box-shadow: 0 4px 12px rgba(255, 152, 0, 0.4);" onclick="showCommunityDetails('Nearby')">
+                                <div style="font-weight: bold; font-size: 12px;">Nearby</div>
+                                <div style="font-size: 9px; opacity: 0.8;">Medium Alert</div>
+                                <div style="font-size: 8px; margin-top: 2px;">⚠️ Caution</div>
+                            </div>
+                            
+                            <div class="district low" style="top: 65%; left: 30%; cursor: pointer; transition: all 0.3s ease; box-shadow: 0 4px 12px rgba(76, 175, 80, 0.4);" onclick="showCommunityDetails('Community')">
+                                <div style="font-weight: bold; font-size: 12px;">Community</div>
+                                <div style="font-size: 9px; opacity: 0.8;">Good Status</div>
+                                <div style="font-size: 8px; margin-top: 2px;">✅ Safe</div>
+                            </div>
+                            
+                            <!-- Your Location Pin -->
+                            <div style="position: absolute; top: 25%; left: 40%; width: 16px; height: 16px; background: #2196F3; border: 3px solid white; border-radius: 50%; animation: pulse 2s infinite;"></div>
+                            
+                            <!-- Safety Radius -->
+                            <div style="position: absolute; top: 15%; left: 30%; width: 40%; height: 40%; border: 2px solid rgba(76, 175, 80, 0.6); border-radius: 50%; pointer-events: none;"></div>
+                            
+                            <!-- Community Health Indicator -->
+                            <div style="position: absolute; top: 10px; right: 10px; background: rgba(76, 175, 80, 0.9); color: white; padding: 4px 8px; border-radius: 12px; font-size: 10px; font-weight: bold;">
+                                🏥 Community Safe
+                            </div>
+                        </div>
+                        
+                        <!-- Enhanced Community Status -->
+                        <div style="background: #e8f5e8; border: 1px solid #4CAF50; border-radius: 8px; padding: 12px; margin-top: 16px;">
+                            <div style="font-weight: 600; color: #4CAF50; margin-bottom: 4px;">✅ Your Area Status</div>
+                            <div style="color: #666; font-size: 14px;">Water quality is good. No health alerts in your immediate area.</div>
+                            <div style="margin-top: 8px; font-size: 12px; color: #4CAF50;">
+                                <strong>Last checked:</strong> 2 hours ago • <strong>Next check:</strong> 4 hours
+                            </div>
+                        </div>
+                        
+                        <div style="background: #fff3e0; border: 1px solid #FF9800; border-radius: 8px; padding: 12px; margin-top: 12px;">
+                            <div style="font-weight: 600; color: #FF9800; margin-bottom: 4px;">⚠️ Nearby Alert</div>
+                            <div style="color: #666; font-size: 14px;">Water contamination reported 2km away. Avoid that area.</div>
+                            <div style="margin-top: 8px; font-size: 12px; color: #FF9800;">
+                                <strong>Distance:</strong> 2.1 km • <strong>Reported:</strong> 1 hour ago
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Community Health Insights -->
+                    <div style="background: white; border-radius: 12px; padding: 16px; margin: 16px 0; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+                        <h4 style="margin-bottom: 12px;">📊 Community Health Insights</h4>
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px;">
+                            <div style="background: #f8f9fa; padding: 12px; border-radius: 8px; text-align: center;">
+                                <div style="font-size: 24px; color: #4CAF50; margin-bottom: 8px;">💧</div>
+                                <div style="font-weight: 600; font-size: 14px;">Water Quality</div>
+                                <div style="color: #4CAF50; font-weight: 600;">Good</div>
+                            </div>
+                            <div style="background: #f8f9fa; padding: 12px; border-radius: 8px; text-align: center;">
+                                <div style="font-size: 24px; color: #2196F3; margin-bottom: 8px;">🏥</div>
+                                <div style="font-weight: 600; font-size: 14px;">Health Centers</div>
+                                <div style="color: #2196F3; font-weight: 600;">3 Nearby</div>
+                            </div>
+                            <div style="background: #f8f9fa; padding: 12px; border-radius: 8px; text-align: center;">
+                                <div style="font-size: 24px; color: #FF9800; margin-bottom: 8px;">🚨</div>
+                                <div style="font-weight: 600; font-size: 14px;">Active Alerts</div>
+                                <div style="color: #FF9800; font-weight: 600;">1 Nearby</div>
+                            </div>
+                            <div style="background: #f8f9fa; padding: 12px; border-radius: 8px; text-align: center;">
+                                <div style="font-size: 24px; color: #9C27B0; margin-bottom: 8px;">👥</div>
+                                <div style="font-weight: 600; font-size: 14px;">Community</div>
+                                <div style="color: #9C27B0; font-weight: 600;">Safe</div>
+                            </div>
+                        </div>
+                        
+                        <!-- Quick Actions -->
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
+                            <button style="background: #e3f2fd; border: 1px solid #2196F3; color: #2196F3; padding: 8px; border-radius: 8px; font-size: 12px;" onclick="reportConcern()">📝 Report Concern</button>
+                            <button style="background: #e8f5e8; border: 1px solid #4CAF50; color: #4CAF50; padding: 8px; border-radius: 8px; font-size: 12px;" onclick="getHealthTips()">💡 Health Tips</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Database Manager Screen -->
+            <div class="screen hidden" id="database-manager">
+                <div class="status-bar">
+                    <span>9:41</span>
+                    <span>Jal Guard</span>
+                    <span>100%</span>
+                </div>
+                <div class="app-bar">
+                    <button class="back-btn" onclick="showScreen('command-center')">←</button>
+                    <h1>Database Manager</h1>
+                </div>
+                <div class="content">
+                    <div style="background: white; border-radius: 12px; padding: 16px; margin: 16px 0; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+                        <h3 style="margin-bottom: 16px;">🗄️ Database Status</h3>
+                        
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 16px;">
+                            <div style="background: #f8f9fa; padding: 12px; border-radius: 8px; text-align: center;">
+                                <div style="font-size: 24px; color: #4CAF50; margin-bottom: 8px;">📊</div>
+                                <div style="font-weight: 600; font-size: 14px;">Total Records</div>
+                                <div style="color: #4CAF50; font-weight: 600;">2,847</div>
+                            </div>
+                            <div style="background: #f8f9fa; padding: 12px; border-radius: 8px; text-align: center;">
+                                <div style="font-size: 24px; color: #2196F3; margin-bottom: 8px;">🔄</div>
+                                <div style="font-weight: 600; font-size: 14px;">Sync Status</div>
+                                <div style="color: #2196F3; font-weight: 600;">Online</div>
+                            </div>
+                            <div style="background: #f8f9fa; padding: 12px; border-radius: 8px; text-align: center;">
+                                <div style="font-size: 24px; color: #FF9800; margin-bottom: 8px;">💾</div>
+                                <div style="font-weight: 600; font-size: 14px;">Storage Used</div>
+                                <div style="color: #FF9800; font-weight: 600;">45.2 MB</div>
+                            </div>
+                            <div style="background: #f8f9fa; padding: 12px; border-radius: 8px; text-align: center;">
+                                <div style="font-size: 24px; color: #9C27B0; margin-bottom: 8px;">⚡</div>
+                                <div style="font-weight: 600; font-size: 14px;">Last Backup</div>
+                                <div style="color: #9C27B0; font-weight: 600;">2h ago</div>
+                            </div>
+                        </div>
+                        
+                        <div style="background: #e3f2fd; border: 1px solid #2196F3; border-radius: 8px; padding: 12px; margin-bottom: 16px;">
+                            <div style="font-weight: 600; color: #2196F3; margin-bottom: 4px;">📈 Database Analytics</div>
+                            <div style="color: #666; font-size: 14px;">• 1,234 Health Reports • 567 Users • 89 Districts • 23 IoT Sensors</div>
+                        </div>
+                        
+                        <button class="btn btn-primary" style="margin-bottom: 8px;">🔄 Sync with Cloud</button>
+                        <button class="btn btn-secondary" style="background: #f0f0f0; color: #666;">💾 Backup Database</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Offline Sync Screen -->
+            <div class="screen hidden" id="offline-sync">
+                <div class="status-bar">
+                    <span>9:41</span>
+                    <span>Jal Guard</span>
+                    <span>100%</span>
+                </div>
+                <div class="app-bar">
+                    <button class="back-btn" onclick="showScreen('field-dashboard')">←</button>
+                    <h1>Offline Sync</h1>
+                </div>
+                <div class="content">
+                    <div style="background: white; border-radius: 12px; padding: 16px; margin: 16px 0; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+                        <h3 style="margin-bottom: 16px;">🔄 Sync Status</h3>
+                        
+                        <div style="background: #f8f9fa; padding: 12px; border-radius: 8px; margin-bottom: 16px;">
+                            <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+                                <span>Pending Reports:</span>
+                                <span style="font-weight: 600; color: #FF9800;">2</span>
+                            </div>
+                            <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+                                <span>Last Sync:</span>
+                                <span style="font-weight: 600;">2 hours ago</span>
+                            </div>
+                            <div style="display: flex; justify-content: space-between;">
+                                <span>Connection:</span>
+                                <span style="font-weight: 600; color: #4CAF50;">Online</span>
+                            </div>
+                        </div>
+                        
+                        <div style="background: #fff3e0; border: 1px solid #FF9800; border-radius: 8px; padding: 12px; margin-bottom: 16px;">
+                            <div style="font-weight: 600; color: #FF9800; margin-bottom: 4px;">📤 Pending Uploads</div>
+                            <div style="color: #666; font-size: 14px;">• Water quality report - Mawryngkneng<br>• Health symptoms - Shillong</div>
+                        </div>
+                        
+                        <button class="btn btn-primary" style="margin-bottom: 8px;">🔄 Sync Now</button>
+                        <button class="btn btn-secondary" style="background: #f0f0f0; color: #666;">📱 View Offline Data</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Health Tips Screen -->
+            <div class="screen hidden" id="health-tips">
+                <div class="status-bar">
+                    <span>9:41</span>
+                    <span>Jal Guard</span>
+                    <span>100%</span>
+                </div>
+                <div class="app-bar">
+                    <button class="back-btn" onclick="showScreen('citizen-dashboard')">←</button>
+                    <h1>Health Tips</h1>
+                </div>
+                <div class="content">
+                    <div style="background: white; border-radius: 12px; padding: 16px; margin: 16px 0; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+                        <h3 style="margin-bottom: 16px;">💡 Daily Health Tips</h3>
+                        
+                        <div style="border: 1px solid #e0e0e0; border-radius: 8px; padding: 12px; margin-bottom: 12px;">
+                            <div style="display: flex; align-items: center; margin-bottom: 8px;">
+                                <span style="font-size: 24px; margin-right: 12px;">💧</span>
+                                <div style="flex: 1;">
+                                    <div style="font-weight: 600;">Water Safety</div>
+                                    <div style="color: #666; font-size: 12px;">Today's tip</div>
+                                </div>
+                            </div>
+                            <div style="color: #666; font-size: 14px;">Always boil water for at least 1 minute before drinking, especially during monsoon season when contamination risk is higher.</div>
+                        </div>
+                        
+                        <div style="border: 1px solid #e0e0e0; border-radius: 8px; padding: 12px; margin-bottom: 12px;">
+                            <div style="display: flex; align-items: center; margin-bottom: 8px;">
+                                <span style="font-size: 24px; margin-right: 12px;">🧼</span>
+                                <div style="flex: 1;">
+                                    <div style="font-weight: 600;">Hand Hygiene</div>
+                                    <div style="color: #666; font-size: 12px;">Essential practice</div>
+                                </div>
+                            </div>
+                            <div style="color: #666; font-size: 14px;">Wash your hands with soap and clean water for at least 20 seconds, especially before eating and after using the toilet.</div>
+                        </div>
+                        
+                        <div style="border: 1px solid #e0e0e0; border-radius: 8px; padding: 12px;">
+                            <div style="display: flex; align-items: center; margin-bottom: 8px;">
+                                <span style="font-size: 24px; margin-right: 12px;">🍎</span>
+                                <div style="flex: 1;">
+                                    <div style="font-weight: 600;">Nutrition</div>
+                                    <div style="color: #666; font-size: 12px;">Healthy eating</div>
+                                </div>
+                            </div>
+                            <div style="color: #666; font-size: 14px;">Eat fresh, locally grown vegetables and fruits. Avoid street food during heavy rains to prevent water-borne diseases.</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -1748,12 +2357,20 @@
                 'district-details': 'District Details',
                 'resources': 'Resources',
                 'emergency': 'Emergency',
+                'heatmap-official': 'Heatmap View',
+                'database-manager': 'Database',
                 'field-dashboard': 'Field Dashboard',
+                'field-ai-copilot': 'AI Assistant',
                 'report-form': 'Report Form',
                 'mcp-card': 'MCP Card',
                 'education': 'Education',
+                'heatmap-worker': 'Local Heatmap',
+                'offline-sync': 'Offline Sync',
                 'citizen-dashboard': 'Citizen Dashboard',
+                'citizen-ai-copilot': 'AI Health',
                 'concern-report': 'Concern Report',
+                'heatmap-citizen': 'Community Map',
+                'health-tips': 'Health Tips',
                 'notifications': 'Notifications',
                 'profile': 'Profile',
                 'settings': 'Settings'
@@ -1829,6 +2446,173 @@
                 toggleButton.textContent = '+';
                 controls.style.maxHeight = '60px';
             }
+        }
+
+        // Heatmap Interactive Functions
+        function toggleHeatmapLayer(layer) {
+            const buttons = document.querySelectorAll('[onclick^="toggleHeatmapLayer"]');
+            buttons.forEach(btn => {
+                btn.style.background = '#f0f0f0';
+                btn.style.color = '#666';
+            });
+            
+            event.target.style.background = '#2E7D32';
+            event.target.style.color = 'white';
+            
+            // Simulate layer change
+            const overlay = document.getElementById('heatmap-overlay');
+            if (overlay) {
+                switch(layer) {
+                    case 'risk':
+                        overlay.style.background = 'rgba(0,0,0,0.1)';
+                        break;
+                    case 'reports':
+                        overlay.style.background = 'rgba(33, 150, 243, 0.1)';
+                        break;
+                    case 'iot':
+                        overlay.style.background = 'rgba(76, 175, 80, 0.1)';
+                        break;
+                }
+            }
+        }
+
+        function showDistrictDetails(districtName) {
+            alert(`District Details: ${districtName}\n\nRisk Level: ${getRiskLevel(districtName)}\nReports: ${getReportCount(districtName)}\nIoT Sensors: ${getSensorCount(districtName)}`);
+        }
+
+        function showAreaDetails(areaName) {
+            alert(`Area Details: ${areaName}\n\nStatus: ${getAreaStatus(areaName)}\nLast Visit: ${getLastVisit(areaName)}\nNext Check: ${getNextCheck(areaName)}`);
+        }
+
+        function showCommunityDetails(communityName) {
+            alert(`Community Details: ${communityName}\n\nHealth Status: ${getCommunityStatus(communityName)}\nWater Quality: ${getWaterQuality(communityName)}\nSafety Level: ${getSafetyLevel(communityName)}`);
+        }
+
+        function exportHeatmap() {
+            alert('Heatmap exported successfully!\n\nFormat: PNG\nSize: 1920x1080\nData: Real-time risk assessment');
+        }
+
+        function refreshHeatmap() {
+            alert('Heatmap refreshed!\n\nNew data loaded\nLast update: Just now\nSensors: 23 active');
+        }
+
+        function toggleHeatmapAnimation() {
+            const districts = document.querySelectorAll('.district');
+            districts.forEach(district => {
+                district.classList.toggle('heatmap-animated');
+            });
+            alert('Heatmap animation toggled!');
+        }
+
+        function showHeatmapSettings() {
+            alert('Heatmap Settings\n\n• Auto-refresh: 30 seconds\n• Risk threshold: Medium\n• Display mode: Real-time\n• Export format: PNG');
+        }
+
+        function startFieldWork() {
+            alert('Field Work Started!\n\nGPS tracking: Active\nLocation: Mawryngkneng\nStatus: In progress');
+        }
+
+        function syncReports() {
+            alert('Reports Synced!\n\nUploaded: 2 reports\nStatus: Complete\nNext sync: 1 hour');
+        }
+
+        function reportConcern() {
+            alert('Report Concern\n\nRedirecting to concern form...\nLocation: Auto-detected\nPriority: Medium');
+        }
+
+        function getHealthTips() {
+            alert('Health Tips\n\n• Boil water before drinking\n• Wash hands frequently\n• Avoid stagnant water\n• Report any symptoms');
+        }
+
+        // Helper functions for mock data
+        function getRiskLevel(district) {
+            const risks = {
+                'Ri Bhoi': 'Critical (9.2/10)',
+                'East Khasi': 'High (7.8/10)',
+                'West Khasi': 'Medium (5.4/10)',
+                'Jaintia': 'Low (2.1/10)',
+                'Garo Hills': 'Medium (4.7/10)'
+            };
+            return risks[district] || 'Unknown';
+        }
+
+        function getReportCount(district) {
+            const reports = {
+                'Ri Bhoi': '23 reports',
+                'East Khasi': '15 reports',
+                'West Khasi': '8 reports',
+                'Jaintia': '3 reports',
+                'Garo Hills': '12 reports'
+            };
+            return reports[district] || '0 reports';
+        }
+
+        function getSensorCount(district) {
+            const sensors = {
+                'Ri Bhoi': '5 sensors',
+                'East Khasi': '4 sensors',
+                'West Khasi': '3 sensors',
+                'Jaintia': '2 sensors',
+                'Garo Hills': '3 sensors'
+            };
+            return sensors[district] || '0 sensors';
+        }
+
+        function getAreaStatus(area) {
+            const statuses = {
+                'Mawryngkneng': 'Safe - Good water quality',
+                'Shillong': 'Medium risk - Monitor closely',
+                'Cherrapunji': 'High risk - Immediate attention needed',
+                'Pynursla': 'Safe - All clear'
+            };
+            return statuses[area] || 'Unknown status';
+        }
+
+        function getLastVisit(area) {
+            const visits = {
+                'Mawryngkneng': '2 hours ago',
+                'Shillong': '4 hours ago',
+                'Cherrapunji': '1 hour ago',
+                'Pynursla': '6 hours ago'
+            };
+            return visits[area] || 'Not visited';
+        }
+
+        function getNextCheck(area) {
+            const checks = {
+                'Mawryngkneng': 'In 2 hours',
+                'Shillong': 'In 1 hour',
+                'Cherrapunji': 'In 30 minutes',
+                'Pynursla': 'In 4 hours'
+            };
+            return checks[area] || 'Not scheduled';
+        }
+
+        function getCommunityStatus(community) {
+            const statuses = {
+                'Your Area': 'Safe - No alerts',
+                'Nearby': 'Medium alert - Water contamination',
+                'Community': 'Good - All systems normal'
+            };
+            return statuses[community] || 'Unknown';
+        }
+
+        function getWaterQuality(community) {
+            const quality = {
+                'Your Area': 'Good - Safe to drink',
+                'Nearby': 'Poor - Boil before use',
+                'Community': 'Good - Regular testing'
+            };
+            return quality[community] || 'Unknown';
+        }
+
+        function getSafetyLevel(community) {
+            const safety = {
+                'Your Area': 'High - Very safe',
+                'Nearby': 'Medium - Exercise caution',
+                'Community': 'High - Safe environment'
+            };
+            return safety[community] || 'Unknown';
         }
 
         // Auto-start splash animations on page load

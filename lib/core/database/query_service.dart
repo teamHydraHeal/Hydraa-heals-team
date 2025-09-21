@@ -1,5 +1,4 @@
 import 'package:sqflite/sqflite.dart';
-import 'dart:convert';
 
 import 'database_service.dart';
 import 'dao/user_dao.dart';
@@ -152,7 +151,7 @@ class QueryService {
           COUNT(CASE WHEN severity = 'high' THEN 1 END) as high_reports,
           COUNT(CASE WHEN severity = 'medium' THEN 1 END) as medium_reports,
           COUNT(CASE WHEN severity = 'low' THEN 1 END) as low_reports
-        FROM ${DatabaseService._healthReportsTable}
+        FROM ${DatabaseService.healthReportsTable}
         WHERE $whereClause
         GROUP BY DATE(reported_at)
         ORDER BY date ASC
@@ -196,7 +195,7 @@ class QueryService {
           AVG(longitude) as avg_longitude,
           COUNT(CASE WHEN severity = 'critical' THEN 1 END) as critical_count,
           COUNT(CASE WHEN severity = 'high' THEN 1 END) as high_count
-        FROM ${DatabaseService._healthReportsTable}
+        FROM ${DatabaseService.healthReportsTable}
         WHERE $whereClause
         GROUP BY district_id
         ORDER BY report_count DESC
@@ -248,8 +247,8 @@ class QueryService {
           MAX(hr.reported_at) as last_report_date,
           COUNT(CASE WHEN hr.severity = 'critical' THEN 1 END) as critical_reports,
           u.last_login
-        FROM ${DatabaseService._usersTable} u
-        LEFT JOIN ${DatabaseService._healthReportsTable} hr ON u.id = hr.user_id
+        FROM ${DatabaseService.usersTable} u
+        LEFT JOIN ${DatabaseService.healthReportsTable} hr ON u.id = hr.user_id
         WHERE $whereClause
         GROUP BY u.id, u.name, u.role, u.district_id, u.last_login
         ORDER BY reports_submitted DESC
@@ -279,9 +278,9 @@ class QueryService {
           COUNT(CASE WHEN hr.severity = 'high' THEN 1 END) as high_reports,
           AVG(isd.quality_score) as avg_water_quality,
           COUNT(isd.id) as sensor_readings
-        FROM ${DatabaseService._districtsTable} d
-        LEFT JOIN ${DatabaseService._healthReportsTable} hr ON d.id = hr.district_id
-        LEFT JOIN ${DatabaseService._iotSensorDataTable} isd ON d.id = isd.district_id
+        FROM ${DatabaseService.districtsTable} d
+        LEFT JOIN ${DatabaseService.healthReportsTable} hr ON d.id = hr.district_id
+        LEFT JOIN ${DatabaseService.iotSensorDataTable} isd ON d.id = isd.district_id
         GROUP BY d.id, d.name, d.risk_score, d.risk_level
         ORDER BY d.risk_score DESC
       ''');
@@ -309,7 +308,7 @@ class QueryService {
           END) as avg_response_time_minutes,
           COUNT(CASE WHEN processed_at IS NOT NULL THEN 1 END) as processed_reports,
           COUNT(*) as total_reports
-        FROM ${DatabaseService._healthReportsTable}
+        FROM ${DatabaseService.healthReportsTable}
         WHERE reported_at >= datetime('now', '-30 days')
       ''');
 
@@ -319,7 +318,7 @@ class QueryService {
           COUNT(*) as total_offline_reports,
           COUNT(CASE WHEN is_synced = 1 THEN 1 END) as synced_reports,
           AVG(sync_attempts) as avg_sync_attempts
-        FROM ${DatabaseService._healthReportsTable}
+        FROM ${DatabaseService.healthReportsTable}
         WHERE is_offline = 1
       ''');
 
@@ -333,7 +332,7 @@ class QueryService {
           SELECT 
             user_id,
             COUNT(*) as activities_per_user
-          FROM ${DatabaseService._healthReportsTable}
+          FROM ${DatabaseService.healthReportsTable}
           WHERE reported_at >= datetime('now', '-7 days')
           GROUP BY user_id
         )
@@ -365,7 +364,7 @@ class QueryService {
           COUNT(CASE WHEN latitude IS NOT NULL AND longitude IS NOT NULL THEN 1 END) as reports_with_location,
           COUNT(CASE WHEN ai_analysis IS NOT NULL THEN 1 END) as reports_with_ai_analysis,
           COUNT(CASE WHEN photo_urls IS NOT NULL AND photo_urls != '[]' THEN 1 END) as reports_with_photos
-        FROM ${DatabaseService._healthReportsTable}
+        FROM ${DatabaseService.healthReportsTable}
       ''');
 
       // User data quality
@@ -375,7 +374,7 @@ class QueryService {
           COUNT(CASE WHEN is_verified = 1 THEN 1 END) as verified_users,
           COUNT(CASE WHEN professional_id IS NOT NULL THEN 1 END) as users_with_professional_id,
           COUNT(CASE WHEN district_id IS NOT NULL THEN 1 END) as users_with_district
-        FROM ${DatabaseService._usersTable}
+        FROM ${DatabaseService.usersTable}
         WHERE is_active = 1
       ''');
 
@@ -386,7 +385,7 @@ class QueryService {
           COUNT(CASE WHEN quality_score IS NOT NULL THEN 1 END) as readings_with_quality_score,
           COUNT(CASE WHEN is_anomaly = 1 THEN 1 END) as anomaly_readings,
           AVG(quality_score) as avg_quality_score
-        FROM ${DatabaseService._iotSensorDataTable}
+        FROM ${DatabaseService.iotSensorDataTable}
         WHERE recorded_at >= datetime('now', '-7 days')
       ''');
 
@@ -416,7 +415,7 @@ class QueryService {
           AVG(CASE WHEN severity = 'critical' THEN 1.0 ELSE 0.0 END) as critical_ratio,
           AVG(CASE WHEN severity = 'high' THEN 1.0 ELSE 0.0 END) as high_ratio,
           COUNT(*) * 1.2 as predicted_reports
-        FROM ${DatabaseService._healthReportsTable}
+        FROM ${DatabaseService.healthReportsTable}
         WHERE reported_at >= datetime('now', '-7 days')
         GROUP BY district_id
         HAVING recent_reports > 0
@@ -436,8 +435,8 @@ class QueryService {
             WHEN COUNT(hr.id) > 2 THEN 'MEDIUM'
             ELSE 'LOW'
           END as escalation_risk
-        FROM ${DatabaseService._districtsTable} d
-        LEFT JOIN ${DatabaseService._healthReportsTable} hr ON d.id = hr.district_id
+        FROM ${DatabaseService.districtsTable} d
+        LEFT JOIN ${DatabaseService.healthReportsTable} hr ON d.id = hr.district_id
         WHERE hr.reported_at >= datetime('now', '-3 days')
         AND hr.severity = 'critical'
         GROUP BY d.id, d.name, d.risk_score, d.risk_level
@@ -496,7 +495,7 @@ class QueryService {
             (julianday(processed_at) - julianday(reported_at)) * 24 <= 24 THEN 1 END) as processed_within_24h,
           COUNT(CASE WHEN processed_at IS NOT NULL AND 
             (julianday(processed_at) - julianday(reported_at)) * 24 <= 48 THEN 1 END) as processed_within_48h
-        FROM ${DatabaseService._healthReportsTable}
+        FROM ${DatabaseService.healthReportsTable}
         WHERE reported_at >= datetime('now', '-30 days')
       ''');
 
@@ -507,7 +506,7 @@ class QueryService {
           COUNT(CASE WHEN is_verified = 1 THEN 1 END) as verified_users,
           COUNT(CASE WHEN role = 'healthOfficial' AND is_verified = 1 THEN 1 END) as verified_officials,
           COUNT(CASE WHEN role = 'ashaWorker' AND is_verified = 1 THEN 1 END) as verified_asha_workers
-        FROM ${DatabaseService._usersTable}
+        FROM ${DatabaseService.usersTable}
         WHERE is_active = 1
       ''');
 
