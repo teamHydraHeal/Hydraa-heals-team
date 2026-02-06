@@ -180,7 +180,7 @@ class _ProfessionalVerificationScreenState extends State<ProfessionalVerificatio
             
             // Document Type Dropdown
             DropdownButtonFormField<String>(
-              initialValue: _selectedDocumentType,
+              value: _selectedDocumentType,
               decoration: InputDecoration(
                 labelText: 'Document Type',
                 prefixIcon: const Icon(Icons.description),

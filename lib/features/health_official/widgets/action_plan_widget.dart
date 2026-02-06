@@ -10,482 +10,451 @@ class ActionPlanWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final situationAnalysis = actionPlan['situation_analysis'] as Map<String, dynamic>? ?? {};
+    final situationAnalysis =
+        actionPlan['situation_analysis'] as Map<String, dynamic>? ?? {};
     final actionItems = actionPlan['action_items'] as List<dynamic>? ?? [];
-    final resourceRequirements = actionPlan['resource_requirements'] as Map<String, dynamic>? ?? {};
+    final resourceRequirements =
+        actionPlan['resource_requirements'] as Map<String, dynamic>? ?? {};
     final timeline = actionPlan['timeline'] as List<dynamic>? ?? [];
-    final successProbability = actionPlan['success_probability'] as double? ?? 0.0;
+    final successProbability =
+        actionPlan['success_probability'] as double? ?? 0.0;
+    final mlPrediction = actionPlan['ml_prediction'] as Map<String, dynamic>?;
 
     return SingleChildScrollView(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(20),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Situation Analysis
-          _buildSituationAnalysisCard(situationAnalysis),
-          
-          const SizedBox(height: 16),
-          
-          // Success Probability
-          _buildSuccessProbabilityCard(successProbability),
-          
-          const SizedBox(height: 16),
-          
-          // Action Items
-          _buildActionItemsCard(actionItems),
-          
-          const SizedBox(height: 16),
-          
-          // Resource Requirements
-          _buildResourceRequirementsCard(resourceRequirements),
-          
-          const SizedBox(height: 16),
-          
+          // ML Prediction Alert (if available)
+          if (mlPrediction != null) _buildMlAlert(mlPrediction),
+          if (mlPrediction != null) const SizedBox(height: 24),
+
+          // Quick Summary Row
+          _buildQuickSummary(situationAnalysis, successProbability),
+          const SizedBox(height: 24),
+
+          // Action Steps (simplified)
+          _buildActionSteps(actionItems),
+          const SizedBox(height: 24),
+
+          // Resources Needed
+          _buildResourcesNeeded(resourceRequirements),
+          const SizedBox(height: 24),
+
           // Timeline
-          _buildTimelineCard(timeline),
-          
-          const SizedBox(height: 16),
-          
+          _buildTimeline(timeline),
+          const SizedBox(height: 24),
+
           // Action Buttons
           _buildActionButtons(context),
+          const SizedBox(height: 40),
         ],
       ),
     );
   }
 
-  Widget _buildSituationAnalysisCard(Map<String, dynamic> situation) {
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const Row(
-              children: [
-                Icon(Icons.analytics, color: Colors.blue),
-                SizedBox(width: 8),
-                Text(
-                  'Situation Analysis',
-                  style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 16),
-            Row(
-              children: [
-                Expanded(
-                  child: _buildStatItem(
-                    'Total Reports',
-                    '${situation['total_reports'] ?? 0}',
-                    Colors.blue,
-                    Icons.assignment,
-                  ),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: _buildStatItem(
-                    'Critical Reports',
-                    '${situation['critical_reports'] ?? 0}',
-                    Colors.red,
-                    Icons.warning,
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 12),
-            Row(
-              children: [
-                Expanded(
-                  child: _buildStatItem(
-                    'High Risk',
-                    '${situation['high_risk_reports'] ?? 0}',
-                    Colors.orange,
-                    Icons.trending_up,
-                  ),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: _buildStatItem(
-                    'Water Issue',
-                    situation['water_quality_issue'] == true ? 'Yes' : 'No',
-                    situation['water_quality_issue'] == true ? Colors.red : Colors.green,
-                    Icons.water_drop,
-                  ),
-                ),
-              ],
-            ),
-            if (situation['outbreak_risk'] == true) ...[
-              const SizedBox(height: 12),
-              Container(
-                padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  color: Colors.red.withValues(alpha: 0.1),
-                  borderRadius: BorderRadius.circular(8),
-                  border: Border.all(color: Colors.red.withValues(alpha: 0.3)),
-                ),
-                child: const Row(
-                  children: [
-                    Icon(Icons.dangerous, color: Colors.red),
-                    SizedBox(width: 8),
-                    Text(
-                      'OUTBREAK RISK DETECTED',
-                      style: TextStyle(
-                        color: Colors.red,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ],
-        ),
-      ),
-    );
-  }
+  // ===== ML PREDICTION ALERT =====
+  Widget _buildMlAlert(Map<String, dynamic> prediction) {
+    final status = (prediction['status'] as String? ?? 'UNKNOWN').toUpperCase();
+    final totalRisk = (prediction['total_risk'] as num?)?.toDouble() ?? 0.0;
+    final advisory = prediction['advisory'] as String? ?? '';
 
-  Widget _buildSuccessProbabilityCard(double probability) {
-    final percentage = (probability * 100).round();
-    final color = probability > 0.7 ? Colors.green : probability > 0.4 ? Colors.orange : Colors.red;
-    
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const Row(
-              children: [
-                Icon(Icons.trending_up, color: Colors.green),
-                SizedBox(width: 8),
-                Text(
-                  'Success Probability',
-                  style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 16),
-            Row(
-              children: [
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        '$percentage%',
-                        style: TextStyle(
-                          fontSize: 32,
-                          fontWeight: FontWeight.bold,
-                          color: color,
-                        ),
-                      ),
-                      const Text(
-                        'Success Rate',
-                        style: TextStyle(
-                          fontSize: 14,
-                          color: Colors.grey,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                Expanded(
-                  child: CircularProgressIndicator(
-                    value: probability,
-                    backgroundColor: Colors.grey[300],
-                    valueColor: AlwaysStoppedAnimation<Color>(color),
-                    strokeWidth: 8,
-                  ),
-                ),
-              ],
-            ),
-          ],
-        ),
-      ),
-    );
-  }
+    Color alertColor;
+    IconData alertIcon;
+    String alertTitle;
 
-  Widget _buildActionItemsCard(List<dynamic> actionItems) {
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const Row(
-              children: [
-                Icon(Icons.checklist, color: Colors.blue),
-                SizedBox(width: 8),
-                Text(
-                  'Action Items',
-                  style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 16),
-            ...actionItems.map((item) => _buildActionItem(item)).toList(),
-          ],
-        ),
-      ),
-    );
-  }
+    switch (status) {
+      case 'RED':
+        alertColor = const Color(0xFFD32F2F);
+        alertIcon = Icons.error;
+        alertTitle = 'HIGH RISK';
+        break;
+      case 'YELLOW':
+        alertColor = const Color(0xFFF57C00);
+        alertIcon = Icons.warning_amber_rounded;
+        alertTitle = 'MODERATE RISK';
+        break;
+      case 'GREEN':
+        alertColor = const Color(0xFF388E3C);
+        alertIcon = Icons.check_circle;
+        alertTitle = 'LOW RISK';
+        break;
+      default:
+        alertColor = Colors.grey;
+        alertIcon = Icons.help_outline;
+        alertTitle = 'UNKNOWN';
+    }
 
-  Widget _buildActionItem(dynamic item) {
-    final priority = item['priority'] as String? ?? 'medium';
-    final color = _getPriorityColor(priority);
-    
     return Container(
-      margin: const EdgeInsets.only(bottom: 12),
-      padding: const EdgeInsets.all(12),
+      padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: color.withValues(alpha: 0.1),
-        borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: color.withValues(alpha: 0.3)),
+        color: alertColor,
+        borderRadius: BorderRadius.circular(16),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
             children: [
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                decoration: BoxDecoration(
-                  color: color,
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: Text(
-                  priority.toUpperCase(),
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontSize: 10,
-                    fontWeight: FontWeight.bold,
-                  ),
+              Icon(alertIcon, color: Colors.white, size: 32),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text(
+                      'ML PREDICTION',
+                      style: TextStyle(
+                        color: Colors.white70,
+                        fontSize: 12,
+                        fontWeight: FontWeight.w600,
+                        letterSpacing: 1,
+                      ),
+                    ),
+                    Text(
+                      alertTitle,
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 24,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ],
                 ),
               ),
-              const Spacer(),
-              Text(
-                item['estimated_duration'] as String? ?? 'Unknown',
-                style: const TextStyle(
-                  fontSize: 12,
-                  color: Colors.grey,
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                decoration: BoxDecoration(
+                  color: Colors.white.withValues(alpha: 0.2),
+                  borderRadius: BorderRadius.circular(20),
+                ),
+                child: Text(
+                  '${(totalRisk * 100).round()}%',
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
               ),
             ],
           ),
-          const SizedBox(height: 8),
-          Text(
-            item['title'] as String? ?? 'Unknown Action',
-            style: const TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.w600,
+          if (advisory.isNotEmpty) ...[
+            const SizedBox(height: 16),
+            Text(
+              advisory,
+              style: const TextStyle(
+                color: Colors.white,
+                fontSize: 15,
+                height: 1.5,
+              ),
             ),
-          ),
-          const SizedBox(height: 4),
-          Text(
-            item['description'] as String? ?? 'No description available',
-            style: const TextStyle(
-              fontSize: 14,
-              color: Colors.grey,
-            ),
-          ),
-          const SizedBox(height: 8),
-          Wrap(
-            spacing: 8,
-            runSpacing: 4,
-            children: (item['resources_needed'] as List<dynamic>? ?? [])
-                .map((resource) => Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                      decoration: BoxDecoration(
-                        color: Colors.grey[200],
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      child: Text(
-                        resource.toString(),
-                        style: const TextStyle(
-                          fontSize: 12,
-                          color: Colors.grey,
-                        ),
-                      ),
-                    ))
-                .toList(),
-          ),
+          ],
         ],
       ),
     );
   }
 
-  Widget _buildResourceRequirementsCard(Map<String, dynamic> requirements) {
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+  // ===== QUICK SUMMARY =====
+  Widget _buildQuickSummary(Map<String, dynamic> situation, double probability) {
+    final totalReports = situation['total_reports'] ?? 0;
+    final criticalReports = situation['critical_reports'] ?? 0;
+    final waterIssue = situation['water_quality_issue'] == true;
+    final outbreakRisk = situation['outbreak_risk'] == true;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Text(
+          'SITUATION OVERVIEW',
+          style: TextStyle(
+            fontSize: 13,
+            fontWeight: FontWeight.w700,
+            letterSpacing: 1.5,
+            color: Colors.grey,
+          ),
+        ),
+        const SizedBox(height: 16),
+        Row(
           children: [
-            const Row(
+            _buildSummaryCard(
+              icon: Icons.article,
+              label: 'Total\nReports',
+              value: '$totalReports',
+              color: Colors.blue,
+            ),
+            const SizedBox(width: 12),
+            _buildSummaryCard(
+              icon: Icons.priority_high,
+              label: 'Critical\nCases',
+              value: '$criticalReports',
+              color: criticalReports > 0 ? Colors.red : Colors.grey,
+            ),
+            const SizedBox(width: 12),
+            _buildSummaryCard(
+              icon: Icons.water_drop,
+              label: 'Water\nQuality',
+              value: waterIssue ? 'BAD' : 'OK',
+              color: waterIssue ? Colors.red : Colors.green,
+            ),
+            const SizedBox(width: 12),
+            _buildSummaryCard(
+              icon: Icons.trending_up,
+              label: 'Success\nChance',
+              value: '${(probability * 100).round()}%',
+              color: probability > 0.6 ? Colors.green : Colors.orange,
+            ),
+          ],
+        ),
+        if (outbreakRisk) ...[
+          const SizedBox(height: 16),
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            decoration: BoxDecoration(
+              color: Colors.red.withValues(alpha: 0.1),
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(color: Colors.red.withValues(alpha: 0.3)),
+            ),
+            child: Row(
               children: [
-                Icon(Icons.inventory, color: Colors.orange),
-                SizedBox(width: 8),
-                Text(
-                  'Resource Requirements',
-                  style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
+                const Icon(Icons.warning, color: Colors.red, size: 24),
+                const SizedBox(width: 12),
+                const Expanded(
+                  child: Text(
+                    'OUTBREAK RISK DETECTED',
+                    style: TextStyle(
+                      color: Colors.red,
+                      fontSize: 14,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+                Container(
+                  width: 12,
+                  height: 12,
+                  decoration: BoxDecoration(
+                    color: Colors.red,
+                    shape: BoxShape.circle,
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.red.withValues(alpha: 0.5),
+                        blurRadius: 8,
+                      ),
+                    ],
                   ),
                 ),
               ],
             ),
-            const SizedBox(height: 16),
-            Row(
+          ),
+        ],
+      ],
+    );
+  }
+
+  Widget _buildSummaryCard({
+    required IconData icon,
+    required String label,
+    required String value,
+    required Color color,
+  }) {
+    return Expanded(
+      child: Container(
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: const Color(0xFF2A2A2A),
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(color: color.withValues(alpha: 0.3)),
+        ),
+        child: Column(
+          children: [
+            Icon(icon, color: color, size: 28),
+            const SizedBox(height: 12),
+            Text(
+              value,
+              style: TextStyle(
+                fontSize: 22,
+                fontWeight: FontWeight.bold,
+                color: color,
+              ),
+            ),
+            const SizedBox(height: 4),
+            Text(
+              label,
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                fontSize: 11,
+                color: Colors.grey[400],
+                height: 1.3,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  // ===== ACTION STEPS =====
+  Widget _buildActionSteps(List<dynamic> actionItems) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            const Text(
+              'ACTION STEPS',
+              style: TextStyle(
+                fontSize: 13,
+                fontWeight: FontWeight.w700,
+                letterSpacing: 1.5,
+                color: Colors.grey,
+              ),
+            ),
+            const Spacer(),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+              decoration: BoxDecoration(
+                color: Colors.blue.withValues(alpha: 0.2),
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Text(
+                '${actionItems.length} tasks',
+                style: const TextStyle(
+                  color: Colors.blue,
+                  fontSize: 12,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 16),
+        ...actionItems.asMap().entries.map((entry) {
+          final index = entry.key;
+          final item = entry.value;
+          return _buildActionStep(index + 1, item);
+        }),
+      ],
+    );
+  }
+
+  Widget _buildActionStep(int stepNumber, dynamic item) {
+    final priority = (item['priority'] as String? ?? 'medium').toLowerCase();
+    final title = item['title'] as String? ?? 'Unknown Action';
+    final description = item['description'] as String? ?? '';
+    final duration = item['estimated_duration'] as String? ?? '';
+
+    Color priorityColor;
+    switch (priority) {
+      case 'critical':
+        priorityColor = Colors.red;
+        break;
+      case 'high':
+        priorityColor = Colors.orange;
+        break;
+      default:
+        priorityColor = Colors.blue;
+    }
+
+    return Container(
+      margin: const EdgeInsets.only(bottom: 12),
+      decoration: BoxDecoration(
+        color: const Color(0xFF2A2A2A),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: priorityColor.withValues(alpha: 0.3)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Header with step number and priority
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            decoration: BoxDecoration(
+              color: priorityColor.withValues(alpha: 0.15),
+              borderRadius: const BorderRadius.only(
+                topLeft: Radius.circular(15),
+                topRight: Radius.circular(15),
+              ),
+            ),
+            child: Row(
               children: [
-                Expanded(
-                  child: _buildStatItem(
-                    'Estimated Cost',
-                    '₹${(requirements['total_estimated_cost'] as int? ?? 0).toString()}',
-                    Colors.orange,
-                    Icons.attach_money,
+                Container(
+                  width: 32,
+                  height: 32,
+                  decoration: BoxDecoration(
+                    color: priorityColor,
+                    shape: BoxShape.circle,
+                  ),
+                  child: Center(
+                    child: Text(
+                      '$stepNumber',
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 16,
+                      ),
+                    ),
                   ),
                 ),
                 const SizedBox(width: 12),
                 Expanded(
-                  child: _buildStatItem(
-                    'Personnel',
-                    '${requirements['personnel_required'] ?? 0}',
-                    Colors.blue,
-                    Icons.people,
+                  child: Text(
+                    title,
+                    style: const TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white,
+                    ),
+                  ),
+                ),
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                  decoration: BoxDecoration(
+                    color: Colors.white.withValues(alpha: 0.1),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Text(
+                    priority.toUpperCase(),
+                    style: TextStyle(
+                      color: priorityColor,
+                      fontSize: 11,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                 ),
               ],
-            ),
-            const SizedBox(height: 12),
-            _buildStatItem(
-              'Duration',
-              requirements['estimated_duration'] as String? ?? 'Unknown',
-              Colors.green,
-              Icons.schedule,
-            ),
-            const SizedBox(height: 16),
-            const Text(
-              'Equipment Needed:',
-              style: TextStyle(
-                fontSize: 14,
-                fontWeight: FontWeight.w600,
-              ),
-            ),
-            const SizedBox(height: 8),
-            ...(requirements['equipment_needed'] as Map<String, dynamic>? ?? {})
-                .entries
-                .map((entry) => Padding(
-                      padding: const EdgeInsets.only(bottom: 4),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Text(entry.key),
-                          Text(
-                            '${entry.value}',
-                            style: const TextStyle(fontWeight: FontWeight.w600),
-                          ),
-                        ],
-                      ),
-                    ))
-                .toList(),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildTimelineCard(List<dynamic> timeline) {
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const Row(
-              children: [
-                Icon(Icons.schedule, color: Colors.purple),
-                SizedBox(width: 8),
-                Text(
-                  'Timeline',
-                  style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 16),
-            ...timeline.map((item) => _buildTimelineItem(item)).toList(),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildTimelineItem(dynamic item) {
-    return Container(
-      margin: const EdgeInsets.only(bottom: 12),
-      child: Row(
-        children: [
-          Container(
-            width: 12,
-            height: 12,
-            decoration: const BoxDecoration(
-              color: Colors.purple,
-              shape: BoxShape.circle,
             ),
           ),
-          const SizedBox(width: 12),
-          Expanded(
+          // Description
+          Padding(
+            padding: const EdgeInsets.all(16),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  item['time'] as String? ?? 'Unknown',
-                  style: const TextStyle(
-                    fontSize: 12,
-                    color: Colors.grey,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-                Text(
-                  item['action'] as String? ?? 'Unknown Action',
-                  style: const TextStyle(
+                  description,
+                  style: TextStyle(
                     fontSize: 14,
-                    fontWeight: FontWeight.w600,
+                    color: Colors.grey[300],
+                    height: 1.5,
                   ),
                 ),
-                Text(
-                  'Duration: ${item['duration'] ?? 'Unknown'}',
-                  style: const TextStyle(
-                    fontSize: 12,
-                    color: Colors.grey,
+                if (duration.isNotEmpty) ...[
+                  const SizedBox(height: 12),
+                  Row(
+                    children: [
+                      Icon(Icons.schedule, size: 18, color: Colors.grey[500]),
+                      const SizedBox(width: 6),
+                      Text(
+                        'Duration: $duration',
+                        style: TextStyle(
+                          fontSize: 13,
+                          color: Colors.grey[500],
+                        ),
+                      ),
+                    ],
                   ),
-                ),
+                ],
               ],
-            ),
-          ),
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-            decoration: BoxDecoration(
-              color: Colors.grey[200],
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: Text(
-              item['status'] as String? ?? 'pending',
-              style: const TextStyle(
-                fontSize: 10,
-                color: Colors.grey,
-              ),
             ),
           ),
         ],
@@ -493,92 +462,371 @@ class ActionPlanWidget extends StatelessWidget {
     );
   }
 
-  Widget _buildActionButtons(BuildContext context) {
-    return Row(
+  // ===== RESOURCES NEEDED =====
+  Widget _buildResourcesNeeded(Map<String, dynamic> requirements) {
+    final cost = requirements['total_estimated_cost'] as int? ?? 0;
+    final personnel = requirements['personnel_required'] ?? 0;
+    final duration = requirements['estimated_duration'] as String? ?? 'Unknown';
+    final equipment = requirements['equipment_needed'] as Map<String, dynamic>? ?? {};
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Expanded(
-          child: ElevatedButton.icon(
-            onPressed: () {
-              // Implement approve action plan
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                  content: Text('Action plan approved and sent to teams'),
-                  backgroundColor: Colors.green,
-                ),
-              );
-            },
-            icon: const Icon(Icons.check),
-            label: const Text('Approve Plan'),
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.green,
-              foregroundColor: Colors.white,
-            ),
+        const Text(
+          'RESOURCES NEEDED',
+          style: TextStyle(
+            fontSize: 13,
+            fontWeight: FontWeight.w700,
+            letterSpacing: 1.5,
+            color: Colors.grey,
           ),
         ),
-        const SizedBox(width: 12),
-        Expanded(
-          child: OutlinedButton.icon(
-            onPressed: () {
-              // Implement modify action plan
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                  content: Text('Action plan modification requested'),
+        const SizedBox(height: 16),
+        
+        // Key metrics row
+        Container(
+          padding: const EdgeInsets.all(20),
+          decoration: BoxDecoration(
+            color: const Color(0xFF2A2A2A),
+            borderRadius: BorderRadius.circular(16),
+          ),
+          child: Row(
+            children: [
+              Expanded(
+                child: _buildResourceMetric(
+                  Icons.currency_rupee,
+                  'Budget',
+                  '₹${_formatNumber(cost)}',
+                  Colors.amber,
                 ),
-              );
-            },
-            icon: const Icon(Icons.edit),
-            label: const Text('Modify Plan'),
+              ),
+              Container(
+                width: 1,
+                height: 50,
+                color: Colors.grey[700],
+              ),
+              Expanded(
+                child: _buildResourceMetric(
+                  Icons.people,
+                  'Team Size',
+                  '$personnel',
+                  Colors.blue,
+                ),
+              ),
+              Container(
+                width: 1,
+                height: 50,
+                color: Colors.grey[700],
+              ),
+              Expanded(
+                child: _buildResourceMetric(
+                  Icons.schedule,
+                  'Duration',
+                  duration,
+                  Colors.green,
+                ),
+              ),
+            ],
+          ),
+        ),
+        
+        // Equipment list
+        if (equipment.isNotEmpty) ...[
+          const SizedBox(height: 16),
+          Container(
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: const Color(0xFF2A2A2A),
+              borderRadius: BorderRadius.circular(16),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Icon(Icons.inventory_2, color: Colors.grey[400], size: 20),
+                    const SizedBox(width: 8),
+                    Text(
+                      'Equipment Checklist',
+                      style: TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w600,
+                        color: Colors.grey[300],
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 16),
+                ...equipment.entries.map((e) => _buildEquipmentItem(e.key, e.value)),
+              ],
+            ),
+          ),
+        ],
+      ],
+    );
+  }
+
+  Widget _buildResourceMetric(IconData icon, String label, String value, Color color) {
+    return Column(
+      children: [
+        Icon(icon, color: color, size: 24),
+        const SizedBox(height: 8),
+        Text(
+          value,
+          style: TextStyle(
+            fontSize: 18,
+            fontWeight: FontWeight.bold,
+            color: color,
+          ),
+          textAlign: TextAlign.center,
+        ),
+        const SizedBox(height: 4),
+        Text(
+          label,
+          style: TextStyle(
+            fontSize: 12,
+            color: Colors.grey[500],
           ),
         ),
       ],
     );
   }
 
-  Widget _buildStatItem(String label, String value, Color color, IconData icon) {
-    return Container(
-      padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        color: color.withValues(alpha: 0.1),
-        borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: color.withValues(alpha: 0.3)),
-      ),
-      child: Column(
+  Widget _buildEquipmentItem(String name, dynamic quantity) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 10),
+      child: Row(
         children: [
-          Icon(icon, color: color, size: 20),
-          const SizedBox(height: 8),
-          Text(
-            value,
-            style: TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.bold,
-              color: color,
+          Container(
+            width: 8,
+            height: 8,
+            decoration: const BoxDecoration(
+              color: Colors.blue,
+              shape: BoxShape.circle,
             ),
           ),
-          Text(
-            label,
-            style: const TextStyle(
-              fontSize: 12,
-              color: Colors.grey,
+          const SizedBox(width: 12),
+          Expanded(
+            child: Text(
+              name,
+              style: TextStyle(
+                fontSize: 14,
+                color: Colors.grey[300],
+              ),
             ),
-            textAlign: TextAlign.center,
+          ),
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+            decoration: BoxDecoration(
+              color: Colors.blue.withValues(alpha: 0.2),
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: Text(
+              'x$quantity',
+              style: const TextStyle(
+                color: Colors.blue,
+                fontWeight: FontWeight.w600,
+                fontSize: 13,
+              ),
+            ),
           ),
         ],
       ),
     );
   }
 
-  Color _getPriorityColor(String priority) {
-    switch (priority.toLowerCase()) {
-      case 'critical':
-        return Colors.red;
-      case 'high':
-        return Colors.orange;
-      case 'medium':
-        return Colors.blue;
-      case 'low':
-        return Colors.green;
-      default:
-        return Colors.grey;
+  // ===== TIMELINE =====
+  Widget _buildTimeline(List<dynamic> timeline) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Text(
+          'TIMELINE',
+          style: TextStyle(
+            fontSize: 13,
+            fontWeight: FontWeight.w700,
+            letterSpacing: 1.5,
+            color: Colors.grey,
+          ),
+        ),
+        const SizedBox(height: 16),
+        Container(
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            color: const Color(0xFF2A2A2A),
+            borderRadius: BorderRadius.circular(16),
+          ),
+          child: Column(
+            children: timeline.asMap().entries.map((entry) {
+              final index = entry.key;
+              final item = entry.value;
+              final isLast = index == timeline.length - 1;
+              return _buildTimelineItem(item, isLast);
+            }).toList(),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildTimelineItem(dynamic item, bool isLast) {
+    final time = item['time'] as String? ?? '';
+    final action = item['action'] as String? ?? 'Unknown';
+    final duration = item['duration'] as String? ?? '';
+
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        // Timeline indicator
+        Column(
+          children: [
+            Container(
+              width: 16,
+              height: 16,
+              decoration: BoxDecoration(
+                color: Colors.green,
+                shape: BoxShape.circle,
+                border: Border.all(color: const Color(0xFF2A2A2A), width: 3),
+              ),
+            ),
+            if (!isLast)
+              Container(
+                width: 2,
+                height: 50,
+                color: Colors.green.withValues(alpha: 0.3),
+              ),
+          ],
+        ),
+        const SizedBox(width: 16),
+        // Content
+        Expanded(
+          child: Padding(
+            padding: EdgeInsets.only(bottom: isLast ? 0 : 16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                if (time.isNotEmpty)
+                  Text(
+                    time,
+                    style: TextStyle(
+                      fontSize: 12,
+                      color: Colors.green[300],
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                const SizedBox(height: 4),
+                Text(
+                  action,
+                  style: const TextStyle(
+                    fontSize: 15,
+                    fontWeight: FontWeight.w600,
+                    color: Colors.white,
+                  ),
+                ),
+                if (duration.isNotEmpty) ...[
+                  const SizedBox(height: 4),
+                  Text(
+                    duration,
+                    style: TextStyle(
+                      fontSize: 13,
+                      color: Colors.grey[500],
+                    ),
+                  ),
+                ],
+              ],
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  // ===== ACTION BUTTONS =====
+  Widget _buildActionButtons(BuildContext context) {
+    return Row(
+      children: [
+        Expanded(
+          child: ElevatedButton(
+            onPressed: () {
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(
+                  content: Text('✓ Action plan approved and sent to teams'),
+                  backgroundColor: Color(0xFF388E3C),
+                  behavior: SnackBarBehavior.floating,
+                ),
+              );
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: const Color(0xFF388E3C),
+              foregroundColor: Colors.white,
+              padding: const EdgeInsets.symmetric(vertical: 16),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+            ),
+            child: const Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(Icons.check, size: 20),
+                SizedBox(width: 8),
+                Text(
+                  'APPROVE PLAN',
+                  style: TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.bold,
+                    letterSpacing: 0.5,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+        const SizedBox(width: 12),
+        Expanded(
+          child: OutlinedButton(
+            onPressed: () {
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(
+                  content: Text('Opening plan editor...'),
+                  behavior: SnackBarBehavior.floating,
+                ),
+              );
+            },
+            style: OutlinedButton.styleFrom(
+              foregroundColor: Colors.grey[300],
+              side: BorderSide(color: Colors.grey[600]!),
+              padding: const EdgeInsets.symmetric(vertical: 16),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+            ),
+            child: const Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(Icons.edit, size: 20),
+                SizedBox(width: 8),
+                Text(
+                  'MODIFY PLAN',
+                  style: TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.bold,
+                    letterSpacing: 0.5,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  String _formatNumber(int number) {
+    if (number >= 100000) {
+      return '${(number / 100000).toStringAsFixed(1)}L';
+    } else if (number >= 1000) {
+      return '${(number / 1000).toStringAsFixed(0)}K';
     }
+    return number.toString();
   }
 }

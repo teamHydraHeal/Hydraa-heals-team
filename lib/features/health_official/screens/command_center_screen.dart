@@ -249,25 +249,25 @@ class _CommandCenterScreenState extends State<CommandCenterScreen>
             child: Row(
               children: [
                 const Text(
-                  'Map Layer:',
+                  'Layer:',
                   style: TextStyle(
-                    fontSize: 16,
+                    fontSize: 14,
                     fontWeight: FontWeight.w600,
                   ),
                 ),
-                const SizedBox(width: 16),
+                const SizedBox(width: 10),
                 Expanded(
                   child: SegmentedButton<bool>(
                     segments: const [
                       ButtonSegment<bool>(
                         value: true,
-                        label: Text('Risk Prediction'),
-                        icon: Icon(Icons.analytics),
+                        label: Text('Risk', style: TextStyle(fontSize: 13)),
+                        icon: Icon(Icons.analytics, size: 18),
                       ),
                       ButtonSegment<bool>(
                         value: false,
-                        label: Text('Field Reports'),
-                        icon: Icon(Icons.report),
+                        label: Text('Reports', style: TextStyle(fontSize: 13)),
+                        icon: Icon(Icons.report, size: 18),
                       ),
                     ],
                     selected: {_showRiskPrediction},

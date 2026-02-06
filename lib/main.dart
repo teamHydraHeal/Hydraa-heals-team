@@ -1,8 +1,8 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
-import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 
 import 'core/providers/auth_provider.dart';
 import 'core/providers/connectivity_provider.dart';
@@ -15,38 +15,61 @@ import 'core/database/database_manager.dart';
 import 'core/theme/app_theme.dart';
 import 'firebase_options.dart';
 
-// Global notification service instance
-final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
-    FlutterLocalNotificationsPlugin();
-
 // Background message handler
 @pragma('vm:entry-point')
 Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
-  await Firebase.initializeApp(
-    options: DefaultFirebaseOptions.currentPlatform,
-  );
-  print('Handling a background message: ${message.messageId}');
+  try {
+    await Firebase.initializeApp(
+      options: DefaultFirebaseOptions.currentPlatform,
+    );
+  } catch (e) {
+    debugPrint('Firebase init in background failed: $e');
+  }
+  debugPrint('Handling a background message: ${message.messageId}');
 }
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   
-  // Initialize Firebase
-  await Firebase.initializeApp(
-    options: DefaultFirebaseOptions.currentPlatform,
-  );
+  // Initialize Firebase (may fail on web with older packages)
+  try {
+    await Firebase.initializeApp(
+      options: DefaultFirebaseOptions.currentPlatform,
+    );
+    debugPrint('Firebase initialized successfully');
+  } catch (e) {
+    debugPrint('Firebase initialization failed (non-fatal): $e');
+  }
   
-  // Initialize notification service
-  await NotificationService.initialize();
+  // Initialize notification service (skip on web)
+  if (!kIsWeb) {
+    try {
+      await NotificationService.initialize();
+    } catch (e) {
+      debugPrint('Notification service init failed (non-fatal): $e');
+    }
+  }
   
-  // Initialize enhanced database system
-  await DatabaseManager.initialize();
+  // Initialize enhanced database system (skip on web - sqflite not supported)
+  if (!kIsWeb) {
+    try {
+      await DatabaseManager.initialize();
+    } catch (e) {
+      debugPrint('Database init failed (non-fatal): $e');
+    }
+    
+    // Initialize offline service (now uses enhanced database)
+    try {
+      await OfflineService.initialize();
+    } catch (e) {
+      debugPrint('Offline service init failed (non-fatal): $e');
+    }
+  }
   
-  // Initialize offline service (now uses enhanced database)
-  await OfflineService.initialize();
-  
-  // Set up background message handler
-  FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
+  // Set up background message handler (skip on web)
+  if (!kIsWeb) {
+    FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
+  }
   
   runApp(const JalGuardApp());
 }

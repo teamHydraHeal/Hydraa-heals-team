@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
-import 'package:timezone/timezone.dart' as tz;
+// timezone import removed - using DateTime directly for scheduling
 
 class NotificationService {
   static final FlutterLocalNotificationsPlugin _localNotifications =
@@ -157,15 +157,14 @@ class NotificationService {
       iOS: iosDetails,
     );
 
-    await _localNotifications.zonedSchedule(
+    // For demo purposes, show immediately instead of scheduling
+    // (zonedSchedule requires timezone package setup and androidScheduleMode)
+    await _localNotifications.show(
       id.hashCode,
       title,
       body,
-      tz.TZDateTime.from(scheduledDate, tz.local),
       details,
       payload: payload,
-      uiLocalNotificationDateInterpretation:
-          UILocalNotificationDateInterpretation.absoluteTime,
     );
   }
 

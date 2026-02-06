@@ -1,0 +1,10 @@
+venv/
+__pycache__/
+*.pyc
+.env
+trained_model/*.joblib
+!ML/trained_model/*.joblib
+.vscode/
+.idea/
+data/*.csv
+!ML/data/synthetic_with_risks.csv

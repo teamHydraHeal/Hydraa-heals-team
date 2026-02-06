@@ -119,15 +119,6 @@ class _AadhaarEntryScreenState extends State<AadhaarEntryScreen> {
                 FilteringTextInputFormatter.digitsOnly,
                 LengthLimitingTextInputFormatter(12),
               ],
-              onChanged: (value) {
-                final formatted = _formatAadhaar(value);
-                if (formatted != value) {
-                  _aadhaarController.value = TextEditingValue(
-                    text: formatted,
-                    selection: TextSelection.collapsed(offset: formatted.length),
-                  );
-                }
-              },
               decoration: InputDecoration(
                 labelText: 'Aadhaar Number',
                 hintText: '1234 5678 9012',

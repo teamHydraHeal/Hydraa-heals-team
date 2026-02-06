@@ -30,26 +30,34 @@ class AppRouter {
     initialLocation: '/splash',
     redirect: (context, state) {
       final authProvider = Provider.of<AuthProvider>(context, listen: false);
+      final path = state.fullPath ?? '';
       
       // Allow splash screen to show without redirect
-      if (state.fullPath == '/splash') {
+      if (path == '/splash') {
         return null;
       }
       
-      // If user is not authenticated, redirect to welcome
+      // Define auth-related routes
+      final isAuthRoute = ['/welcome', '/aadhaar-entry', '/otp-verification', '/professional-verification']
+          .contains(path);
+      
+      // If user is not authenticated, only allow auth routes
       if (!authProvider.isAuthenticated) {
-        return '/welcome';
+        return isAuthRoute ? null : '/welcome';
       }
       
       // If user is authenticated but not verified (for professionals)
       if (authProvider.currentUser != null && 
           !authProvider.currentUser!.isVerified &&
           !authProvider.currentUser!.isCitizen) {
-        return '/professional-verification';
+        if (path != '/professional-verification') {
+          return '/professional-verification';
+        }
+        return null;
       }
       
-      // Redirect to appropriate dashboard based on role
-      if (authProvider.currentUser != null) {
+      // Redirect authenticated users away from auth routes to their dashboard
+      if (isAuthRoute && authProvider.currentUser != null) {
         switch (authProvider.currentUser!.role) {
           case UserRole.healthOfficial:
             return '/health-official/dashboard';
@@ -60,6 +68,7 @@ class AppRouter {
         }
       }
       
+      // Allow navigation to all other routes
       return null;
     },
     routes: [

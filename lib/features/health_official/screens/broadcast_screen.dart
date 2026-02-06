@@ -167,7 +167,7 @@ class _BroadcastScreenState extends State<BroadcastScreen> {
                 ),
                 Expanded(
                   child: DropdownButtonFormField<String>(
-                    initialValue: _selectedLanguage,
+                    value: _selectedLanguage,
                     decoration: const InputDecoration(
                       border: OutlineInputBorder(),
                     ),
@@ -199,7 +199,7 @@ class _BroadcastScreenState extends State<BroadcastScreen> {
                 ),
                 Expanded(
                   child: DropdownButtonFormField<String>(
-                    initialValue: _selectedSeverity,
+                    value: _selectedSeverity,
                     decoration: const InputDecoration(
                       border: OutlineInputBorder(),
                     ),

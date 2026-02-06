@@ -109,7 +109,7 @@ class _EmergencyEscalationScreenState extends State<EmergencyEscalationScreen> {
             ),
             const SizedBox(height: 8),
             DropdownButtonFormField<String>(
-              initialValue: _selectedEmergencyType,
+              value: _selectedEmergencyType,
               decoration: const InputDecoration(
                 border: OutlineInputBorder(),
                 prefixIcon: Icon(Icons.emergency),
@@ -139,7 +139,7 @@ class _EmergencyEscalationScreenState extends State<EmergencyEscalationScreen> {
             ),
             const SizedBox(height: 8),
             DropdownButtonFormField<String>(
-              initialValue: _selectedDistrict,
+              value: _selectedDistrict,
               decoration: const InputDecoration(
                 border: OutlineInputBorder(),
                 prefixIcon: Icon(Icons.location_on),
@@ -169,7 +169,7 @@ class _EmergencyEscalationScreenState extends State<EmergencyEscalationScreen> {
             ),
             const SizedBox(height: 8),
             DropdownButtonFormField<String>(
-              initialValue: _selectedSeverity,
+              value: _selectedSeverity,
               decoration: const InputDecoration(
                 border: OutlineInputBorder(),
                 prefixIcon: Icon(Icons.priority_high),

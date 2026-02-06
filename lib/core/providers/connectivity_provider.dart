@@ -27,7 +27,9 @@ class ConnectivityProvider extends ChangeNotifier {
       _updateConnectivityStatus(result);
       
       // Listen to connectivity changes
-      _connectivity.onConnectivityChanged.listen(_updateConnectivityStatus);
+      _connectivity.onConnectivityChanged.listen((result) {
+        _updateConnectivityStatus(result);
+      });
       
       _isInitialized = true;
       notifyListeners();

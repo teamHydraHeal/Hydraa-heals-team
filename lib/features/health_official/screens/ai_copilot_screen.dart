@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../core/services/ai_analytics_service.dart';
+import '../../../core/services/ml_prediction_service.dart';
 import '../../../core/models/health_report_model.dart';
 import '../widgets/action_plan_widget.dart';
 import '../widgets/ai_chat_widget.dart';
@@ -16,6 +17,7 @@ class _AiCopilotScreenState extends State<AiCopilotScreen>
     with TickerProviderStateMixin {
   late TabController _tabController;
   bool _isGeneratingPlan = false;
+  bool _mlBackendAvailable = false;
   Map<String, dynamic>? _actionPlan;
   List<Map<String, dynamic>> _chatHistory = [];
 
@@ -24,6 +26,7 @@ class _AiCopilotScreenState extends State<AiCopilotScreen>
     super.initState();
     _tabController = TabController(length: 2, vsync: this);
     _initializeChat();
+    _checkMlBackend();
   }
 
   @override
@@ -40,6 +43,16 @@ class _AiCopilotScreenState extends State<AiCopilotScreen>
         'timestamp': DateTime.now(),
       },
     ];
+  }
+
+  Future<void> _checkMlBackend() async {
+    final available = await MlPredictionService.isBackendAvailable();
+    if (mounted) {
+      setState(() => _mlBackendAvailable = available);
+      if (available) {
+        _addChatMessage('ai', '🟢 ML backend is online. The trained RandomForest model is ready for predictions.');
+      }
+    }
   }
 
   Future<void> _generateActionPlan() async {
@@ -95,13 +108,44 @@ class _AiCopilotScreenState extends State<AiCopilotScreen>
         mockIotData,
       );
 
+      // Try to get ML prediction from the Flask backend
+      Map<String, dynamic>? mlPrediction;
+      try {
+        mlPrediction = await MlPredictionService.predict(
+          ph: 5.8,
+          turbidity: 12.0,
+          orp: 220.0,
+          rainfall: 25.0,
+          diarrhea: 3,
+          vomiting: 2,
+          fever: 1,
+        );
+      } catch (e) {
+        debugPrint('ML prediction failed: $e');
+      }
+
+      // Attach ML prediction to the action plan if available
+      if (mlPrediction != null) {
+        actionPlan['ml_prediction'] = mlPrediction;
+      }
+
       setState(() {
         _actionPlan = actionPlan;
         _isGeneratingPlan = false;
       });
 
       // Add to chat history
-      _addChatMessage('ai', 'I\'ve generated an action plan based on the current situation. You can view it in the Action Plan tab.');
+      if (mlPrediction != null) {
+        final status = mlPrediction['status'] ?? 'UNKNOWN';
+        final risk = ((mlPrediction['total_risk'] as num?)?.toDouble() ?? 0.0) * 100;
+        _addChatMessage('ai', 'Action plan generated with ML prediction.\n\n'
+            '🤖 ML Status: $status\n'
+            '📊 Risk Score: ${risk.toStringAsFixed(0)}%\n'
+            '💡 Advisory: ${mlPrediction['advisory'] ?? 'N/A'}\n\n'
+            'View the full plan in the Action Plan tab.');
+      } else {
+        _addChatMessage('ai', 'I\'ve generated an action plan based on the current situation. View it in the Action Plan tab.\n\nNote: ML backend is offline — using rule-based analysis only. Start the Flask backend for ML predictions.');
+      }
     } catch (e) {
       setState(() {
         _isGeneratingPlan = false;
@@ -262,6 +306,13 @@ class _AiCopilotScreenState extends State<AiCopilotScreen>
   }
 
   void _handleUserMessage(String message) {
+    // Check if user is sending data for ML prediction
+    final lowerMsg = message.toLowerCase();
+    if (lowerMsg.contains('predict') || lowerMsg.contains('analyze water') || lowerMsg.contains('test water')) {
+      _handleMlQuery(message);
+      return;
+    }
+    
     // Simulate AI response
     Future.delayed(const Duration(seconds: 1), () {
       String response = _generateAIResponse(message);
@@ -269,8 +320,59 @@ class _AiCopilotScreenState extends State<AiCopilotScreen>
     });
   }
 
+  Future<void> _handleMlQuery(String message) async {
+    _addChatMessage('ai', 'Running ML prediction on the backend...');
+    
+    final prediction = await MlPredictionService.predictFromText(message);
+    
+    if (prediction != null) {
+      final status = prediction['status'] ?? 'UNKNOWN';
+      final risk = ((prediction['total_risk'] as num?)?.toDouble() ?? 0.0) * 100;
+      _addChatMessage('ai',
+          '\ud83e\udd16 ML Prediction Results:\n\n'
+          'Status: $status\n'
+          'Risk Score: ${risk.toStringAsFixed(0)}%\n'
+          'Rule Engine: ${prediction['rule_status']}\n'
+          'ML Model: ${prediction['ml_status']}\n\n'
+          '\ud83d\udca1 Advisory: ${prediction['advisory']}\n\n'
+          'Processed data: ${prediction['processed_data']}');
+    } else {
+      _addChatMessage('ai',
+          'Could not reach the ML backend. Make sure the Flask server is running:\n\n'
+          'cd jal-ML && python backend.py');
+    }
+  }
+
   String _generateAIResponse(String userMessage) {
-    final message = userMessage.toLowerCase();
+    final message = userMessage.toLowerCase().trim();
+    
+    // Greetings
+    if (RegExp(r'^(hi|hello|hey|greetings|good morning|good afternoon|good evening)[\s!.?]*$').hasMatch(message)) {
+      return 'Hello! I\'m your JalGuard AI assistant. I can help you with:\n\n'
+          '• Risk analysis for water contamination\n'
+          '• Generate action plans\n'
+          '• Resource management\n'
+          '• Outbreak prediction\n'
+          '• ML-powered water quality analysis (type "predict")\n\n'
+          'How can I assist you today?';
+    }
+    
+    // Help/What can you do
+    if (message.contains('help') || message.contains('what can you do') || message.contains('capabilities')) {
+      return 'I can assist you with:\n\n'
+          '1. **Risk Analysis** - Type "risk" or "situation"\n'
+          '2. **Action Plans** - Type "action plan" or click Generate\n'
+          '3. **Resource Status** - Type "resources" or "supplies"\n'
+          '4. **Timeline** - Type "timeline"\n'
+          '5. **ML Prediction** - Type "predict" for real-time water quality analysis\n'
+          '6. **Outbreak Info** - Type "outbreak" or "disease"\n\n'
+          'What would you like to know?';
+    }
+    
+    // Thanks
+    if (message.contains('thank') || message.contains('thanks')) {
+      return 'You\'re welcome! Let me know if you need anything else regarding water quality monitoring or health response.';
+    }
     
     if (message.contains('risk') || message.contains('situation')) {
       return 'Based on current data, East Khasi Hills shows high risk with 23 active reports. Water contamination is the primary concern affecting multiple villages. I recommend immediate water testing and emergency response deployment.';
@@ -283,7 +385,13 @@ class _AiCopilotScreenState extends State<AiCopilotScreen>
     } else if (message.contains('outbreak') || message.contains('disease')) {
       return 'Outbreak probability is currently at 65% based on symptom patterns and environmental conditions. Primary concerns: Gastroenteritis and potential Typhoid cases. Prevention measures should focus on water purification and hygiene education.';
     } else {
-      return 'I understand you\'re asking about "$userMessage". I can help you with risk analysis, action planning, resource management, and outbreak prediction. What specific aspect would you like me to focus on?';
+      return 'I can help you with that! Here are some things you can ask me:\n\n'
+          '• "What\'s the current risk situation?"\n'
+          '• "Generate an action plan"\n'
+          '• "What resources do we have?"\n'
+          '• "predict" - to run ML water quality analysis\n'
+          '• "help" - to see all my capabilities\n\n'
+          'What would you like to know?';
     }
   }
 }

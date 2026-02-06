@@ -22,11 +22,13 @@ class DistrictMapWidget extends StatefulWidget {
 class _DistrictMapWidgetState extends State<DistrictMapWidget> {
   GoogleMapController? _mapController;
   Set<Marker> _markers = {};
+  Set<Circle> _circles = {};
 
   @override
   void initState() {
     super.initState();
     _createMarkers();
+    _createZoneCircles();
   }
 
   @override
@@ -35,6 +37,7 @@ class _DistrictMapWidgetState extends State<DistrictMapWidget> {
     if (oldWidget.districts != widget.districts || 
         oldWidget.showRiskPrediction != widget.showRiskPrediction) {
       _createMarkers();
+      _createZoneCircles();
     }
   }
 
@@ -68,6 +71,41 @@ class _DistrictMapWidgetState extends State<DistrictMapWidget> {
         return BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueRed);
       case RiskLevel.critical:
         return BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueViolet);
+    }
+  }
+
+  void _createZoneCircles() {
+    _circles.clear();
+
+    for (final district in widget.districts) {
+      final color = _getRiskColor(district.riskLevel);
+      // Radius based on risk: higher risk = bigger zone
+      double radius;
+      switch (district.riskLevel) {
+        case RiskLevel.critical:
+          radius = 30000; // 30 km
+          break;
+        case RiskLevel.high:
+          radius = 25000; // 25 km
+          break;
+        case RiskLevel.medium:
+          radius = 20000; // 20 km
+          break;
+        case RiskLevel.low:
+          radius = 15000; // 15 km
+          break;
+      }
+
+      _circles.add(
+        Circle(
+          circleId: CircleId(district.id),
+          center: LatLng(district.latitude, district.longitude),
+          radius: radius,
+          fillColor: color.withValues(alpha: 0.25),
+          strokeColor: color.withValues(alpha: 0.7),
+          strokeWidth: 2,
+        ),
+      );
     }
   }
 
@@ -142,6 +180,7 @@ class _DistrictMapWidgetState extends State<DistrictMapWidget> {
               zoom: 8.0,
             ),
             markers: _markers,
+            circles: _circles,
             mapType: MapType.normal,
             myLocationEnabled: true,
             myLocationButtonEnabled: true,
@@ -152,20 +191,22 @@ class _DistrictMapWidgetState extends State<DistrictMapWidget> {
         
         // District List
         Container(
-          height: 120,
-          padding: const EdgeInsets.all(16),
+          padding: const EdgeInsets.fromLTRB(12, 8, 12, 8),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
             children: [
               Text(
                 widget.showRiskPrediction ? 'Risk Prediction' : 'Field Reports',
                 style: const TextStyle(
-                  fontSize: 16,
+                  fontSize: 14,
                   fontWeight: FontWeight.w600,
                 ),
+                overflow: TextOverflow.ellipsis,
               ),
-              const SizedBox(height: 8),
-              Expanded(
+              const SizedBox(height: 6),
+              SizedBox(
+                height: 70,
                 child: ListView.builder(
                   scrollDirection: Axis.horizontal,
                   itemCount: widget.districts.length,
@@ -204,69 +245,47 @@ class _DistrictMapWidgetState extends State<DistrictMapWidget> {
   }
 
   Widget _buildDistrictCard(District district) {
-    return Container(
-      width: 200,
-      margin: const EdgeInsets.only(right: 12),
-      child: Card(
-        child: InkWell(
-          onTap: () => widget.onDistrictSelected(district),
-          borderRadius: BorderRadius.circular(8),
-          child: Padding(
-            padding: const EdgeInsets.all(12),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+    final color = _getRiskColor(district.riskLevel);
+    return GestureDetector(
+      onTap: () => widget.onDistrictSelected(district),
+      child: Container(
+        width: 150,
+        margin: const EdgeInsets.only(right: 8),
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+        decoration: BoxDecoration(
+          color: color.withValues(alpha: 0.15),
+          borderRadius: BorderRadius.circular(10),
+          border: Border.all(color: color.withValues(alpha: 0.4)),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Row(
               children: [
-                Row(
-                  children: [
-                    Container(
-                      width: 8,
-                      height: 8,
-                      decoration: BoxDecoration(
-                        color: _getRiskColor(district.riskLevel),
-                        shape: BoxShape.circle,
-                      ),
-                    ),
-                    const SizedBox(width: 8),
-                    Expanded(
-                      child: Text(
-                        district.name,
-                        style: const TextStyle(
-                          fontWeight: FontWeight.w600,
-                          fontSize: 14,
-                        ),
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    ),
-                  ],
+                Container(
+                  width: 8,
+                  height: 8,
+                  decoration: BoxDecoration(color: color, shape: BoxShape.circle),
                 ),
-                const SizedBox(height: 4),
-                Text(
-                  'Risk: ${district.riskLevel.name.toUpperCase()}',
-                  style: TextStyle(
-                    color: _getRiskColor(district.riskLevel),
-                    fontSize: 12,
-                    fontWeight: FontWeight.w500,
-                  ),
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  'Score: ${district.riskScore.toStringAsFixed(1)}/10',
-                  style: const TextStyle(
-                    fontSize: 12,
-                    color: Colors.grey,
-                  ),
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  'Reports: ${district.activeReports}',
-                  style: const TextStyle(
-                    fontSize: 12,
-                    color: Colors.grey,
+                const SizedBox(width: 6),
+                Expanded(
+                  child: Text(
+                    district.name,
+                    style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 12),
+                    overflow: TextOverflow.ellipsis,
+                    maxLines: 1,
                   ),
                 ),
               ],
             ),
-          ),
+            const SizedBox(height: 4),
+            Text(
+              'Risk: ${district.riskLevel.name.toUpperCase()}  •  ${district.riskScore.toStringAsFixed(1)}/10',
+              style: TextStyle(color: color, fontSize: 10, fontWeight: FontWeight.w500),
+              overflow: TextOverflow.ellipsis,
+            ),
+          ],
         ),
       ),
     );
