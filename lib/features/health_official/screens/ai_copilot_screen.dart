@@ -161,7 +161,11 @@ class _AiCopilotScreenState extends State<AiCopilotScreen>
         controller: _tabController,
         children: [
           // Chat tab — fully powered by Ollama + TTS
-          AiChatWidget(actionPlanContext: _actionPlan),
+          AiChatWidget(
+            actionPlanContext: _actionPlan,
+            onGenerateActionPlan: _generateActionPlan,
+            isGeneratingPlan: _isGeneratingPlan,
+          ),
           // Action Plan tab
           _buildActionPlanTab(),
         ],

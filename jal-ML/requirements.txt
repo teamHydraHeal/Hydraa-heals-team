@@ -6,3 +6,4 @@ joblib
 numpy
 gTTS
 deep-translator
+requests

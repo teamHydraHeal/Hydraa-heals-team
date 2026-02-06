@@ -1,15 +1,71 @@
 services:
+  # ─── Ollama LLM (gemma2:2b) ───
+  ollama:
+    image: ollama/ollama:latest
+    container_name: jalguard-ollama
+    ports:
+      - "11434:11434"
+    volumes:
+      - ollama_data:/root/.ollama
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:11434/"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
+
+  # ─── Pull the model after Ollama starts ───
+  ollama-pull:
+    image: curlimages/curl:latest
+    container_name: jalguard-ollama-pull
+    depends_on:
+      ollama:
+        condition: service_healthy
+    entrypoint: >
+      sh -c "curl -s http://ollama:11434/api/pull -d '{\"name\": \"gemma2:2b\"}' && echo 'Model pulled successfully'"
+    restart: "no"
+
+  # ─── Python ML Backend (Flask + gTTS + Ollama chat) ───
   ml-backend:
     build:
       context: ./jal-ML
       dockerfile: Dockerfile
+    container_name: jalguard-backend
     ports:
       - "5001:5001"
     environment:
       - PORT=5001
+      - OLLAMA_URL=http://ollama:11434
+      - OLLAMA_MODEL=gemma2:2b
+    depends_on:
+      ollama:
+        condition: service_healthy
     restart: unless-stopped
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:5001/"]
+      test: ["CMD", "curl", "-f", "http://localhost:5001/tts/languages"]
       interval: 30s
       timeout: 10s
       retries: 3
+
+  # ─── Flutter Web + Nginx (serves app + proxies API) ───
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: jalguard-web
+    ports:
+      - "9090:80"
+    depends_on:
+      ml-backend:
+        condition: service_healthy
+    restart: unless-stopped
+
+volumes:
+  ollama_data:

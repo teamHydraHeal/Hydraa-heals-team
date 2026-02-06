@@ -1,0 +1,26 @@
+# Build outputs
+build/
+.dart_tool/
+
+# IDE / OS
+.idea/
+.vscode/
+*.iml
+.DS_Store
+
+# Git
+.git/
+.gitignore
+
+# Test & docs
+test/
+debug/
+archive/
+*.md
+
+# ML backend (built separately)
+jal-ML/
+
+# Other
+.env
+*.log

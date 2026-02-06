@@ -12,10 +12,14 @@ import '../../../core/services/tts_service.dart';
 /// - Regional language picker for TTS playback
 class AiChatWidget extends StatefulWidget {
   final Map<String, dynamic>? actionPlanContext;
+  final VoidCallback? onGenerateActionPlan;
+  final bool isGeneratingPlan;
 
   const AiChatWidget({
     super.key,
     this.actionPlanContext,
+    this.onGenerateActionPlan,
+    this.isGeneratingPlan = false,
   });
 
   @override
@@ -64,6 +68,16 @@ class _AiChatWidgetState extends State<AiChatWidget>
   }
 
   @override
+  void didUpdateWidget(covariant AiChatWidget oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    // When action plan is newly generated, inject context message into chat
+    if (widget.actionPlanContext != null &&
+        oldWidget.actionPlanContext == null) {
+      injectActionPlanMessage(widget.actionPlanContext!);
+    }
+  }
+
+  @override
   void dispose() {
     _controller.dispose();
     _scrollController.dispose();
@@ -80,6 +94,50 @@ class _AiChatWidgetState extends State<AiChatWidget>
           'I can also read my answers aloud in your language \u{2014} just tap the \u{1F50A} icon!',
       isUser: false,
     ));
+  }
+
+  /// Called when action plan is generated — sends it to Ollama for a summary
+  void injectActionPlanMessage(Map<String, dynamic> plan) async {
+    // Show a quick status message
+    setState(() {
+      _messages.add(_ChatMessage(
+        text: '\u{2705} Action plan generated! Let me summarize it for you...',
+        isUser: false,
+      ));
+      _isTyping = true;
+    });
+    _scrollToBottom();
+
+    // Send the full action plan to Ollama and ask for a summary
+    const prompt =
+        'I just generated an action plan for the current water quality situation. '
+        'Please summarize it clearly: what is the risk, what are the key action steps, '
+        'and what precautions should people take? Keep it concise and easy to understand.';
+
+    _history.add({'role': 'user', 'content': prompt});
+
+    final result = await ChatService.sendMessage(
+      prompt,
+      history: _history,
+      context: plan,
+    );
+
+    final response = result['response'] as String? ?? 'Could not generate summary.';
+    final llmUsed = result['llm_used'] as bool? ?? false;
+
+    _history.add({'role': 'assistant', 'content': response});
+
+    if (mounted) {
+      setState(() {
+        _messages.add(_ChatMessage(
+          text: response,
+          isUser: false,
+          llmUsed: llmUsed,
+        ));
+        _isTyping = false;
+      });
+      _scrollToBottom();
+    }
   }
 
   Future<void> _checkOllamaStatus() async {
@@ -213,9 +271,91 @@ class _AiChatWidgetState extends State<AiChatWidget>
       child: Column(
         children: [
           _buildTopBar(),
+          if (widget.actionPlanContext == null) _buildQuickActions(),
           Expanded(child: _buildMessageList()),
           _buildInputArea(),
         ],
+      ),
+    );
+  }
+
+  // ===== QUICK ACTION CHIPS =====
+  Widget _buildQuickActions() {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      child: Wrap(
+        spacing: 8,
+        runSpacing: 8,
+        children: [
+          _buildActionChip(
+            icon: Icons.auto_awesome,
+            label: widget.isGeneratingPlan ? 'Generating...' : 'Generate Action Plan',
+            gradient: const [Color(0xFF667eea), Color(0xFF764ba2)],
+            onTap: widget.isGeneratingPlan ? null : widget.onGenerateActionPlan,
+          ),
+          _buildActionChip(
+            icon: Icons.water_drop,
+            label: 'Water Safety Tips',
+            gradient: const [Color(0xFF4facfe), Color(0xFF00f2fe)],
+            onTap: () {
+              _controller.text = 'What are the water safety tips for villagers?';
+              _sendMessage();
+            },
+          ),
+          _buildActionChip(
+            icon: Icons.health_and_safety,
+            label: 'Health Precautions',
+            gradient: const [Color(0xFF43e97b), Color(0xFF38f9d7)],
+            onTap: () {
+              _controller.text = 'What health precautions should people take if water is contaminated?';
+              _sendMessage();
+            },
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildActionChip({
+    required IconData icon,
+    required String label,
+    required List<Color> gradient,
+    VoidCallback? onTap,
+  }) {
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(20),
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+          decoration: BoxDecoration(
+            gradient: LinearGradient(colors: gradient),
+            borderRadius: BorderRadius.circular(20),
+            boxShadow: [
+              BoxShadow(
+                color: gradient[0].withValues(alpha: 0.3),
+                blurRadius: 8,
+                offset: const Offset(0, 3),
+              ),
+            ],
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(icon, size: 15, color: Colors.white),
+              const SizedBox(width: 6),
+              Text(
+                label,
+                style: const TextStyle(
+                  fontSize: 12,
+                  fontWeight: FontWeight.w600,
+                  color: Colors.white,
+                ),
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }

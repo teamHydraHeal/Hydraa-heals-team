@@ -11,8 +11,15 @@ class MlPredictionService {
 
   static String _detectBaseUrl() {
     if (kIsWeb) {
-      final host = web.window.location.hostname;
-      return 'http://$host:5001';
+      final location = web.window.location;
+      final port = location.port;
+      // When served via nginx (Docker), use same origin — nginx proxies API calls
+      // When running locally via `flutter run`, use port 5001 for direct backend access
+      final isNginxServed = port == '' || port == '80' || port == '9090';
+      if (isNginxServed) {
+        return location.origin;
+      }
+      return 'http://${location.hostname}:5001';
     }
     return 'http://localhost:5001';
   }
