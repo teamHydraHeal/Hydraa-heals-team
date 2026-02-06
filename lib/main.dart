@@ -92,7 +92,7 @@ class JalGuardApp extends StatelessWidget {
             title: 'Jal Guard',
             theme: AppTheme.lightTheme,
             darkTheme: AppTheme.darkTheme,
-            themeMode: ThemeMode.system,
+            themeMode: ThemeMode.light, // Force beautiful light theme
             locale: languageProvider.currentLocale,
             routerConfig: AppRouter.router,
             debugShowCheckedModeBanner: false,

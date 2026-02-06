@@ -50,30 +50,19 @@ class _AiChatWidgetState extends State<AiChatWidget> {
   Widget build(BuildContext context) {
     return Column(
       children: [
-        // Chat Messages
         Expanded(
           child: ListView.builder(
             controller: _scrollController,
             padding: const EdgeInsets.all(16),
             itemCount: widget.chatHistory.length,
-            itemBuilder: (context, index) {
-              final message = widget.chatHistory[index];
-              return _buildMessageBubble(message);
-            },
+            itemBuilder: (context, index) => _buildMessageBubble(widget.chatHistory[index]),
           ),
         ),
-        
-        // Message Input
         Container(
           padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
             color: Theme.of(context).colorScheme.surface,
-            border: Border(
-              top: BorderSide(
-                color: Colors.grey.withValues(alpha: 0.3),
-                width: 1,
-              ),
-            ),
+            border: Border(top: BorderSide(color: Colors.grey.withValues(alpha: 0.3))),
           ),
           child: Row(
             children: [
@@ -82,13 +71,8 @@ class _AiChatWidgetState extends State<AiChatWidget> {
                   controller: _messageController,
                   decoration: InputDecoration(
                     hintText: 'Ask me anything about the health situation...',
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(24),
-                    ),
-                    contentPadding: const EdgeInsets.symmetric(
-                      horizontal: 16,
-                      vertical: 12,
-                    ),
+                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(24)),
+                    contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                   ),
                   maxLines: null,
                   onSubmitted: (_) => _sendMessage(),
@@ -109,9 +93,8 @@ class _AiChatWidgetState extends State<AiChatWidget> {
 
   Widget _buildMessageBubble(Map<String, dynamic> message) {
     final isAI = message['type'] == 'ai';
-    final messageText = message['message'] as String? ?? '';
-    final timestamp = message['timestamp'] as DateTime? ?? DateTime.now();
-
+    final text = message['message'] as String? ?? '';
+    final time = message['timestamp'] as DateTime? ?? DateTime.now();
     return Container(
       margin: const EdgeInsets.only(bottom: 16),
       child: Row(
@@ -122,15 +105,8 @@ class _AiChatWidgetState extends State<AiChatWidget> {
             Container(
               width: 32,
               height: 32,
-              decoration: BoxDecoration(
-                color: Colors.blue,
-                borderRadius: BorderRadius.circular(16),
-              ),
-              child: const Icon(
-                Icons.psychology,
-                color: Colors.white,
-                size: 18,
-              ),
+              decoration: BoxDecoration(color: Colors.blue, borderRadius: BorderRadius.circular(16)),
+              child: const Icon(Icons.psychology, color: Colors.white, size: 18),
             ),
             const SizedBox(width: 8),
           ],
@@ -138,9 +114,7 @@ class _AiChatWidgetState extends State<AiChatWidget> {
             child: Container(
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
-                color: isAI 
-                    ? Colors.grey[100] 
-                    : Theme.of(context).colorScheme.primary,
+                color: isAI ? Colors.grey[100] : Theme.of(context).colorScheme.primary,
                 borderRadius: BorderRadius.circular(16).copyWith(
                   bottomLeft: isAI ? const Radius.circular(4) : null,
                   bottomRight: !isAI ? const Radius.circular(4) : null,
@@ -149,21 +123,9 @@ class _AiChatWidgetState extends State<AiChatWidget> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
-                    messageText,
-                    style: TextStyle(
-                      color: isAI ? Colors.black87 : Colors.white,
-                      fontSize: 14,
-                    ),
-                  ),
+                  Text(text, style: TextStyle(color: isAI ? Colors.black87 : Colors.white, fontSize: 14)),
                   const SizedBox(height: 4),
-                  Text(
-                    _formatTime(timestamp),
-                    style: TextStyle(
-                      color: isAI ? Colors.grey[600] : Colors.white70,
-                      fontSize: 10,
-                    ),
-                  ),
+                  Text(_formatTime(time), style: TextStyle(color: isAI ? Colors.grey[600] : Colors.white70, fontSize: 10)),
                 ],
               ),
             ),
@@ -173,15 +135,8 @@ class _AiChatWidgetState extends State<AiChatWidget> {
             Container(
               width: 32,
               height: 32,
-              decoration: BoxDecoration(
-                color: Colors.grey[300],
-                borderRadius: BorderRadius.circular(16),
-              ),
-              child: const Icon(
-                Icons.person,
-                color: Colors.white,
-                size: 18,
-              ),
+              decoration: BoxDecoration(color: Colors.grey[300], borderRadius: BorderRadius.circular(16)),
+              child: const Icon(Icons.person, color: Colors.white, size: 18),
             ),
           ],
         ],
@@ -189,18 +144,11 @@ class _AiChatWidgetState extends State<AiChatWidget> {
     );
   }
 
-  String _formatTime(DateTime dateTime) {
-    final now = DateTime.now();
-    final difference = now.difference(dateTime);
-    
-    if (difference.inMinutes < 1) {
-      return 'Just now';
-    } else if (difference.inMinutes < 60) {
-      return '${difference.inMinutes}m ago';
-    } else if (difference.inHours < 24) {
-      return '${difference.inHours}h ago';
-    } else {
-      return '${difference.inDays}d ago';
-    }
+  String _formatTime(DateTime dt) {
+    final diff = DateTime.now().difference(dt);
+    if (diff.inMinutes < 1) return 'Just now';
+    if (diff.inMinutes < 60) return '${diff.inMinutes}m ago';
+    if (diff.inHours < 24) return '${diff.inHours}h ago';
+    return '${diff.inDays}d ago';
   }
 }
