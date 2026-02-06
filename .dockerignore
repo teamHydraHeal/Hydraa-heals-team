@@ -1,5 +1,4 @@
-# Build outputs
-build/
+# Build outputs (keep build/web for Docker)
 .dart_tool/
 
 # IDE / OS
