@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import '../../../core/services/chat_service.dart';
 import '../../../core/services/tts_service.dart';
@@ -55,6 +57,7 @@ class _AiChatWidgetState extends State<AiChatWidget>
   bool _ollamaOnline = false;
   String _ttsLanguage = 'hindi';
   int? _speakingIndex;
+  Timer? _statusTimer;
 
   // Beautiful gradient colors
   static const _primaryGradient = [Color(0xFF667eea), Color(0xFF764ba2)];
@@ -65,6 +68,14 @@ class _AiChatWidgetState extends State<AiChatWidget>
     super.initState();
     _addWelcomeMessage();
     _checkOllamaStatus();
+    // Retry every 10s until Ollama is online
+    _statusTimer = Timer.periodic(const Duration(seconds: 10), (_) {
+      if (!_ollamaOnline) {
+        _checkOllamaStatus();
+      } else {
+        _statusTimer?.cancel();
+      }
+    });
   }
 
   @override
@@ -79,6 +90,7 @@ class _AiChatWidgetState extends State<AiChatWidget>
 
   @override
   void dispose() {
+    _statusTimer?.cancel();
     _controller.dispose();
     _scrollController.dispose();
     _focusNode.dispose();
@@ -174,6 +186,12 @@ class _AiChatWidgetState extends State<AiChatWidget>
 
     final response = result['response'] as String? ?? 'No response.';
     final llmUsed = result['llm_used'] as bool? ?? false;
+
+    // Update Ollama status based on actual response
+    if (llmUsed && !_ollamaOnline) {
+      _ollamaOnline = true;
+      _statusTimer?.cancel();
+    }
 
     _history.add({'role': 'assistant', 'content': response});
 
