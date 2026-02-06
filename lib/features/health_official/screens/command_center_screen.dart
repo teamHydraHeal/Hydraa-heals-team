@@ -240,8 +240,23 @@ class _CommandCenterScreenState extends State<CommandCenterScreen>
       ),
       body: Column(
         children: [
-          // Risk Summary
-          const RiskSummaryWidget(),
+          // Collapsible Risk Summary
+          ExpansionTile(
+            title: const Text(
+              'Risk Summary',
+              style: TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.bold,
+                color: Color(0xFF2E7D32),
+              ),
+            ),
+            initiallyExpanded: false,
+            tilePadding: const EdgeInsets.symmetric(horizontal: 16),
+            childrenPadding: EdgeInsets.zero,
+            children: const [
+              RiskSummaryWidget(),
+            ],
+          ),
           
           // Map Layer Toggle
           Container(

@@ -5,8 +5,8 @@ import 'package:http/http.dart' as http;
 /// Service to communicate with the jal-ML Flask backend
 /// that runs the trained RandomForest model + rule-based risk engine.
 class MlPredictionService {
-  // Default to localhost:5001 where the Flask backend runs
-  static String _baseUrl = 'http://localhost:5001';
+  // GCP instance running the Flask ML backend
+  static String _baseUrl = 'http://34.133.146.11:5001';
 
   /// Override the backend URL (e.g. for production deployment on Render)
   static void setBaseUrl(String url) {

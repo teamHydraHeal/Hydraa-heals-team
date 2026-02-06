@@ -38,21 +38,13 @@ class RiskSummaryWidget extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  const Text(
-                    'Risk Summary',
-                    style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                      color: Color(0xFF2E7D32),
-                    ),
-                  ),
-                  if (urgentNotifications.isNotEmpty)
-                    Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                      decoration: BoxDecoration(
+              if (urgentNotifications.isNotEmpty)
+                Align(
+                  alignment: Alignment.topRight,
+                  child: Container(
+                    margin: const EdgeInsets.only(bottom: 8),
+                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                    decoration: BoxDecoration(
                         color: Colors.red,
                         borderRadius: BorderRadius.circular(12),
                       ),
@@ -76,9 +68,8 @@ class RiskSummaryWidget extends StatelessWidget {
                         ],
                       ),
                     ),
-                ],
-              ),
-              const SizedBox(height: 16),
+                  ),
+              const SizedBox(height: 8),
               Row(
                 children: [
                   Expanded(
