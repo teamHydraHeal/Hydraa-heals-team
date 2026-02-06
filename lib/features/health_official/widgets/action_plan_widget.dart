@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import '../../../core/services/tts_service.dart';
 
 class ActionPlanWidget extends StatefulWidget {
   final Map<String, dynamic> actionPlan;
@@ -14,77 +13,6 @@ class ActionPlanWidget extends StatefulWidget {
 }
 
 class _ActionPlanWidgetState extends State<ActionPlanWidget> {
-  bool _isSpeaking = false;
-  String _ttsLanguage = 'hindi';
-
-  @override
-  void dispose() {
-    TtsService.stop();
-    super.dispose();
-  }
-
-  /// Build a summary string from the action plan for TTS
-  String _buildSpeakableText() {
-    final mlPrediction =
-        widget.actionPlan['ml_prediction'] as Map<String, dynamic>?;
-    final situationAnalysis =
-        widget.actionPlan['situation_analysis'] as Map<String, dynamic>? ?? {};
-    final actionItems =
-        widget.actionPlan['action_items'] as List<dynamic>? ?? [];
-
-    final buffer = StringBuffer();
-
-    if (mlPrediction != null) {
-      final status = mlPrediction['status'] ?? 'unknown';
-      final risk =
-          ((mlPrediction['total_risk'] as num?)?.toDouble() ?? 0.0) * 100;
-      final advisory = mlPrediction['advisory'] ?? '';
-      buffer.writeln(
-          'ML Prediction: Status is $status with ${risk.toStringAsFixed(0)} percent risk.');
-      if (advisory.isNotEmpty) buffer.writeln('Advisory: $advisory.');
-    }
-
-    final riskLevel = situationAnalysis['risk_level'] ?? '';
-    if (riskLevel.isNotEmpty) buffer.writeln('Risk level: $riskLevel.');
-
-    for (int i = 0; i < actionItems.length && i < 5; i++) {
-      final item = actionItems[i] as Map<String, dynamic>? ?? {};
-      buffer.writeln(
-          'Step ${i + 1}: ${item['title'] ?? item['action'] ?? ''}.');
-    }
-
-    return buffer.toString().trim();
-  }
-
-  void _readAloud() async {
-    if (_isSpeaking) {
-      await TtsService.stop();
-      setState(() => _isSpeaking = false);
-      return;
-    }
-
-    final text = _buildSpeakableText();
-    if (text.isEmpty) return;
-
-    setState(() => _isSpeaking = true);
-
-    // Translate to target language first, then speak
-    await TtsService.translateAndSpeak(
-      text,
-      language: _ttsLanguage,
-      onComplete: () {
-        if (mounted) setState(() => _isSpeaking = false);
-      },
-      onError: (err) {
-        if (mounted) {
-          setState(() => _isSpeaking = false);
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('TTS: $err'), backgroundColor: Colors.red),
-          );
-        }
-      },
-    );
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -106,10 +34,6 @@ class _ActionPlanWidgetState extends State<ActionPlanWidget> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // 🔊 Read Aloud bar (AI4Bharat TTS)
-          _buildReadAloudBar(),
-          const SizedBox(height: 16),
-
           // ML Prediction Alert (if available)
           if (mlPrediction != null) _buildMlAlert(mlPrediction),
           if (mlPrediction != null) const SizedBox(height: 24),
@@ -133,100 +57,6 @@ class _ActionPlanWidgetState extends State<ActionPlanWidget> {
           // Action Buttons
           _buildActionButtons(context),
           const SizedBox(height: 40),
-        ],
-      ),
-    );
-  }
-
-  // ===== READ ALOUD BAR (AI4Bharat TTS) =====
-  Widget _buildReadAloudBar() {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          colors: [Colors.indigo.shade700, Colors.blue.shade600],
-        ),
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: Row(
-        children: [
-          // Play / Stop button
-          InkWell(
-            onTap: _readAloud,
-            borderRadius: BorderRadius.circular(20),
-            child: Container(
-              width: 40,
-              height: 40,
-              decoration: BoxDecoration(
-                color: Colors.white.withValues(alpha: 0.2),
-                borderRadius: BorderRadius.circular(20),
-              ),
-              child: _isSpeaking
-                  ? const Icon(Icons.stop, color: Colors.white, size: 22)
-                  : const Icon(Icons.volume_up, color: Colors.white, size: 22),
-            ),
-          ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  _isSpeaking ? 'Translating & Reading…' : 'Translate & Read Aloud',
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontSize: 14,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-                const Text(
-                  'Google Translate + gTTS',
-                  style: TextStyle(color: Colors.white70, fontSize: 10),
-                ),
-              ],
-            ),
-          ),
-          // Language picker (compact)
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 2),
-            decoration: BoxDecoration(
-              color: Colors.white.withValues(alpha: 0.15),
-              borderRadius: BorderRadius.circular(10),
-              border: Border.all(color: Colors.white.withValues(alpha: 0.2)),
-            ),
-            child: Theme(
-              data: Theme.of(context).copyWith(
-                canvasColor: const Color(0xFF1A237E),
-              ),
-              child: DropdownButtonHideUnderline(
-                child: DropdownButton<String>(
-                  value: _ttsLanguage,
-                  isDense: true,
-                  iconEnabledColor: Colors.white70,
-                  style: const TextStyle(fontSize: 12, color: Colors.white),
-                  selectedItemBuilder: (context) {
-                    return TtsService.supportedLanguages.entries.map((e) {
-                      return Align(
-                        alignment: Alignment.centerLeft,
-                        child: Text(e.value, overflow: TextOverflow.ellipsis,
-                          style: const TextStyle(fontSize: 12, color: Colors.white)),
-                      );
-                    }).toList();
-                  },
-                  items: TtsService.supportedLanguages.entries.map((e) {
-                    return DropdownMenuItem(
-                      value: e.key,
-                      child: Text(e.value, overflow: TextOverflow.ellipsis,
-                        style: const TextStyle(fontSize: 12, color: Colors.white)),
-                    );
-                  }).toList(),
-                  onChanged: (val) {
-                    if (val != null) setState(() => _ttsLanguage = val);
-                  },
-                ),
-              ),
-            ),
-          ),
         ],
       ),
     );

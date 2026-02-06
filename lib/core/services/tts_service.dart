@@ -224,6 +224,70 @@ class TtsService {
     }
   }
 
+  /// Summarize an action plan into a clear regional language summary,
+  /// then speak it aloud. This creates a human-friendly summary
+  /// instead of raw word-by-word translation.
+  static Future<bool> summarizeAndSpeak(
+    Map<String, dynamic> actionPlan, {
+    String language = 'hindi',
+    VoidCallback? onStart,
+    VoidCallback? onComplete,
+    Function(String)? onError,
+    Function(String englishSummary, String translatedSummary)? onSummaryReady,
+  }) async {
+    try {
+      // Call the /summarize endpoint
+      final body = {
+        'action_plan': actionPlan,
+        'target_language': language,
+      };
+
+      debugPrint('Summarize: requesting $language summary...');
+
+      final response = await http
+          .post(
+            Uri.parse('$_baseUrl/summarize'),
+            headers: {'Content-Type': 'application/json'},
+            body: jsonEncode(body),
+          )
+          .timeout(const Duration(seconds: 30));
+
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        final englishSummary = data['summary_english'] as String? ?? '';
+        final translatedSummary = data['summary_translated'] as String? ?? '';
+        final textToSpeak = translatedSummary.isNotEmpty ? translatedSummary : englishSummary;
+
+        debugPrint('Summary ready (${textToSpeak.length} chars)');
+
+        // Notify caller with the summary text
+        onSummaryReady?.call(englishSummary, translatedSummary);
+
+        if (textToSpeak.isEmpty) {
+          onError?.call('No summary generated');
+          return false;
+        }
+
+        // Speak the translated summary
+        return speak(
+          textToSpeak,
+          language: language,
+          onStart: onStart,
+          onComplete: onComplete,
+          onError: onError,
+        );
+      } else {
+        debugPrint('Summarize error: ${response.statusCode} ${response.body}');
+        onError?.call('Failed to generate summary');
+        return false;
+      }
+    } catch (e) {
+      debugPrint('Summarize request failed: $e');
+      onError?.call('Summary error: $e');
+      return false;
+    }
+  }
+
   /// Translate text first, then speak in target language.
   /// This is the main method to call for multilingual TTS.
   static Future<bool> translateAndSpeak(

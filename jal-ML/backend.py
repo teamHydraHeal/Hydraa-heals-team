@@ -78,6 +78,215 @@ def translate_text():
         traceback.print_exc()
         return jsonify({"error": f"Translation failed: {str(e)}"}), 500
 
+
+# ────────────────────────────────────────────────────
+# Summarize & Translate Action Plan using Ollama LLM
+# Generates clear, conversational health advisories
+# that regional people can understand via TTS
+# ────────────────────────────────────────────────────
+import json as json_module
+import requests as py_requests
+
+OLLAMA_URL = os.environ.get("OLLAMA_URL", "http://localhost:11434")
+OLLAMA_MODEL = os.environ.get("OLLAMA_MODEL", "gemma2:2b")
+
+
+def _build_ollama_prompt(action_plan):
+    """Build a prompt for the LLM to generate a citizen-friendly health advisory."""
+
+    # Extract key data points
+    ml_pred = action_plan.get("ml_prediction", {})
+    situation = action_plan.get("situation_analysis", {})
+    action_items = action_plan.get("action_items", [])
+    timeline = action_plan.get("timeline", [])
+
+    # Build data context
+    data_lines = []
+
+    if ml_pred:
+        status = ml_pred.get("status", "unknown")
+        risk = ml_pred.get("total_risk", 0)
+        risk_pct = int(float(risk) * 100) if isinstance(risk, (int, float)) else 0
+        advisory = ml_pred.get("advisory", "")
+        risks = ml_pred.get("risks", {})
+        data_lines.append(f"Water Safety Status: {status}")
+        data_lines.append(f"Overall Risk: {risk_pct}%")
+        if advisory:
+            data_lines.append(f"ML Advisory: {advisory}")
+        if risks:
+            for k, v in risks.items():
+                data_lines.append(f"  - {k}: {v}")
+
+    if situation:
+        for k, v in situation.items():
+            if v:
+                data_lines.append(f"{k}: {v}")
+
+    if action_items:
+        data_lines.append("Action Steps:")
+        for i, item in enumerate(action_items[:6]):
+            if isinstance(item, dict):
+                title = item.get("title", item.get("action", ""))
+                desc = item.get("description", "")
+                if title:
+                    data_lines.append(f"  {i+1}. {title}" + (f" - {desc}" if desc else ""))
+
+    data_context = "\n".join(data_lines)
+
+    prompt = f"""You are a public health advisor for Jal Guard, a water safety system in Meghalaya, India. 
+Based on the sensor data and analysis below, create a SHORT, CLEAR health advisory for ordinary citizens.
+
+WATER QUALITY DATA:
+{data_context}
+
+INSTRUCTIONS:
+- Write as if speaking directly to a village resident
+- Explain in simple words: Is the water safe? Why or why not?
+- If pH is too high or low, explain what that means for health
+- Give 3-4 specific precautions they should take
+- Mention if they should boil water, use filters, or avoid the source
+- Keep it under 150 words — this will be read aloud via text-to-speech
+- Do NOT use technical jargon, bullet points, or markdown formatting
+- Write in natural, conversational sentences as a caring health worker would speak
+
+ADVISORY:"""
+
+    return prompt
+
+
+def _call_ollama(prompt):
+    """Call Ollama API to generate text."""
+    try:
+        resp = py_requests.post(
+            f"{OLLAMA_URL}/api/generate",
+            json={
+                "model": OLLAMA_MODEL,
+                "prompt": prompt,
+                "stream": False,
+                "options": {
+                    "temperature": 0.7,
+                    "top_p": 0.9,
+                    "num_predict": 300,
+                }
+            },
+            timeout=60,
+        )
+        if resp.status_code == 200:
+            data = resp.json()
+            return data.get("response", "").strip()
+        else:
+            print(f"Ollama error {resp.status_code}: {resp.text}")
+            return None
+    except Exception as e:
+        print(f"Ollama request failed: {e}")
+        return None
+
+
+def _fallback_summary(action_plan):
+    """Rule-based fallback if Ollama is unavailable."""
+    ml_pred = action_plan.get("ml_prediction", {})
+    situation = action_plan.get("situation_analysis", {})
+    action_items = action_plan.get("action_items", [])
+    parts = []
+
+    if ml_pred:
+        status = ml_pred.get("status", "unknown")
+        risk = ml_pred.get("total_risk", 0)
+        risk_pct = int(float(risk) * 100) if isinstance(risk, (int, float)) else 0
+        advisory = ml_pred.get("advisory", "")
+
+        if status.lower() in ("unsafe", "danger", "critical"):
+            parts.append(f"Warning! The water in your area is not safe to drink. The risk level is {risk_pct} percent.")
+        elif status.lower() in ("caution", "moderate"):
+            parts.append(f"Be careful. The water in your area may not be fully safe. Risk level is {risk_pct} percent.")
+        else:
+            parts.append(f"The water in your area appears safe for now. Risk level is {risk_pct} percent.")
+        if advisory:
+            parts.append(advisory)
+
+    risk_level = situation.get("risk_level", "")
+    if risk_level:
+        parts.append(f"The current risk level is {risk_level}.")
+
+    if action_items:
+        parts.append("Here is what you should do.")
+        for i, item in enumerate(action_items[:4]):
+            if isinstance(item, dict):
+                title = item.get("title", item.get("action", ""))
+                if title:
+                    parts.append(f"Step {i+1}: {title}.")
+
+    parts.append("Please boil all drinking water. If anyone feels sick, visit your nearest health center immediately.")
+    return " ".join(parts)
+
+
+@app.route("/summarize", methods=["POST"])
+def summarize_action_plan():
+    """Generate a clear, conversational health advisory using Ollama LLM,
+    then translate it for regional TTS playback.
+
+    Request JSON:
+        action_plan (dict): The full action plan data
+        target_language (str): Language for translation (e.g., "hindi")
+
+    Returns: JSON with English + translated summary
+    """
+    data = request.json or {}
+    action_plan = data.get("action_plan", {})
+    target_lang = data.get("target_language", "hindi").lower()
+
+    # --- Generate summary using Ollama LLM ---
+    prompt = _build_ollama_prompt(action_plan)
+    english_summary = _call_ollama(prompt)
+
+    llm_used = True
+    if not english_summary:
+        # Fallback to rule-based if Ollama is down
+        english_summary = _fallback_summary(action_plan)
+        llm_used = False
+
+    # --- Translate to target language ---
+    target_code = TRANSLATE_CODES.get(target_lang, "hi")
+
+    if target_lang == "english" or target_code == "en":
+        return jsonify({
+            "summary_english": english_summary,
+            "summary_translated": english_summary,
+            "target_language": target_lang,
+            "llm_used": llm_used,
+        })
+
+    try:
+        # Translate sentence by sentence for better quality
+        sentences = [s.strip() for s in english_summary.replace("\n", " ").split(". ") if s.strip()]
+        translated_parts = []
+        for sentence in sentences:
+            try:
+                translator = GoogleTranslator(source="en", target=target_code)
+                translated = translator.translate(sentence + ".")
+                translated_parts.append(translated if translated else sentence + ".")
+            except:
+                translated_parts.append(sentence + ".")
+
+        translated_summary = " ".join(translated_parts)
+
+        return jsonify({
+            "summary_english": english_summary,
+            "summary_translated": translated_summary,
+            "target_language": target_lang,
+            "llm_used": llm_used,
+        })
+    except Exception as e:
+        traceback.print_exc()
+        return jsonify({
+            "summary_english": english_summary,
+            "summary_translated": english_summary,
+            "target_language": target_lang,
+            "llm_used": llm_used,
+            "error": f"Translation failed: {str(e)}"
+        })
+
+
 # ────────────────────────────────────────────────────
 # ML Model Loading
 # ────────────────────────────────────────────────────
@@ -251,6 +460,130 @@ def tts_languages():
         for k, v in LANGUAGE_CODES.items()
     ]
     return jsonify({"languages": langs})
+
+
+# ────────────────────────────────────────────────────
+# Ollama Chat Endpoint — powers the AI Co-pilot chat
+# ────────────────────────────────────────────────────
+CHAT_SYSTEM_PROMPT = """You are Jal Guard AI, a friendly and knowledgeable water quality and public health assistant for Meghalaya, India.
+
+Your role:
+- Explain water safety data to health officials and citizens in simple, clear language
+- Provide health advisories based on water quality (pH, turbidity, ORP, contamination)
+- Suggest precautions when water is unsafe (boil first, use filters, avoid source)
+- Help interpret ML predictions, risk scores, and action plans
+- Respond in a warm, caring tone like a trusted health advisor
+- Keep answers concise (2-4 sentences unless the user asks for detail)
+- If someone asks about a specific water parameter, explain what the value means for health
+- You can suggest generating an action plan or running ML predictions when relevant
+
+Water quality facts:
+- Safe pH: 6.5-8.5. Below 6.5 is acidic, above 8.5 is alkaline — both harmful.
+- Turbidity above 5 NTU means water may not be clear and could harbor bacteria.
+- ORP below 200mV means poor disinfection; bacteria may survive.
+- High rainfall increases contamination risk from runoff.
+
+You are deployed in Meghalaya where the Khasi language is spoken. Always be respectful of local culture."""
+
+
+@app.route("/chat", methods=["POST"])
+def chat():
+    """Ollama-powered chat for the AI Co-pilot.
+
+    Request JSON:
+        message (str): The user's message
+        history (list): Optional conversation history [{role, content}, ...]
+        context (dict): Optional context (current action plan, ML data, etc.)
+
+    Returns: JSON with the AI's response
+    """
+    data = request.json or {}
+    user_message = data.get("message", "").strip()
+    history = data.get("history", [])
+    context = data.get("context", {})
+
+    if not user_message:
+        return jsonify({"error": "No message provided"}), 400
+
+    # Build messages for Ollama
+    prompt_parts = [CHAT_SYSTEM_PROMPT]
+
+    # Inject context if provided (action plan, ML data, etc.)
+    if context:
+        ctx_str = json_module.dumps(context, indent=2, default=str)
+        prompt_parts.append(f"\n--- Current Context ---\n{ctx_str}\n--- End Context ---\n")
+
+    # Add conversation history
+    for msg in history[-10:]:  # Last 10 messages for context window
+        role = msg.get("role", "user")
+        content = msg.get("content", "")
+        if role == "user":
+            prompt_parts.append(f"\nUser: {content}")
+        else:
+            prompt_parts.append(f"\nAssistant: {content}")
+
+    # Add current user message
+    prompt_parts.append(f"\nUser: {user_message}")
+    prompt_parts.append("\nAssistant:")
+
+    full_prompt = "\n".join(prompt_parts)
+
+    # Call Ollama
+    response_text = _call_ollama(full_prompt)
+
+    if response_text:
+        return jsonify({
+            "response": response_text,
+            "llm_used": True,
+            "model": OLLAMA_MODEL,
+        })
+    else:
+        # Fallback to simple rule-based response
+        fallback = _fallback_chat(user_message)
+        return jsonify({
+            "response": fallback,
+            "llm_used": False,
+            "model": "fallback",
+        })
+
+
+def _fallback_chat(message):
+    """Simple keyword-based fallback when Ollama is unavailable."""
+    msg = message.lower()
+    if any(w in msg for w in ["risk", "situation", "status"]):
+        return "Based on current data, there are active water quality concerns. I recommend generating an action plan for a detailed analysis. Note: The AI model is currently offline — responses are limited."
+    elif any(w in msg for w in ["safe", "drink", "water"]):
+        return "For safety, always boil water before drinking if there are any quality concerns. Check the latest ML prediction for your area's water safety status."
+    elif any(w in msg for w in ["help", "what can"]):
+        return ("I can help with:\n• Water quality analysis\n• Health risk assessment\n"
+                "• Action plan generation\n• Precaution recommendations\n\n"
+                "Note: The AI model is offline. Start Ollama for full AI capabilities.")
+    elif any(w in msg for w in ["hi", "hello", "hey"]):
+        return "Hello! I'm Jal Guard AI. I can help you understand water quality data and health risks. What would you like to know?"
+    else:
+        return "I'm here to help with water quality and health concerns. The AI model is currently offline, so my responses are limited. Try asking about water safety, risk levels, or action plans."
+
+
+# ────────────────────────────────────────────────────
+# Ollama Status Check
+# ────────────────────────────────────────────────────
+@app.route("/ollama/status", methods=["GET"])
+def ollama_status():
+    """Check if Ollama is running and the configured model is available."""
+    try:
+        resp = py_requests.get(f"{OLLAMA_URL}/api/tags", timeout=5)
+        if resp.status_code == 200:
+            models = [m["name"] for m in resp.json().get("models", [])]
+            model_ready = any(OLLAMA_MODEL in m for m in models)
+            return jsonify({
+                "ollama_running": True,
+                "model": OLLAMA_MODEL,
+                "model_ready": model_ready,
+                "available_models": models,
+            })
+        return jsonify({"ollama_running": False, "error": f"HTTP {resp.status_code}"})
+    except Exception as e:
+        return jsonify({"ollama_running": False, "error": str(e)})
 
 
 if __name__ == "__main__":
