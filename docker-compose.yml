@@ -3,8 +3,7 @@ services:
   ollama:
     image: ollama/ollama:latest
     container_name: jalguard-ollama
-    ports:
-      - "11434:11434"
+    # No host port needed — only ml-backend connects via Docker network
     volumes:
       - ollama_data:/root/.ollama
     restart: unless-stopped
