@@ -38,8 +38,7 @@ services:
       context: ./jal-ML
       dockerfile: Dockerfile
     container_name: jalguard-backend
-    ports:
-      - "5001:5001"
+    # No host port needed — nginx proxies to ml-backend via Docker network
     environment:
       - PORT=5001
       - OLLAMA_URL=http://ollama:11434
