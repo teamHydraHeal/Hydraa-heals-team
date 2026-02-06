@@ -1,12 +1,21 @@
 import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
+import 'package:web/web.dart' as web;
 
 /// Service to communicate with the jal-ML Flask backend
 /// that runs the trained RandomForest model + rule-based risk engine.
 class MlPredictionService {
-  // Local development — change to GCP IP for deployment
-  static String _baseUrl = 'http://localhost:5001';
+  // Auto-detect backend URL: use same host as the page on web, localhost for native
+  static String _baseUrl = _detectBaseUrl();
+
+  static String _detectBaseUrl() {
+    if (kIsWeb) {
+      final host = web.window.location.hostname;
+      return 'http://$host:5001';
+    }
+    return 'http://localhost:5001';
+  }
 
   /// Override the backend URL (e.g. for production deployment on Render)
   static void setBaseUrl(String url) {

@@ -12,8 +12,16 @@ import 'package:web/web.dart' as web;
 ///
 /// Uses the browser's native HTMLAudioElement for reliable web playback.
 class TtsService {
-  // Local development — change to GCP IP for deployment
-  static String _baseUrl = 'http://localhost:5001';
+  // Auto-detect backend URL: use same host as the page on web, localhost for native
+  static String _baseUrl = _detectBaseUrl();
+
+  static String _detectBaseUrl() {
+    if (kIsWeb) {
+      final host = web.window.location.hostname;
+      return 'http://$host:5001';
+    }
+    return 'http://localhost:5001';
+  }
 
   static bool _isSpeaking = false;
   static web.HTMLAudioElement? _audioElement;
