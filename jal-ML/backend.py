@@ -88,7 +88,15 @@ import json as json_module
 import requests as py_requests
 
 OLLAMA_URL = os.environ.get("OLLAMA_URL", "http://localhost:11434")
-OLLAMA_MODEL = os.environ.get("OLLAMA_MODEL", "gemma2:2b")
+OLLAMA_MODEL = os.environ.get("OLLAMA_MODEL", "qwen2.5:1.5b")
+OLLAMA_TIMEOUT_SEC = int(os.environ.get("OLLAMA_TIMEOUT_SEC", "45"))
+OLLAMA_KEEP_ALIVE = os.environ.get("OLLAMA_KEEP_ALIVE", "30m")
+OLLAMA_NUM_PREDICT = int(os.environ.get("OLLAMA_NUM_PREDICT", "120"))
+OLLAMA_NUM_CTX = int(os.environ.get("OLLAMA_NUM_CTX", "1024"))
+OLLAMA_TEMPERATURE = float(os.environ.get("OLLAMA_TEMPERATURE", "0.4"))
+OLLAMA_TOP_P = float(os.environ.get("OLLAMA_TOP_P", "0.9"))
+CHAT_MAX_HISTORY = int(os.environ.get("CHAT_MAX_HISTORY", "6"))
+CHAT_HISTORY_CHAR_LIMIT = int(os.environ.get("CHAT_HISTORY_CHAR_LIMIT", "500"))
 
 
 def _build_ollama_prompt(action_plan):
@@ -147,6 +155,7 @@ INSTRUCTIONS:
 - Mention if they should boil water, use filters, or avoid the source
 - Keep it under 150 words — this will be read aloud via text-to-speech
 - Do NOT use technical jargon, bullet points, or markdown formatting
+- Do NOT use emoji or emoticons
 - Write in natural, conversational sentences as a caring health worker would speak
 
 ADVISORY:"""
@@ -163,13 +172,15 @@ def _call_ollama(prompt):
                 "model": OLLAMA_MODEL,
                 "prompt": prompt,
                 "stream": False,
+                "keep_alive": OLLAMA_KEEP_ALIVE,
                 "options": {
-                    "temperature": 0.7,
-                    "top_p": 0.9,
-                    "num_predict": 300,
+                    "temperature": OLLAMA_TEMPERATURE,
+                    "top_p": OLLAMA_TOP_P,
+                    "num_ctx": OLLAMA_NUM_CTX,
+                    "num_predict": OLLAMA_NUM_PREDICT,
                 }
             },
-            timeout=60,
+            timeout=OLLAMA_TIMEOUT_SEC,
         )
         if resp.status_code == 200:
             data = resp.json()
@@ -376,6 +387,8 @@ def predict():
 # ────────────────────────────────────────────────────
 from gtts import gTTS
 import io
+import re
+import unicodedata
 
 # Map language names → gTTS language codes
 LANGUAGE_CODES = {
@@ -412,6 +425,54 @@ LANGUAGE_DISPLAY = {
 }
 
 
+def _clean_text_for_tts(text):
+    """Normalize text and strip emoji/symbol characters so TTS sounds natural."""
+    if not text:
+        return ""
+
+    # Normalize compatibility glyphs (full-width chars, etc.).
+    normalized = unicodedata.normalize("NFKC", text)
+
+    cleaned_chars = []
+    for ch in normalized:
+        cat = unicodedata.category(ch)
+        # Drop most symbol categories (emoji, dingbats, pictographs, misc symbols).
+        if cat in {"So", "Sk", "Cs"}:
+            continue
+        cleaned_chars.append(ch)
+
+    cleaned = "".join(cleaned_chars)
+    # Collapse repeated punctuation/noise and normalize whitespace.
+    cleaned = re.sub(r"[_~`^|]+", " ", cleaned)
+    cleaned = re.sub(r"\s+", " ", cleaned).strip()
+    return cleaned
+
+
+def _clean_chat_output_text(text):
+    """Strip emojis, emoticons, and decorative symbols from chat responses."""
+    if not text:
+        return ""
+
+    cleaned = _clean_text_for_tts(text)
+
+    # Remove common text emoticons that TTS may read literally.
+    emoticon_patterns = [
+        r"(:-?\)|:-?\(|;-?\)|:-?D|:-?P|:-?p|:'\(|:\*|<3)",
+        r"(\^_\^|\^\.\^|\^\-\^|T_T|xD|XD)",
+    ]
+    for pat in emoticon_patterns:
+        cleaned = re.sub(pat, " ", cleaned)
+
+    # Keep only letters/numbers/whitespace and minimal sentence punctuation.
+    cleaned = "".join(
+        ch for ch in cleaned
+        if ch.isalnum() or ch.isspace() or ch in {".", ",", "?", "!", "-", "'"}
+    )
+
+    cleaned = re.sub(r"\s+", " ", cleaned).strip()
+    return cleaned
+
+
 @app.route("/tts", methods=["POST"])
 def text_to_speech():
     """Convert text to speech using gTTS (Google Text-to-Speech).
@@ -430,6 +491,11 @@ def text_to_speech():
 
     if not text:
         return jsonify({"error": "No text provided"}), 400
+
+    # Remove emojis/symbol noise so audio is clean and understandable.
+    text = _clean_text_for_tts(text)
+    if not text:
+        return jsonify({"error": "Text contains no speakable content after cleanup"}), 400
 
     lang_code = LANGUAGE_CODES.get(language, "hi")
 
@@ -465,25 +531,21 @@ def tts_languages():
 # ────────────────────────────────────────────────────
 # Ollama Chat Endpoint — powers the AI Co-pilot chat
 # ────────────────────────────────────────────────────
-CHAT_SYSTEM_PROMPT = """You are Jal Guard AI, a friendly and knowledgeable water quality and public health assistant for Meghalaya, India.
+CHAT_SYSTEM_PROMPT = """You are Jal Guard AI, a friendly public-health assistant for water safety in Meghalaya, India.
 
-Your role:
-- Explain water safety data to health officials and citizens in simple, clear language
-- Provide health advisories based on water quality (pH, turbidity, ORP, contamination)
-- Suggest precautions when water is unsafe (boil first, use filters, avoid source)
-- Help interpret ML predictions, risk scores, and action plans
-- Respond in a warm, caring tone like a trusted health advisor
-- Keep answers concise (2-4 sentences unless the user asks for detail)
-- If someone asks about a specific water parameter, explain what the value means for health
-- You can suggest generating an action plan or running ML predictions when relevant
+Guidelines:
+- Reply in simple, practical language for citizens and officials.
+- Keep default answers short (2-4 sentences), unless asked for detail.
+- Explain pH, turbidity, ORP, and contamination in health terms.
+- For unsafe water, give clear precautions (boil, filter, avoid source).
+- Help interpret ML predictions, risk scores, and action plans.
+- Be respectful of local culture and Khasi-speaking communities.
+- Never use emojis or emoticons in responses.
 
-Water quality facts:
-- Safe pH: 6.5-8.5. Below 6.5 is acidic, above 8.5 is alkaline — both harmful.
-- Turbidity above 5 NTU means water may not be clear and could harbor bacteria.
-- ORP below 200mV means poor disinfection; bacteria may survive.
-- High rainfall increases contamination risk from runoff.
-
-You are deployed in Meghalaya where the Khasi language is spoken. Always be respectful of local culture."""
+Reference thresholds:
+- Safe pH: 6.5 to 8.5.
+- Turbidity > 5 NTU can indicate contamination risk.
+- ORP < 200 mV can indicate weak disinfection."""
 
 
 @app.route("/chat", methods=["POST"])
@@ -514,9 +576,9 @@ def chat():
         prompt_parts.append(f"\n--- Current Context ---\n{ctx_str}\n--- End Context ---\n")
 
     # Add conversation history
-    for msg in history[-10:]:  # Last 10 messages for context window
+    for msg in history[-CHAT_MAX_HISTORY:]:
         role = msg.get("role", "user")
-        content = msg.get("content", "")
+        content = msg.get("content", "")[:CHAT_HISTORY_CHAR_LIMIT]
         if role == "user":
             prompt_parts.append(f"\nUser: {content}")
         else:
@@ -532,6 +594,8 @@ def chat():
     response_text = _call_ollama(full_prompt)
 
     if response_text:
+        # Enforce symbol-free responses so readout stays clean.
+        response_text = _clean_chat_output_text(response_text)
         return jsonify({
             "response": response_text,
             "llm_used": True,
@@ -540,6 +604,7 @@ def chat():
     else:
         # Fallback to simple rule-based response
         fallback = _fallback_chat(user_message)
+        fallback = _clean_chat_output_text(fallback)
         return jsonify({
             "response": fallback,
             "llm_used": False,
@@ -551,13 +616,12 @@ def _fallback_chat(message):
     """Simple keyword-based fallback when Ollama is unavailable."""
     msg = message.lower()
     if any(w in msg for w in ["risk", "situation", "status"]):
-        return "Based on current data, there are active water quality concerns. I recommend generating an action plan for a detailed analysis. Note: The AI model is currently offline — responses are limited."
+        return "Based on current data, there are active water quality concerns. I recommend generating an action plan for a detailed analysis. Note: The AI model is currently offline and responses are limited."
     elif any(w in msg for w in ["safe", "drink", "water"]):
         return "For safety, always boil water before drinking if there are any quality concerns. Check the latest ML prediction for your area's water safety status."
     elif any(w in msg for w in ["help", "what can"]):
-        return ("I can help with:\n• Water quality analysis\n• Health risk assessment\n"
-                "• Action plan generation\n• Precaution recommendations\n\n"
-                "Note: The AI model is offline. Start Ollama for full AI capabilities.")
+        return ("I can help with water quality analysis, health risk assessment, action plan generation, and precaution recommendations. "
+            "Note: The AI model is offline. Start Ollama for full AI capabilities.")
     elif any(w in msg for w in ["hi", "hello", "hey"]):
         return "Hello! I'm Jal Guard AI. I can help you understand water quality data and health risks. What would you like to know?"
     else:

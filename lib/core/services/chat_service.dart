@@ -58,7 +58,7 @@ class ChatService {
             headers: {'Content-Type': 'application/json'},
             body: jsonEncode(body),
           )
-          .timeout(const Duration(seconds: 60));
+          .timeout(const Duration(seconds: 120));
 
       if (response.statusCode == 200) {
         return jsonDecode(response.body) as Map<String, dynamic>;
@@ -74,7 +74,7 @@ class ChatService {
       debugPrint('Chat request failed: $e');
       return {
         'response':
-            'Unable to reach the AI backend. Check that the server is running.',
+            'AI response is delayed or backend is temporarily unreachable. Please retry in a few seconds.',
         'llm_used': false,
         'model': 'offline',
       };

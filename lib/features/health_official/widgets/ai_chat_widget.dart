@@ -8,7 +8,7 @@ import '../../../core/services/tts_service.dart';
 ///
 /// Features:
 /// - Ollama-powered intelligent responses about water quality & health
-/// - Inline TTS: tap 🔊 on any AI message to hear it in a regional language
+/// - Inline TTS: tap speaker on any AI message to hear it in a regional language
 /// - Animated typing indicator
 /// - Gradient message bubbles & modern design
 /// - Regional language picker for TTS playback
@@ -101,11 +101,31 @@ class _AiChatWidgetState extends State<AiChatWidget>
   void _addWelcomeMessage() {
     _messages.add(_ChatMessage(
       text:
-          'Namaste! \u{1F64F} I\'m Jal Guard AI \u{2014} your water quality and health assistant.\n\n'
+          'Namaste! I\'m Jal Guard AI \u{2014} your water quality and health assistant.\n\n'
           'Ask me anything about water safety, health risks, or precautions. '
-          'I can also read my answers aloud in your language \u{2014} just tap the \u{1F50A} icon!',
+          'I can also read my answers aloud in your language \u{2014} just tap the speaker icon.',
       isUser: false,
     ));
+  }
+
+  String _sanitizeAiText(String text) {
+    var cleaned = text;
+
+    // Remove emoji and pictograph ranges.
+    cleaned = cleaned.replaceAll(
+      RegExp(r'[\u{1F300}-\u{1FAFF}\u{2600}-\u{27BF}]', unicode: true),
+      '',
+    );
+
+    // Remove common text emoticons.
+    cleaned = cleaned.replaceAll(RegExp(r'(:-?\)|:-?\(|;-?\)|:-?D|:-?P|:-?p|<3)'), '');
+    cleaned = cleaned.replaceAll(RegExp(r'(\^_\^|\^\.\^|\^\-\^|T_T|xD|XD)'), '');
+
+    // Remove decorative bullets/symbols often read aloud awkwardly.
+    cleaned = cleaned.replaceAll(RegExp(r'[•▪◆◇★☆]'), '');
+
+    cleaned = cleaned.replaceAll(RegExp(r'\s+'), ' ').trim();
+    return cleaned;
   }
 
   /// Called when action plan is generated — sends it to Ollama for a summary
@@ -113,7 +133,7 @@ class _AiChatWidgetState extends State<AiChatWidget>
     // Show a quick status message
     setState(() {
       _messages.add(_ChatMessage(
-        text: '\u{2705} Action plan generated! Let me summarize it for you...',
+        text: 'Action plan generated. Let me summarize it for you.',
         isUser: false,
       ));
       _isTyping = true;
@@ -134,7 +154,8 @@ class _AiChatWidgetState extends State<AiChatWidget>
       context: plan,
     );
 
-    final response = result['response'] as String? ?? 'Could not generate summary.';
+    final responseRaw = result['response'] as String? ?? 'Could not generate summary.';
+    final response = _sanitizeAiText(responseRaw);
     final llmUsed = result['llm_used'] as bool? ?? false;
 
     _history.add({'role': 'assistant', 'content': response});
@@ -184,7 +205,8 @@ class _AiChatWidgetState extends State<AiChatWidget>
       context: widget.actionPlanContext,
     );
 
-    final response = result['response'] as String? ?? 'No response.';
+    final responseRaw = result['response'] as String? ?? 'No response.';
+    final response = _sanitizeAiText(responseRaw);
     final llmUsed = result['llm_used'] as bool? ?? false;
 
     // Update Ollama status based on actual response
@@ -233,8 +255,10 @@ class _AiChatWidgetState extends State<AiChatWidget>
       _speakingIndex = index;
     });
 
+    final speakText = _sanitizeAiText(msg.text);
+
     await TtsService.translateAndSpeak(
-      msg.text,
+      speakText,
       language: _ttsLanguage,
       onComplete: () {
         if (mounted) {
