@@ -165,24 +165,53 @@ class _CommandCenterScreenState extends State<CommandCenterScreen>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: const Color(0xFFF4F7F5),
       appBar: AppBar(
-        title: const Text('Command Center'),
+        toolbarHeight: 76,
+        titleSpacing: 20,
+        title: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'District Operations',
+              style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                color: Colors.white.withValues(alpha: 0.86),
+              ),
+            ),
+            Text(
+              'Command Center',
+              style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                color: Colors.white,
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+          ],
+        ),
+        flexibleSpace: Container(
+          decoration: const BoxDecoration(
+            gradient: LinearGradient(
+              colors: [Color(0xFF1B5E20), Color(0xFF2E7D32)],
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+            ),
+          ),
+        ),
         actions: [
           Consumer<ConnectivityProvider>(
             builder: (context, connectivity, child) {
               return Container(
-                margin: const EdgeInsets.only(right: 16),
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                margin: const EdgeInsets.only(right: 8, top: 18, bottom: 18),
+                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                 decoration: BoxDecoration(
-                  color: connectivity.isOnline ? Colors.green : Colors.red,
-                  borderRadius: BorderRadius.circular(12),
+                  color: Colors.white.withValues(alpha: 0.2),
+                  borderRadius: BorderRadius.circular(20),
                 ),
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     Icon(
                       connectivity.isOnline ? Icons.wifi : Icons.wifi_off,
-                      size: 16,
+                      size: 15,
                       color: Colors.white,
                     ),
                     const SizedBox(width: 4),
@@ -190,7 +219,7 @@ class _CommandCenterScreenState extends State<CommandCenterScreen>
                       connectivity.isOnline ? 'Online' : 'Offline',
                       style: const TextStyle(
                         color: Colors.white,
-                        fontSize: 12,
+                        fontSize: 11,
                         fontWeight: FontWeight.w600,
                       ),
                     ),
@@ -203,13 +232,20 @@ class _CommandCenterScreenState extends State<CommandCenterScreen>
             builder: (context, notificationProvider, child) {
               return Stack(
                 children: [
-                  IconButton(
-                    icon: const Icon(Icons.notifications),
-                    onPressed: () => context.push('/notifications'),
+                  Padding(
+                    padding: const EdgeInsets.only(right: 8, top: 10, bottom: 10),
+                    child: IconButton(
+                      style: IconButton.styleFrom(
+                        backgroundColor: Colors.white.withValues(alpha: 0.14),
+                        foregroundColor: Colors.white,
+                      ),
+                      icon: const Icon(Icons.notifications_none_rounded),
+                      onPressed: () => context.push('/notifications'),
+                    ),
                   ),
                   if (notificationProvider.unreadCount > 0)
                     Positioned(
-                      right: 8,
+                      right: 10,
                       top: 8,
                       child: Container(
                         padding: const EdgeInsets.all(2),
@@ -240,6 +276,8 @@ class _CommandCenterScreenState extends State<CommandCenterScreen>
       ),
       body: Column(
         children: [
+          _buildSituationOverview(),
+
           // Collapsible Risk Summary
           ExpansionTile(
             title: const Text(
@@ -260,7 +298,13 @@ class _CommandCenterScreenState extends State<CommandCenterScreen>
           
           // Map Layer Toggle
           Container(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            margin: const EdgeInsets.fromLTRB(16, 8, 16, 4),
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(14),
+              border: Border.all(color: const Color(0xFFDCE7E1)),
+            ),
             child: Row(
               children: [
                 const Text(
@@ -321,7 +365,7 @@ class _CommandCenterScreenState extends State<CommandCenterScreen>
           // Bottom Tab Bar
           Container(
             decoration: BoxDecoration(
-              color: Theme.of(context).colorScheme.surface,
+              color: Colors.white,
               boxShadow: [
                 BoxShadow(
                   color: Colors.black.withValues(alpha:0.1),
@@ -332,20 +376,20 @@ class _CommandCenterScreenState extends State<CommandCenterScreen>
             ),
             child: TabBar(
               controller: _tabController,
-              labelColor: Theme.of(context).colorScheme.primary,
-              unselectedLabelColor: Colors.grey,
-              indicatorColor: Theme.of(context).colorScheme.primary,
+              labelColor: const Color(0xFF1B5E20),
+              unselectedLabelColor: const Color(0xFF7A8A82),
+              indicatorColor: const Color(0xFF1B5E20),
               tabs: const [
                 Tab(
-                  icon: Icon(Icons.map),
+                  icon: Icon(Icons.map_rounded),
                   text: 'Map',
                 ),
                 Tab(
-                  icon: Icon(Icons.broadcast_on_personal),
+                  icon: Icon(Icons.campaign_outlined),
                   text: 'Broadcast',
                 ),
                 Tab(
-                  icon: Icon(Icons.settings),
+                  icon: Icon(Icons.tune_rounded),
                   text: 'Settings',
                 ),
               ],
@@ -355,11 +399,64 @@ class _CommandCenterScreenState extends State<CommandCenterScreen>
       ),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () => context.push('/health-official/ai-copilot'),
-        icon: const Icon(Icons.psychology),
+        icon: const Icon(Icons.psychology_alt_outlined),
         label: const Text('AI Co-pilot'),
-        backgroundColor: Theme.of(context).colorScheme.primary,
+        backgroundColor: const Color(0xFF1B5E20),
         foregroundColor: Colors.white,
       ),
+    );
+  }
+
+  Widget _buildSituationOverview() {
+    final totalActive = _districts.fold<int>(0, (sum, d) => sum + d.activeReports);
+    final totalCritical = _districts.fold<int>(0, (sum, d) => sum + d.criticalReports);
+
+    return Container(
+      margin: const EdgeInsets.fromLTRB(16, 16, 16, 6),
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        gradient: const LinearGradient(
+          colors: [Color(0xFF1B5E20), Color(0xFF2E7D32)],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+        borderRadius: BorderRadius.circular(18),
+      ),
+      child: Row(
+        children: [
+          Expanded(
+            child: _buildOverviewMetric('Districts', '${_districts.length}'),
+          ),
+          Expanded(
+            child: _buildOverviewMetric('Active Reports', '$totalActive'),
+          ),
+          Expanded(
+            child: _buildOverviewMetric('Critical', '$totalCritical'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildOverviewMetric(String label, String value) {
+    return Column(
+      children: [
+        Text(
+          value,
+          style: Theme.of(context).textTheme.titleLarge?.copyWith(
+            color: Colors.white,
+            fontWeight: FontWeight.w700,
+          ),
+        ),
+        const SizedBox(height: 2),
+        Text(
+          label,
+          style: Theme.of(context).textTheme.labelMedium?.copyWith(
+            color: Colors.white.withValues(alpha: 0.85),
+          ),
+          textAlign: TextAlign.center,
+        ),
+      ],
     );
   }
 

@@ -71,16 +71,47 @@ class _CitizenAiCopilotScreenState extends State<CitizenAiCopilotScreen>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: const Color(0xFFF4F7F5),
       appBar: AppBar(
+        toolbarHeight: 74,
+        titleSpacing: 20,
         title: const Text('AI Health Assistant'),
+        flexibleSpace: Container(
+          decoration: const BoxDecoration(
+            gradient: LinearGradient(
+              colors: [Color(0xFF0D7A57), Color(0xFF2AA879)],
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+            ),
+          ),
+        ),
         actions: [
           Consumer<ConnectivityProvider>(
             builder: (context, connectivity, child) {
-              return Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                child: Icon(
-                  connectivity.isOnline ? Icons.wifi : Icons.wifi_off,
-                  color: Colors.white,
+              return Container(
+                margin: const EdgeInsets.only(right: 12, top: 18, bottom: 18),
+                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                decoration: BoxDecoration(
+                  color: Colors.white.withValues(alpha: 0.18),
+                  borderRadius: BorderRadius.circular(20),
+                ),
+                child: Row(
+                  children: [
+                    Icon(
+                      connectivity.isOnline ? Icons.wifi : Icons.wifi_off,
+                      size: 15,
+                      color: Colors.white,
+                    ),
+                    const SizedBox(width: 4),
+                    Text(
+                      connectivity.isOnline ? 'Online' : 'Offline',
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 11,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ],
                 ),
               );
             },
@@ -139,9 +170,9 @@ class _CitizenAiCopilotScreenState extends State<CitizenAiCopilotScreen>
       backgroundColor: Colors.transparent,
       builder: (context) => Container(
         height: MediaQuery.of(context).size.height * 0.7,
-        decoration: const BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+          decoration: const BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
         ),
         child: Column(
           children: [
@@ -168,31 +199,36 @@ class _CitizenAiCopilotScreenState extends State<CitizenAiCopilotScreen>
                   const SizedBox(height: 16),
                   _buildHelpItem(
                     context,
-                    '💧 Water Safety',
+                    Icons.water_drop_outlined,
+                    'Water Safety',
                     'Get instant advice on water quality and safety measures',
                     () => _tabController.animateTo(0),
                   ),
                   _buildHelpItem(
                     context,
-                    '🏥 Health Symptoms',
+                    Icons.monitor_heart_outlined,
+                    'Health Symptoms',
                     'Describe symptoms and get preliminary health guidance',
                     () => _tabController.animateTo(0),
                   ),
                   _buildHelpItem(
                     context,
-                    '👥 Community Support',
+                    Icons.people_outline,
+                    'Community Support',
                     'Connect with local health workers and community members',
                     () => _tabController.animateTo(1),
                   ),
                   _buildHelpItem(
                     context,
-                    '📚 Health Education',
+                    Icons.menu_book_outlined,
+                    'Health Education',
                     'Access offline health tips and preventive measures',
                     () => _tabController.animateTo(2),
                   ),
                   _buildHelpItem(
                     context,
-                    '🚨 Emergency Help',
+                    Icons.emergency_outlined,
+                    'Emergency Help',
                     'Get immediate guidance for health emergencies',
                     () => _showEmergencyHelp(context),
                   ),
@@ -207,6 +243,7 @@ class _CitizenAiCopilotScreenState extends State<CitizenAiCopilotScreen>
 
   Widget _buildHelpItem(
     BuildContext context,
+    IconData icon,
     String title,
     String description,
     VoidCallback onTap,
@@ -214,12 +251,20 @@ class _CitizenAiCopilotScreenState extends State<CitizenAiCopilotScreen>
     return Card(
       margin: const EdgeInsets.only(bottom: 12),
       child: ListTile(
-        leading: const Icon(Icons.arrow_forward_ios, size: 16),
+        leading: Container(
+          padding: const EdgeInsets.all(8),
+          decoration: BoxDecoration(
+            color: const Color(0xFF0D7A57).withValues(alpha: 0.12),
+            borderRadius: BorderRadius.circular(10),
+          ),
+          child: Icon(icon, size: 18, color: const Color(0xFF0D7A57)),
+        ),
         title: Text(
           title,
           style: const TextStyle(fontWeight: FontWeight.w600),
         ),
         subtitle: Text(description),
+        trailing: const Icon(Icons.arrow_forward_ios, size: 14),
         onTap: () {
           Navigator.pop(context);
           onTap();

@@ -21,28 +21,57 @@ class _FieldDashboardScreenState extends State<FieldDashboardScreen> {
   Widget build(BuildContext context) {
     final authProvider = Provider.of<AuthProvider>(context);
     final user = authProvider.currentUser;
+    final theme = Theme.of(context);
 
     return Scaffold(
+      backgroundColor: const Color(0xFFF4F7F5),
       appBar: AppBar(
-        title: Text('Welcome, ${user?.name ?? 'ASHA Worker'}!'),
-        backgroundColor: Colors.transparent,
+        toolbarHeight: 76,
+        titleSpacing: 20,
+        title: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'Field Operations',
+              style: theme.textTheme.labelLarge?.copyWith(
+                color: Colors.white.withValues(alpha: 0.86),
+              ),
+            ),
+            Text(
+              'Welcome, ${user?.name ?? 'ASHA Worker'}',
+              style: theme.textTheme.titleLarge?.copyWith(
+                color: Colors.white,
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+          ],
+        ),
+        flexibleSpace: Container(
+          decoration: const BoxDecoration(
+            gradient: LinearGradient(
+              colors: [Color(0xFF0E6E63), Color(0xFF2A9D8F)],
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+            ),
+          ),
+        ),
         elevation: 0,
         actions: [
           Consumer<ConnectivityProvider>(
             builder: (context, connectivity, child) {
               return Container(
-                margin: const EdgeInsets.only(right: 16),
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                margin: const EdgeInsets.only(right: 14, top: 18, bottom: 18),
+                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                 decoration: BoxDecoration(
-                  color: connectivity.isOnline ? Colors.green : Colors.red,
-                  borderRadius: BorderRadius.circular(12),
+                  color: Colors.white.withValues(alpha: 0.2),
+                  borderRadius: BorderRadius.circular(20),
                 ),
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     Icon(
                       connectivity.isOnline ? Icons.wifi : Icons.wifi_off,
-                      size: 16,
+                      size: 15,
                       color: Colors.white,
                     ),
                     const SizedBox(width: 4),
@@ -50,7 +79,7 @@ class _FieldDashboardScreenState extends State<FieldDashboardScreen> {
                       connectivity.isOnline ? 'Online' : 'Offline',
                       style: const TextStyle(
                         color: Colors.white,
-                        fontSize: 12,
+                        fontSize: 11,
                         fontWeight: FontWeight.w600,
                       ),
                     ),
@@ -71,34 +100,51 @@ class _FieldDashboardScreenState extends State<FieldDashboardScreen> {
           _buildProfileTab(),
         ],
       ),
-      bottomNavigationBar: BottomNavigationBar(
-        type: BottomNavigationBarType.fixed,
-        currentIndex: _selectedIndex,
-        onTap: (index) => setState(() => _selectedIndex = index),
-        selectedItemColor: Theme.of(context).colorScheme.primary,
-        unselectedItemColor: Colors.grey,
-        items: const [
-          BottomNavigationBarItem(
-            icon: Icon(Icons.home),
-            label: 'Home',
+      bottomNavigationBar: Container(
+        decoration: const BoxDecoration(
+          color: Colors.white,
+          boxShadow: [
+            BoxShadow(
+              color: Color(0x14000000),
+              blurRadius: 16,
+              offset: Offset(0, -4),
+            ),
+          ],
+        ),
+        child: SafeArea(
+          top: false,
+          child: BottomNavigationBar(
+            type: BottomNavigationBarType.fixed,
+            elevation: 0,
+            currentIndex: _selectedIndex,
+            onTap: (index) => setState(() => _selectedIndex = index),
+            selectedItemColor: const Color(0xFF0E6E63),
+            unselectedItemColor: const Color(0xFF7A8A82),
+            selectedLabelStyle: const TextStyle(fontWeight: FontWeight.w700),
+            items: const [
+              BottomNavigationBarItem(
+                icon: Icon(Icons.home_rounded),
+                label: 'Home',
+              ),
+              BottomNavigationBarItem(
+                icon: Icon(Icons.assignment_rounded),
+                label: 'Report',
+              ),
+              BottomNavigationBarItem(
+                icon: Icon(Icons.auto_stories_rounded),
+                label: 'Education',
+              ),
+              BottomNavigationBarItem(
+                icon: Icon(Icons.sync_rounded),
+                label: 'Sync',
+              ),
+              BottomNavigationBarItem(
+                icon: Icon(Icons.person_outline_rounded),
+                label: 'Profile',
+              ),
+            ],
           ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.assignment),
-            label: 'Report',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.school),
-            label: 'Education',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.sync),
-            label: 'Sync',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.person),
-            label: 'Profile',
-          ),
-        ],
+        ),
       ),
     );
   }
@@ -109,57 +155,27 @@ class _FieldDashboardScreenState extends State<FieldDashboardScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          _buildFieldReadinessCard(),
+
+          const SizedBox(height: 18),
+
+          _buildSectionTitle('Local Health Status', Icons.location_on_outlined),
+
+          const SizedBox(height: 10),
+
           // Local Health Status
-          const Text(
-            'Local Health Status',
-            style: TextStyle(
-              fontSize: 18,
-              fontWeight: FontWeight.bold,
-              color: Color(0xFF2E7D32),
-            ),
-          ),
-          const SizedBox(height: 12),
           const LocalHeatmapWidget(),
           
-          const SizedBox(height: 24),
+          const SizedBox(height: 18),
           
           // Quick Report Button
-          SizedBox(
-            width: double.infinity,
-            height: 80,
-            child: ElevatedButton.icon(
-              onPressed: () => context.push('/field-worker/report-form'),
-              icon: const Icon(Icons.add, size: 32),
-              label: const Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Text(
-                    'Submit Report',
-                    style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                  Text(
-                    'Quick Health Check',
-                    style: TextStyle(
-                      fontSize: 14,
-                      fontWeight: FontWeight.normal,
-                    ),
-                  ),
-                ],
-              ),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Theme.of(context).colorScheme.primary,
-                foregroundColor: Colors.white,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
-              ),
-            ),
-          ),
+          _buildSubmitReportCta(),
           
           const SizedBox(height: 24),
+
+          _buildSectionTitle('Recent Activity', Icons.history_rounded),
+
+          const SizedBox(height: 10),
           
           // Recent Activity
           const RecentActivityWidget(),
@@ -167,15 +183,8 @@ class _FieldDashboardScreenState extends State<FieldDashboardScreen> {
           const SizedBox(height: 24),
           
           // Quick Actions
-          const Text(
-            'Quick Actions',
-            style: TextStyle(
-              fontSize: 18,
-              fontWeight: FontWeight.bold,
-              color: Color(0xFF2E7D32),
-            ),
-          ),
-          const SizedBox(height: 12),
+          _buildSectionTitle('Quick Actions', Icons.flash_on_outlined),
+          const SizedBox(height: 10),
           Row(
             children: [
               Expanded(
@@ -201,6 +210,129 @@ class _FieldDashboardScreenState extends State<FieldDashboardScreen> {
           ),
         ],
       ),
+    );
+  }
+
+  Widget _buildFieldReadinessCard() {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(18),
+      decoration: BoxDecoration(
+        gradient: const LinearGradient(
+          colors: [Color(0xFF0E6E63), Color(0xFF2A9D8F)],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+        borderRadius: BorderRadius.circular(20),
+        boxShadow: const [
+          BoxShadow(
+            color: Color(0x260E6E63),
+            blurRadius: 18,
+            offset: Offset(0, 8),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: Colors.white.withValues(alpha: 0.2),
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: const Icon(Icons.medical_services_outlined, color: Colors.white),
+              ),
+              const SizedBox(width: 10),
+              Text(
+                'Field Readiness',
+                style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                  color: Colors.white,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 10),
+          Text(
+            'Daily sync, rapid reporting, and hotspot tracking are active for your assigned block.',
+            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+              color: Colors.white.withValues(alpha: 0.9),
+              height: 1.35,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildSubmitReportCta() {
+    return InkWell(
+      borderRadius: BorderRadius.circular(18),
+      onTap: () => context.push('/field-worker/report-form'),
+      child: Ink(
+        padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 18),
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(18),
+          gradient: const LinearGradient(
+            colors: [Color(0xFF1F8F6A), Color(0xFF2CB67D)],
+            begin: Alignment.centerLeft,
+            end: Alignment.centerRight,
+          ),
+        ),
+        child: Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(10),
+              decoration: BoxDecoration(
+                color: Colors.white.withValues(alpha: 0.18),
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: const Icon(Icons.playlist_add_check_rounded, color: Colors.white),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Submit Health Report',
+                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                      color: Colors.white,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                  Text(
+                    'Capture signs, symptoms, and water quality observations.',
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                      color: Colors.white.withValues(alpha: 0.86),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const Icon(Icons.arrow_forward_rounded, color: Colors.white),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildSectionTitle(String title, IconData icon) {
+    return Row(
+      children: [
+        Icon(icon, size: 18, color: const Color(0xFF1E6F52)),
+        const SizedBox(width: 6),
+        Text(
+          title,
+          style: Theme.of(context).textTheme.titleMedium?.copyWith(
+            fontWeight: FontWeight.w700,
+            color: const Color(0xFF1E2C25),
+          ),
+        ),
+      ],
     );
   }
 

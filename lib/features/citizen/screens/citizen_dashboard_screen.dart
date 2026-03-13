@@ -23,29 +23,67 @@ class _CitizenDashboardScreenState extends State<CitizenDashboardScreen> {
   Widget build(BuildContext context) {
     final authProvider = Provider.of<AuthProvider>(context);
     final user = authProvider.currentUser;
+    final theme = Theme.of(context);
 
     return Scaffold(
+      backgroundColor: const Color(0xFFF4F7F5),
       appBar: AppBar(
-        title: Text('Hello, ${user?.name ?? 'Citizen'}!'),
-        backgroundColor: Colors.transparent,
+        toolbarHeight: 76,
+        titleSpacing: 20,
+        title: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'Public Health Pulse',
+              style: theme.textTheme.labelLarge?.copyWith(
+                color: Colors.white.withValues(alpha: 0.86),
+                fontWeight: FontWeight.w500,
+                letterSpacing: 0.3,
+              ),
+            ),
+            Text(
+              'Hello, ${user?.name ?? 'Citizen'}',
+              style: theme.textTheme.titleLarge?.copyWith(
+                color: Colors.white,
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+          ],
+        ),
+        flexibleSpace: Container(
+          decoration: const BoxDecoration(
+            gradient: LinearGradient(
+              colors: [Color(0xFF0D7A57), Color(0xFF27A376)],
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+            ),
+          ),
+        ),
         elevation: 0,
         actions: [
           Consumer<NotificationProvider>(
             builder: (context, notificationProvider, child) {
               return Stack(
                 children: [
-                  IconButton(
-                    icon: const Icon(Icons.notifications),
-                    onPressed: () => context.push('/notifications'),
+                  Padding(
+                    padding: const EdgeInsets.only(right: 12, top: 10, bottom: 10),
+                    child: IconButton(
+                      style: IconButton.styleFrom(
+                        backgroundColor: Colors.white.withValues(alpha: 0.14),
+                        foregroundColor: Colors.white,
+                      ),
+                      icon: const Icon(Icons.notifications_none_rounded),
+                      onPressed: () => context.push('/notifications'),
+                    ),
                   ),
                   if (notificationProvider.unreadCount > 0)
                     Positioned(
-                      right: 8,
+                      right: 12,
                       top: 8,
                       child: Container(
                         padding: const EdgeInsets.all(2),
                         decoration: const BoxDecoration(
-                          color: Colors.red,
+                          color: Color(0xFFE53935),
                           shape: BoxShape.circle,
                         ),
                         constraints: const BoxConstraints(
@@ -79,34 +117,52 @@ class _CitizenDashboardScreenState extends State<CitizenDashboardScreen> {
           _buildProfileTab(),
         ],
       ),
-      bottomNavigationBar: BottomNavigationBar(
-        type: BottomNavigationBarType.fixed,
-        currentIndex: _selectedIndex,
-        onTap: (index) => setState(() => _selectedIndex = index),
-        selectedItemColor: Theme.of(context).colorScheme.primary,
-        unselectedItemColor: Colors.grey,
-        items: const [
-          BottomNavigationBarItem(
-            icon: Icon(Icons.home),
-            label: 'Home',
+      bottomNavigationBar: Container(
+        decoration: const BoxDecoration(
+          color: Colors.white,
+          boxShadow: [
+            BoxShadow(
+              color: Color(0x14000000),
+              blurRadius: 16,
+              offset: Offset(0, -4),
+            ),
+          ],
+        ),
+        child: SafeArea(
+          top: false,
+          child: BottomNavigationBar(
+            type: BottomNavigationBarType.fixed,
+            backgroundColor: Colors.white,
+            elevation: 0,
+            currentIndex: _selectedIndex,
+            onTap: (index) => setState(() => _selectedIndex = index),
+            selectedItemColor: const Color(0xFF0D7A57),
+            unselectedItemColor: const Color(0xFF7A8A82),
+            selectedLabelStyle: const TextStyle(fontWeight: FontWeight.w700),
+            items: const [
+              BottomNavigationBarItem(
+                icon: Icon(Icons.home_rounded),
+                label: 'Home',
+              ),
+              BottomNavigationBarItem(
+                icon: Icon(Icons.assignment_rounded),
+                label: 'Report',
+              ),
+              BottomNavigationBarItem(
+                icon: Icon(Icons.auto_stories_rounded),
+                label: 'Learn',
+              ),
+              BottomNavigationBarItem(
+                icon: Icon(Icons.notifications_active_outlined),
+                label: 'Alerts',
+              ),
+              BottomNavigationBarItem(
+                icon: Icon(Icons.person_outline_rounded),
+                label: 'Profile',
+              ),
+            ],
           ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.assignment),
-            label: 'Report',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.school),
-            label: 'Learn',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.notifications),
-            label: 'Alerts',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.person),
-            label: 'Profile',
-          ),
-        ],
+        ),
       ),
     );
   }
@@ -117,63 +173,185 @@ class _CitizenDashboardScreenState extends State<CitizenDashboardScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          _buildCommunityPulseCard(),
+
+          const SizedBox(height: 18),
+
+          _buildSectionTitle('Your Area Status', Icons.location_on_outlined),
+
+          const SizedBox(height: 10),
+
           // Area Status
           const AreaStatusWidget(),
           
-          const SizedBox(height: 24),
+          const SizedBox(height: 22),
+
+          _buildSectionTitle('Community Health Map', Icons.map_outlined),
+
+          const SizedBox(height: 10),
           
           // Community Health Map
           const CommunityHeatmapWidget(),
           
-          const SizedBox(height: 24),
+          const SizedBox(height: 22),
+
+          _buildSectionTitle('Health Alerts', Icons.warning_amber_rounded),
+
+          const SizedBox(height: 10),
           
           // Health Alerts
           const HealthAlertsWidget(),
           
-          const SizedBox(height: 24),
+          const SizedBox(height: 18),
           
           // Report Concern Button
-          SizedBox(
-            width: double.infinity,
-            height: 80,
-            child: ElevatedButton.icon(
-              onPressed: () => context.push('/citizen/concern-report'),
-              icon: const Icon(Icons.report_problem, size: 32),
-              label: const Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Text(
-                    'Report Concern',
-                    style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                  Text(
-                    'Community Health',
-                    style: TextStyle(
-                      fontSize: 14,
-                      fontWeight: FontWeight.normal,
-                    ),
-                  ),
-                ],
-              ),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Theme.of(context).colorScheme.primary,
-                foregroundColor: Colors.white,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
-              ),
-            ),
-          ),
+          _buildPrimaryCtaCard(),
           
-          const SizedBox(height: 24),
+          const SizedBox(height: 22),
+
+          _buildSectionTitle('Quick Actions', Icons.flash_on_outlined),
+
+          const SizedBox(height: 10),
           
           // Quick Actions
           const QuickActionsWidget(),
         ],
       ),
+    );
+  }
+
+  Widget _buildCommunityPulseCard() {
+    final now = DateTime.now();
+    final minutes = now.minute.toString().padLeft(2, '0');
+
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(18),
+      decoration: BoxDecoration(
+        gradient: const LinearGradient(
+          colors: [Color(0xFF0D7A57), Color(0xFF1F9D6A)],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+        borderRadius: BorderRadius.circular(20),
+        boxShadow: const [
+          BoxShadow(
+            color: Color(0x2A0D7A57),
+            blurRadius: 18,
+            offset: Offset(0, 8),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: Colors.white.withValues(alpha: 0.18),
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: const Icon(Icons.health_and_safety_outlined, color: Colors.white),
+              ),
+              const SizedBox(width: 10),
+              Expanded(
+                child: Text(
+                  'Community Pulse',
+                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                    color: Colors.white,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+              ),
+              Text(
+                '${now.hour}:$minutes',
+                style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                  color: Colors.white.withValues(alpha: 0.88),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          Text(
+            'Live risk tracking and district advisories are active. Report unusual symptoms quickly to protect your neighborhood.',
+            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+              color: Colors.white.withValues(alpha: 0.9),
+              height: 1.35,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildPrimaryCtaCard() {
+    return InkWell(
+      borderRadius: BorderRadius.circular(18),
+      onTap: () => context.push('/citizen/concern-report'),
+      child: Ink(
+        width: double.infinity,
+        padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 18),
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(18),
+          gradient: const LinearGradient(
+            colors: [Color(0xFF1F8F6A), Color(0xFF2CB67D)],
+            begin: Alignment.centerLeft,
+            end: Alignment.centerRight,
+          ),
+        ),
+        child: Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(10),
+              decoration: BoxDecoration(
+                color: Colors.white.withValues(alpha: 0.18),
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: const Icon(Icons.report_gmailerrorred_rounded, color: Colors.white, size: 24),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Report Health Concern',
+                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                      color: Colors.white,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                  Text(
+                    'Send photos, symptoms, and location in under a minute.',
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                      color: Colors.white.withValues(alpha: 0.86),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const Icon(Icons.arrow_forward_rounded, color: Colors.white),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildSectionTitle(String title, IconData icon) {
+    return Row(
+      children: [
+        Icon(icon, size: 18, color: const Color(0xFF1E6F52)),
+        const SizedBox(width: 6),
+        Text(
+          title,
+          style: Theme.of(context).textTheme.titleMedium?.copyWith(
+            fontWeight: FontWeight.w700,
+            color: const Color(0xFF1E2C25),
+          ),
+        ),
+      ],
     );
   }
 

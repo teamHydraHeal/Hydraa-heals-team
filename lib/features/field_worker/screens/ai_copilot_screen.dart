@@ -71,16 +71,47 @@ class _FieldWorkerAiCopilotScreenState extends State<FieldWorkerAiCopilotScreen>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: const Color(0xFFF4F7F5),
       appBar: AppBar(
+        toolbarHeight: 74,
+        titleSpacing: 20,
         title: const Text('Field Assistant'),
+        flexibleSpace: Container(
+          decoration: const BoxDecoration(
+            gradient: LinearGradient(
+              colors: [Color(0xFF0E6E63), Color(0xFF2A9D8F)],
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+            ),
+          ),
+        ),
         actions: [
           Consumer<ConnectivityProvider>(
             builder: (context, connectivity, child) {
-              return Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                child: Icon(
-                  connectivity.isOnline ? Icons.wifi : Icons.wifi_off,
-                  color: Colors.white,
+              return Container(
+                margin: const EdgeInsets.only(right: 12, top: 18, bottom: 18),
+                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                decoration: BoxDecoration(
+                  color: Colors.white.withValues(alpha: 0.18),
+                  borderRadius: BorderRadius.circular(20),
+                ),
+                child: Row(
+                  children: [
+                    Icon(
+                      connectivity.isOnline ? Icons.wifi : Icons.wifi_off,
+                      size: 15,
+                      color: Colors.white,
+                    ),
+                    const SizedBox(width: 4),
+                    Text(
+                      connectivity.isOnline ? 'Online' : 'Offline',
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 11,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ],
                 ),
               );
             },
@@ -141,9 +172,9 @@ class _FieldWorkerAiCopilotScreenState extends State<FieldWorkerAiCopilotScreen>
       backgroundColor: Colors.transparent,
       builder: (context) => Container(
         height: MediaQuery.of(context).size.height * 0.7,
-        decoration: const BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+          decoration: const BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
         ),
         child: Column(
           children: [
@@ -170,37 +201,43 @@ class _FieldWorkerAiCopilotScreenState extends State<FieldWorkerAiCopilotScreen>
                   const SizedBox(height: 16),
                   _buildActionItem(
                     context,
-                    '📝 Submit Report',
+                    Icons.description_outlined,
+                    'Submit Report',
                     'Quickly submit a health report with AI assistance',
                     () => context.push('/field-worker/report-form'),
                   ),
                   _buildActionItem(
                     context,
-                    '👶 MCP Card Update',
+                    Icons.badge_outlined,
+                    'MCP Card Update',
                     'Update Mother & Child Protection card information',
                     () => context.push('/field-worker/mcp-card'),
                   ),
                   _buildActionItem(
                     context,
-                    '🏥 Patient Assessment',
+                    Icons.health_and_safety_outlined,
+                    'Patient Assessment',
                     'Get AI guidance for patient assessment and care',
                     () => _tabController.animateTo(2),
                   ),
                   _buildActionItem(
                     context,
-                    '📊 Report Analysis',
+                    Icons.insights_outlined,
+                    'Report Analysis',
                     'Analyze health trends and patterns in your area',
                     () => _tabController.animateTo(1),
                   ),
                   _buildActionItem(
                     context,
-                    '🚨 Emergency Protocol',
+                    Icons.emergency_outlined,
+                    'Emergency Protocol',
                     'Access emergency response procedures and contacts',
                     () => _showEmergencyProtocol(context),
                   ),
                   _buildActionItem(
                     context,
-                    '📚 Training Resources',
+                    Icons.menu_book_outlined,
+                    'Training Resources',
                     'Access offline training materials and guidelines',
                     () => context.push('/education'),
                   ),
@@ -215,6 +252,7 @@ class _FieldWorkerAiCopilotScreenState extends State<FieldWorkerAiCopilotScreen>
 
   Widget _buildActionItem(
     BuildContext context,
+    IconData icon,
     String title,
     String description,
     VoidCallback onTap,
@@ -222,12 +260,20 @@ class _FieldWorkerAiCopilotScreenState extends State<FieldWorkerAiCopilotScreen>
     return Card(
       margin: const EdgeInsets.only(bottom: 12),
       child: ListTile(
-        leading: const Icon(Icons.arrow_forward_ios, size: 16),
+        leading: Container(
+          padding: const EdgeInsets.all(8),
+          decoration: BoxDecoration(
+            color: const Color(0xFF0E6E63).withValues(alpha: 0.12),
+            borderRadius: BorderRadius.circular(10),
+          ),
+          child: Icon(icon, size: 18, color: const Color(0xFF0E6E63)),
+        ),
         title: Text(
           title,
           style: const TextStyle(fontWeight: FontWeight.w600),
         ),
         subtitle: Text(description),
+        trailing: const Icon(Icons.arrow_forward_ios, size: 14),
         onTap: () {
           Navigator.pop(context);
           onTap();

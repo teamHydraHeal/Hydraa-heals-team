@@ -59,9 +59,9 @@ class _AiChatWidgetState extends State<AiChatWidget>
   int? _speakingIndex;
   Timer? _statusTimer;
 
-  // Beautiful gradient colors
-  static const _primaryGradient = [Color(0xFF667eea), Color(0xFF764ba2)];
-  static const _userBubbleGradient = [Color(0xFF4facfe), Color(0xFF00f2fe)];
+  // Professional health-tech palette
+  static const _primaryGradient = [Color(0xFF0D7A57), Color(0xFF2AA879)];
+  static const _userBubbleGradient = [Color(0xFF2364AA), Color(0xFF3E8EDE)];
 
   @override
   void initState() {
@@ -264,6 +264,17 @@ class _AiChatWidgetState extends State<AiChatWidget>
     );
   }
 
+  Future<void> _stopAllSpeech() async {
+    await TtsService.stop();
+    if (!mounted) return;
+    setState(() {
+      for (final m in _messages) {
+        m.isSpeaking = false;
+      }
+      _speakingIndex = null;
+    });
+  }
+
   void _scrollToBottom() {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (_scrollController.hasClients) {
@@ -381,84 +392,88 @@ class _AiChatWidgetState extends State<AiChatWidget>
   // ===== TOP STATUS BAR =====
   Widget _buildTopBar() {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.04),
-            blurRadius: 8,
-            offset: const Offset(0, 2),
-          ),
-        ],
-      ),
+      padding: const EdgeInsets.fromLTRB(12, 12, 12, 8),
       child: Row(
         children: [
-          // Ollama status pill
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-            decoration: BoxDecoration(
-              color: _ollamaOnline
-                  ? const Color(0xFFE8F5E9)
-                  : const Color(0xFFFFF3E0),
-              borderRadius: BorderRadius.circular(20),
-            ),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Container(
-                  width: 7,
-                  height: 7,
-                  decoration: BoxDecoration(
-                    color: _ollamaOnline ? Colors.green : Colors.orange,
-                    shape: BoxShape.circle,
+          Expanded(
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(14),
+                border: Border.all(color: const Color(0xFFDCE7E1)),
+              ),
+              child: Row(
+                children: [
+                  Container(
+                    width: 9,
+                    height: 9,
+                    decoration: BoxDecoration(
+                      color: _ollamaOnline ? const Color(0xFF1B8F5A) : const Color(0xFFE58B2A),
+                      shape: BoxShape.circle,
+                    ),
                   ),
-                ),
-                const SizedBox(width: 6),
-                Text(
-                  _ollamaOnline ? 'AI Online' : 'Fallback Mode',
-                  style: TextStyle(
-                    fontSize: 11,
-                    fontWeight: FontWeight.w600,
-                    color: _ollamaOnline
-                        ? Colors.green.shade700
-                        : Colors.orange.shade700,
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      _ollamaOnline ? 'AI engine connected' : 'Fallback mode active',
+                      style: TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.w600,
+                        color: _ollamaOnline ? const Color(0xFF196D47) : const Color(0xFF9A5B18),
+                      ),
+                      overflow: TextOverflow.ellipsis,
+                    ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
           ),
-          const Spacer(),
-          // TTS Language selector
-          Icon(Icons.volume_up_rounded, size: 16, color: Colors.grey.shade500),
-          const SizedBox(width: 6),
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 2),
-            decoration: BoxDecoration(
-              color: const Color(0xFFF3F0FF),
-              borderRadius: BorderRadius.circular(20),
-              border: Border.all(color: const Color(0xFFD1C4E9)),
-            ),
-            child: DropdownButtonHideUnderline(
-              child: DropdownButton<String>(
-                value: _ttsLanguage,
-                isDense: true,
-                icon: Icon(Icons.expand_more,
-                    size: 16, color: Colors.deepPurple.shade400),
-                style: TextStyle(
-                  fontSize: 12,
-                  fontWeight: FontWeight.w500,
-                  color: Colors.deepPurple.shade700,
-                ),
-                items: TtsService.supportedLanguages.entries.map((e) {
-                  return DropdownMenuItem(
-                    value: e.key,
-                    child: Text(e.value, overflow: TextOverflow.ellipsis),
-                  );
-                }).toList(),
-                onChanged: (val) {
-                  if (val != null) setState(() => _ttsLanguage = val);
-                },
+          const SizedBox(width: 8),
+          Expanded(
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(14),
+                border: Border.all(color: const Color(0xFFDCE7E1)),
+              ),
+              child: Row(
+                children: [
+                  const Icon(Icons.record_voice_over_rounded, size: 17, color: Color(0xFF0D7A57)),
+                  const SizedBox(width: 6),
+                  Expanded(
+                    child: DropdownButtonHideUnderline(
+                      child: DropdownButton<String>(
+                        value: _ttsLanguage,
+                        isDense: true,
+                        icon: const Icon(Icons.expand_more, size: 16, color: Color(0xFF0D7A57)),
+                        style: const TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.w600,
+                          color: Color(0xFF1E2C25),
+                        ),
+                        items: TtsService.supportedLanguages.entries.map((e) {
+                          return DropdownMenuItem(
+                            value: e.key,
+                            child: Text(e.value, overflow: TextOverflow.ellipsis),
+                          );
+                        }).toList(),
+                        onChanged: (val) {
+                          if (val != null) setState(() => _ttsLanguage = val);
+                        },
+                      ),
+                    ),
+                  ),
+                  if (_speakingIndex != null)
+                    GestureDetector(
+                      onTap: _stopAllSpeech,
+                      child: const Padding(
+                        padding: EdgeInsets.only(left: 4),
+                        child: Icon(Icons.stop_circle_outlined, color: Color(0xFFC62828), size: 18),
+                      ),
+                    ),
+                ],
               ),
             ),
           ),
@@ -580,24 +595,27 @@ class _AiChatWidgetState extends State<AiChatWidget>
             gradient: isSpeaking
                 ? const LinearGradient(colors: _primaryGradient)
                 : null,
-            color: isSpeaking ? null : const Color(0xFFF3F0FF),
+            color: isSpeaking ? null : const Color(0xFFEAF4EF),
             borderRadius: BorderRadius.circular(16),
+            border: isSpeaking
+                ? null
+                : Border.all(color: const Color(0xFFCFE4D9)),
           ),
           child: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
               Icon(
-                isSpeaking ? Icons.stop_rounded : Icons.volume_up_rounded,
+                isSpeaking ? Icons.stop_rounded : Icons.play_arrow_rounded,
                 size: 14,
-                color: isSpeaking ? Colors.white : const Color(0xFF667eea),
+                color: isSpeaking ? Colors.white : const Color(0xFF0D7A57),
               ),
               const SizedBox(width: 4),
               Text(
-                isSpeaking ? 'Stop' : '\u{1F50A} Listen',
+                isSpeaking ? 'Stop' : 'Listen',
                 style: TextStyle(
                   fontSize: 11,
                   fontWeight: FontWeight.w600,
-                  color: isSpeaking ? Colors.white : const Color(0xFF667eea),
+                  color: isSpeaking ? Colors.white : const Color(0xFF0D7A57),
                 ),
               ),
             ],

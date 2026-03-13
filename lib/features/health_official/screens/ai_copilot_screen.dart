@@ -15,6 +15,9 @@ class AiCopilotScreen extends StatefulWidget {
 
 class _AiCopilotScreenState extends State<AiCopilotScreen>
     with TickerProviderStateMixin {
+  static const _brandPrimary = Color(0xFF0D7A57);
+  static const _brandSecondary = Color(0xFF2AA879);
+
   late TabController _tabController;
   bool _isGeneratingPlan = false;
   Map<String, dynamic>? _actionPlan;
@@ -115,20 +118,29 @@ class _AiCopilotScreenState extends State<AiCopilotScreen>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF8F9FE),
+      backgroundColor: const Color(0xFFF4F7F5),
       appBar: AppBar(
+        toolbarHeight: 74,
+        titleSpacing: 20,
         elevation: 0,
-        backgroundColor: Colors.white,
-        foregroundColor: const Color(0xFF2D3142),
+        backgroundColor: Colors.transparent,
+        foregroundColor: Colors.white,
+        flexibleSpace: Container(
+          decoration: const BoxDecoration(
+            gradient: LinearGradient(
+              colors: [_brandPrimary, _brandSecondary],
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+            ),
+          ),
+        ),
         title: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
             Container(
               padding: const EdgeInsets.all(6),
               decoration: BoxDecoration(
-                gradient: const LinearGradient(
-                  colors: [Color(0xFF667eea), Color(0xFF764ba2)],
-                ),
+                color: Colors.white.withValues(alpha: 0.18),
                 borderRadius: BorderRadius.circular(8),
               ),
               child:
@@ -146,10 +158,10 @@ class _AiCopilotScreenState extends State<AiCopilotScreen>
         ),
         bottom: TabBar(
           controller: _tabController,
-          indicatorColor: const Color(0xFF667eea),
+          indicatorColor: Colors.white,
           indicatorWeight: 3,
-          labelColor: const Color(0xFF667eea),
-          unselectedLabelColor: Colors.grey.shade400,
+          labelColor: Colors.white,
+          unselectedLabelColor: Colors.white70,
           labelStyle: const TextStyle(fontWeight: FontWeight.w600, fontSize: 14),
           tabs: const [
             Tab(icon: Icon(Icons.chat_bubble_rounded), text: 'Chat'),
@@ -186,8 +198,8 @@ class _AiCopilotScreenState extends State<AiCopilotScreen>
                 decoration: BoxDecoration(
                   gradient: LinearGradient(
                     colors: [
-                      const Color(0xFF667eea).withValues(alpha: 0.1),
-                      const Color(0xFF764ba2).withValues(alpha: 0.1),
+                      _brandPrimary.withValues(alpha: 0.1),
+                      _brandSecondary.withValues(alpha: 0.1),
                     ],
                   ),
                   shape: BoxShape.circle,
@@ -195,7 +207,7 @@ class _AiCopilotScreenState extends State<AiCopilotScreen>
                 child: const Icon(
                   Icons.assignment_outlined,
                   size: 48,
-                  color: Color(0xFF667eea),
+                  color: _brandPrimary,
                 ),
               ),
               const SizedBox(height: 24),
@@ -204,7 +216,7 @@ class _AiCopilotScreenState extends State<AiCopilotScreen>
                 style: TextStyle(
                   fontSize: 20,
                   fontWeight: FontWeight.w700,
-                  color: Color(0xFF2D3142),
+                  color: Color(0xFF1E2C25),
                 ),
               ),
               const SizedBox(height: 8),
@@ -223,12 +235,12 @@ class _AiCopilotScreenState extends State<AiCopilotScreen>
                 height: 50,
                 decoration: BoxDecoration(
                   gradient: const LinearGradient(
-                    colors: [Color(0xFF667eea), Color(0xFF764ba2)],
+                    colors: [_brandPrimary, _brandSecondary],
                   ),
                   borderRadius: BorderRadius.circular(14),
                   boxShadow: [
                     BoxShadow(
-                      color: const Color(0xFF667eea).withValues(alpha: 0.4),
+                      color: _brandPrimary.withValues(alpha: 0.35),
                       blurRadius: 16,
                       offset: const Offset(0, 6),
                     ),

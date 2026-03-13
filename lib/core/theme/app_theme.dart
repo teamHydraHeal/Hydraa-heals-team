@@ -3,15 +3,15 @@ import 'package:flutter/services.dart';
 
 class AppTheme {
   // Color palette
-  static const Color primaryColor = Color(0xFF2E7D32); // Forest Green
-  static const Color primaryLightColor = Color(0xFF60AD5E);
-  static const Color primaryDarkColor = Color(0xFF005005);
+  static const Color primaryColor = Color(0xFF0D7A57); // Jade Green
+  static const Color primaryLightColor = Color(0xFF42B489);
+  static const Color primaryDarkColor = Color(0xFF07523A);
   
-  static const Color secondaryColor = Color(0xFF1976D2); // Blue
-  static const Color secondaryLightColor = Color(0xFF63A4FF);
-  static const Color secondaryDarkColor = Color(0xFF004BA0);
+  static const Color secondaryColor = Color(0xFF2364AA); // Calm Blue
+  static const Color secondaryLightColor = Color(0xFF5E96D8);
+  static const Color secondaryDarkColor = Color(0xFF15457D);
   
-  static const Color accentColor = Color(0xFFFF9800); // Orange
+  static const Color accentColor = Color(0xFFF2A541); // Warm Amber
   static const Color errorColor = Color(0xFFD32F2F); // Red
   static const Color warningColor = Color(0xFFF57C00); // Orange
   static const Color successColor = Color(0xFF388E3C); // Green
@@ -23,7 +23,7 @@ class AppTheme {
   static const Color criticalRiskColor = Color(0xFF9C27B0); // Purple
   
   // Background colors
-  static const Color surface = Color(0xFFFFFFFF);
+  static const Color surface = Color(0xFFF6FAF8);
   static const Color cardColor = Color(0xFFFFFFFF);
   
   // Text colors
@@ -55,11 +55,13 @@ class AppTheme {
       ),
       
       // App bar theme with gradient and smooth animations
+      scaffoldBackgroundColor: surface,
+
       appBarTheme: AppBarTheme(
         backgroundColor: Colors.transparent,
         foregroundColor: Colors.white,
         elevation: 0,
-        centerTitle: true,
+        centerTitle: false,
         titleTextStyle: const TextStyle(
           fontSize: 20,
           fontWeight: FontWeight.w600,
@@ -71,10 +73,10 @@ class AppTheme {
       // Enhanced card theme with shadows and animations
       cardTheme: CardThemeData(
         color: cardColor,
-        elevation: 4,
-        shadowColor: Colors.black.withValues(alpha:0.1),
+        elevation: 1,
+        shadowColor: Colors.black.withValues(alpha:0.08),
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(16),
+          borderRadius: BorderRadius.circular(18),
         ),
         margin: const EdgeInsets.all(8),
         clipBehavior: Clip.antiAlias,
@@ -85,11 +87,11 @@ class AppTheme {
         style: ElevatedButton.styleFrom(
           backgroundColor: primaryColor,
           foregroundColor: Colors.white,
-          elevation: 4,
-          shadowColor: primaryColor.withValues(alpha:0.3),
+          elevation: 1,
+          shadowColor: primaryColor.withValues(alpha:0.2),
           padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12),
+            borderRadius: BorderRadius.circular(14),
           ),
           textStyle: const TextStyle(
             fontSize: 16,
@@ -133,21 +135,21 @@ class AppTheme {
       // Input decoration theme
       inputDecorationTheme: InputDecorationTheme(
         filled: true,
-        fillColor: Colors.grey[50],
+        fillColor: Colors.white,
         border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(8),
+          borderRadius: BorderRadius.circular(12),
           borderSide: BorderSide(color: Colors.grey[300]!),
         ),
         enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(8),
+          borderRadius: BorderRadius.circular(12),
           borderSide: BorderSide(color: Colors.grey[300]!),
         ),
         focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(8),
+          borderRadius: BorderRadius.circular(12),
           borderSide: const BorderSide(color: primaryColor, width: 2),
         ),
         errorBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(8),
+          borderRadius: BorderRadius.circular(12),
           borderSide: const BorderSide(color: errorColor),
         ),
         contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
@@ -220,17 +222,17 @@ class AppTheme {
           color: textPrimaryColor,
         ),
         headlineSmall: TextStyle(
-          fontSize: 18,
+          fontSize: 20,
           fontWeight: FontWeight.w600,
           color: textPrimaryColor,
         ),
         titleLarge: TextStyle(
-          fontSize: 16,
+          fontSize: 18,
           fontWeight: FontWeight.w600,
           color: textPrimaryColor,
         ),
         titleMedium: TextStyle(
-          fontSize: 14,
+          fontSize: 15,
           fontWeight: FontWeight.w600,
           color: textPrimaryColor,
         ),
@@ -245,7 +247,7 @@ class AppTheme {
           color: textPrimaryColor,
         ),
         bodyMedium: TextStyle(
-          fontSize: 14,
+          fontSize: 15,
           fontWeight: FontWeight.normal,
           color: textPrimaryColor,
         ),
