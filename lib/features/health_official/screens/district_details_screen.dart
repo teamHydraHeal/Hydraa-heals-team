@@ -22,6 +22,7 @@ class _DistrictDetailsScreenState extends State<DistrictDetailsScreen> {
   District? _district;
   List<HealthReport> _reports = [];
   bool _isLoading = true;
+  final GlobalKey _reportsSectionKey = GlobalKey();
 
   @override
   void initState() {
@@ -204,7 +205,10 @@ class _DistrictDetailsScreenState extends State<DistrictDetailsScreen> {
             const SizedBox(height: 16),
             
             // Reports
-            ReportsListWidget(reports: _reports),
+            Container(
+              key: _reportsSectionKey,
+              child: ReportsListWidget(reports: _reports),
+            ),
             
             const SizedBox(height: 16),
             
@@ -359,7 +363,15 @@ class _DistrictDetailsScreenState extends State<DistrictDetailsScreen> {
                 Expanded(
                   child: OutlinedButton.icon(
                     onPressed: () {
-                      // View all reports
+                      final context = _reportsSectionKey.currentContext;
+                      if (context != null) {
+                        Scrollable.ensureVisible(
+                          context,
+                          duration: const Duration(milliseconds: 350),
+                          curve: Curves.easeOut,
+                          alignment: 0.1,
+                        );
+                      }
                     },
                     icon: const Icon(Icons.assignment),
                     label: const Text('View Reports'),
