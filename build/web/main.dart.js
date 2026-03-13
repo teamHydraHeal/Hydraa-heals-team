@@ -34408,7 +34408,7 @@ if(s==null)s=null}return s===!0},
 gMq(){var s=this.b
 if(s==null)s=null
 else{s=s.fontFallbackBaseUrl
-if(s==null)s=null}return s==null?"https://fonts.gstatic.com/s/":s}}
+if(s==null)s=null}return s==null?"/fonts-gstatic/":s}}
 A.Q_.prototype={
 gnZ(a){var s=this.d
 if(s==null){s=self.window.devicePixelRatio
