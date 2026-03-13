@@ -107,7 +107,7 @@ class _ProfessionalVerificationScreenState
               RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
           title: const Row(
             children: [
-              Icon(Icons.notifications_active, color: Color(0xFF2E7D32)),
+              Icon(Icons.notifications_active, color: Color(0xFF0D7A57)),
               SizedBox(width: 8),
               Text('Enable Notifications'),
             ],
@@ -123,7 +123,7 @@ class _ProfessionalVerificationScreenState
             ElevatedButton(
               onPressed: () => Navigator.of(context).pop(),
               style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFF2E7D32),
+                backgroundColor: const Color(0xFF0D7A57),
                 shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(8)),
               ),
@@ -144,7 +144,7 @@ class _ProfessionalVerificationScreenState
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: const Text('Document uploaded successfully'),
-        backgroundColor: const Color(0xFF43A047),
+        backgroundColor: const Color(0xFF2AA879),
         behavior: SnackBarBehavior.floating,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
       ),
@@ -198,7 +198,7 @@ class _ProfessionalVerificationScreenState
                         ],
                       ),
                       child: const Icon(Icons.arrow_back_ios_new,
-                          size: 18, color: Color(0xFF2E7D32)),
+                          size: 18, color: Color(0xFF0D7A57)),
                     ),
                   ),
 
@@ -211,12 +211,12 @@ class _ProfessionalVerificationScreenState
                       height: 90,
                       decoration: BoxDecoration(
                         gradient: const LinearGradient(
-                          colors: [Color(0xFF43A047), Color(0xFF2E7D32)],
+                          colors: [Color(0xFF2AA879), Color(0xFF0D7A57)],
                         ),
                         borderRadius: BorderRadius.circular(22),
                         boxShadow: [
                           BoxShadow(
-                            color: const Color(0xFF2E7D32).withOpacity(0.3),
+                            color: const Color(0xFF0D7A57).withOpacity(0.3),
                             blurRadius: 20,
                             offset: const Offset(0, 10),
                           ),
@@ -240,7 +240,7 @@ class _ProfessionalVerificationScreenState
                       style: const TextStyle(
                         fontSize: 24,
                         fontWeight: FontWeight.bold,
-                        color: Color(0xFF1B5E20),
+                        color: Color(0xFF1E2C25),
                       ),
                     ),
                   ),
@@ -283,11 +283,11 @@ class _ProfessionalVerificationScreenState
                               padding: const EdgeInsets.all(10),
                               decoration: BoxDecoration(
                                 color:
-                                    const Color(0xFF2E7D32).withOpacity(0.1),
+                                    const Color(0xFF0D7A57).withOpacity(0.1),
                                 borderRadius: BorderRadius.circular(12),
                               ),
                               child: const Icon(Icons.badge,
-                                  color: Color(0xFF2E7D32)),
+                                  color: Color(0xFF0D7A57)),
                             ),
                             const SizedBox(width: 12),
                             const Text(
@@ -323,7 +323,7 @@ class _ProfessionalVerificationScreenState
                             focusedBorder: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(14),
                               borderSide: const BorderSide(
-                                  color: Color(0xFF2E7D32), width: 2),
+                                  color: Color(0xFF0D7A57), width: 2),
                             ),
                             contentPadding: const EdgeInsets.symmetric(
                                 horizontal: 18, vertical: 16),
@@ -339,11 +339,11 @@ class _ProfessionalVerificationScreenState
                               padding: const EdgeInsets.all(10),
                               decoration: BoxDecoration(
                                 color:
-                                    const Color(0xFF2E7D32).withOpacity(0.1),
+                                    const Color(0xFF0D7A57).withOpacity(0.1),
                                 borderRadius: BorderRadius.circular(12),
                               ),
                               child: const Icon(Icons.description,
-                                  color: Color(0xFF2E7D32)),
+                                  color: Color(0xFF0D7A57)),
                             ),
                             const SizedBox(width: 12),
                             const Text(
@@ -375,7 +375,7 @@ class _ProfessionalVerificationScreenState
                             focusedBorder: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(14),
                               borderSide: const BorderSide(
-                                  color: Color(0xFF2E7D32), width: 2),
+                                  color: Color(0xFF0D7A57), width: 2),
                             ),
                             contentPadding: const EdgeInsets.symmetric(
                                 horizontal: 18, vertical: 16),
@@ -407,7 +407,7 @@ class _ProfessionalVerificationScreenState
                             borderRadius: BorderRadius.circular(16),
                             border: Border.all(
                               color: _isDocumentUploaded
-                                  ? const Color(0xFF43A047).withOpacity(0.3)
+                                  ? const Color(0xFF2AA879).withOpacity(0.3)
                                   : Colors.grey.shade300,
                               width: 1.5,
                               style: _isDocumentUploaded
@@ -421,7 +421,7 @@ class _ProfessionalVerificationScreenState
                                 padding: const EdgeInsets.all(12),
                                 decoration: BoxDecoration(
                                   color: _isDocumentUploaded
-                                      ? const Color(0xFF43A047).withOpacity(0.1)
+                                      ? const Color(0xFF2AA879).withOpacity(0.1)
                                       : Colors.white,
                                   borderRadius: BorderRadius.circular(14),
                                 ),
@@ -431,7 +431,7 @@ class _ProfessionalVerificationScreenState
                                       : Icons.cloud_upload_outlined,
                                   size: 40,
                                   color: _isDocumentUploaded
-                                      ? const Color(0xFF43A047)
+                                      ? const Color(0xFF2AA879)
                                       : Colors.grey[500],
                                 ),
                               ),
@@ -444,7 +444,7 @@ class _ProfessionalVerificationScreenState
                                   fontSize: 16,
                                   fontWeight: FontWeight.w600,
                                   color: _isDocumentUploaded
-                                      ? const Color(0xFF2E7D32)
+                                      ? const Color(0xFF0D7A57)
                                       : const Color(0xFF333333),
                                 ),
                               ),
@@ -463,7 +463,7 @@ class _ProfessionalVerificationScreenState
                                   icon: const Icon(Icons.upload, size: 18),
                                   label: const Text('Choose File'),
                                   style: ElevatedButton.styleFrom(
-                                    backgroundColor: const Color(0xFF2E7D32),
+                                    backgroundColor: const Color(0xFF0D7A57),
                                     foregroundColor: Colors.white,
                                     elevation: 0,
                                     shape: RoundedRectangleBorder(
@@ -493,11 +493,11 @@ class _ProfessionalVerificationScreenState
                           onPressed:
                               authProvider.isLoading ? null : _submitVerification,
                           style: ElevatedButton.styleFrom(
-                            backgroundColor: const Color(0xFF2E7D32),
+                            backgroundColor: const Color(0xFF0D7A57),
                             disabledBackgroundColor: Colors.grey[300],
                             elevation: 8,
                             shadowColor:
-                                const Color(0xFF2E7D32).withOpacity(0.4),
+                                const Color(0xFF0D7A57).withOpacity(0.4),
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(14),
                             ),

@@ -112,7 +112,7 @@ class _AadhaarEntryScreenState extends State<AadhaarEntryScreen>
                         ],
                       ),
                       child: const Icon(Icons.arrow_back_ios_new,
-                          size: 18, color: Color(0xFF2E7D32)),
+                          size: 18, color: Color(0xFF0D7A57)),
                     ),
                   ),
 
@@ -125,12 +125,12 @@ class _AadhaarEntryScreenState extends State<AadhaarEntryScreen>
                       height: 100,
                       decoration: BoxDecoration(
                         gradient: const LinearGradient(
-                          colors: [Color(0xFF43A047), Color(0xFF2E7D32)],
+                          colors: [Color(0xFF2AA879), Color(0xFF0D7A57)],
                         ),
                         borderRadius: BorderRadius.circular(25),
                         boxShadow: [
                           BoxShadow(
-                            color: const Color(0xFF2E7D32).withOpacity(0.3),
+                            color: const Color(0xFF0D7A57).withOpacity(0.3),
                             blurRadius: 20,
                             offset: const Offset(0, 10),
                           ),
@@ -150,7 +150,7 @@ class _AadhaarEntryScreenState extends State<AadhaarEntryScreen>
                       style: TextStyle(
                         fontSize: 28,
                         fontWeight: FontWeight.bold,
-                        color: Color(0xFF1B5E20),
+                        color: Color(0xFF1E2C25),
                       ),
                     ),
                   ),
@@ -191,11 +191,11 @@ class _AadhaarEntryScreenState extends State<AadhaarEntryScreen>
                             Container(
                               padding: const EdgeInsets.all(10),
                               decoration: BoxDecoration(
-                                color: const Color(0xFF2E7D32).withOpacity(0.1),
+                                color: const Color(0xFF0D7A57).withOpacity(0.1),
                                 borderRadius: BorderRadius.circular(12),
                               ),
                               child: const Icon(Icons.credit_card,
-                                  color: Color(0xFF2E7D32)),
+                                  color: Color(0xFF0D7A57)),
                             ),
                             const SizedBox(width: 12),
                             const Text(
@@ -241,13 +241,13 @@ class _AadhaarEntryScreenState extends State<AadhaarEntryScreen>
                             focusedBorder: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(15),
                               borderSide: const BorderSide(
-                                  color: Color(0xFF2E7D32), width: 2),
+                                  color: Color(0xFF0D7A57), width: 2),
                             ),
                             contentPadding: const EdgeInsets.symmetric(
                                 horizontal: 20, vertical: 18),
                             suffixIcon: _isValid
                                 ? const Icon(Icons.check_circle,
-                                    color: Color(0xFF43A047))
+                                    color: Color(0xFF2AA879))
                                 : null,
                           ),
                         ),
@@ -277,11 +277,11 @@ class _AadhaarEntryScreenState extends State<AadhaarEntryScreen>
                           onPressed:
                               authProvider.isLoading || !_isValid ? null : _requestOtp,
                           style: ElevatedButton.styleFrom(
-                            backgroundColor: const Color(0xFF2E7D32),
+                            backgroundColor: const Color(0xFF0D7A57),
                             disabledBackgroundColor: Colors.grey[300],
                             elevation: _isValid ? 8 : 0,
                             shadowColor:
-                                const Color(0xFF2E7D32).withOpacity(0.4),
+                                const Color(0xFF0D7A57).withOpacity(0.4),
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(16),
                             ),

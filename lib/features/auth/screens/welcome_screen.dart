@@ -8,74 +8,49 @@ class WelcomeScreen extends StatefulWidget {
   State<WelcomeScreen> createState() => _WelcomeScreenState();
 }
 
-class _WelcomeScreenState extends State<WelcomeScreen> 
+class _WelcomeScreenState extends State<WelcomeScreen>
     with TickerProviderStateMixin {
-  late AnimationController _fadeController;
-  late AnimationController _slideController;
-  late AnimationController _scaleController;
-  
-  late Animation<double> _fadeAnimation;
-  late Animation<Offset> _slideAnimation;
-  late Animation<double> _scaleAnimation;
+  late final AnimationController _fadeController;
+  late final AnimationController _slideController;
+
+  late final Animation<double> _fadeAnimation;
+  late final Animation<Offset> _slideAnimation;
 
   @override
   void initState() {
     super.initState();
-    
+
     _fadeController = AnimationController(
-      duration: const Duration(milliseconds: 1500),
+      duration: const Duration(milliseconds: 900),
       vsync: this,
     );
-    
+
     _slideController = AnimationController(
-      duration: const Duration(milliseconds: 1200),
-      vsync: this,
-    );
-    
-    _scaleController = AnimationController(
       duration: const Duration(milliseconds: 800),
       vsync: this,
     );
-    
-    _fadeAnimation = Tween<double>(
-      begin: 0.0,
-      end: 1.0,
-    ).animate(CurvedAnimation(
+
+    _fadeAnimation = CurvedAnimation(
       parent: _fadeController,
-      curve: Curves.easeInOut,
-    ));
-    
+      curve: Curves.easeOut,
+    );
+
     _slideAnimation = Tween<Offset>(
-      begin: const Offset(0, 0.3),
+      begin: const Offset(0, 0.08),
       end: Offset.zero,
     ).animate(CurvedAnimation(
       parent: _slideController,
-      curve: Curves.elasticOut,
+      curve: Curves.easeOutCubic,
     ));
-    
-    _scaleAnimation = Tween<double>(
-      begin: 0.8,
-      end: 1.0,
-    ).animate(CurvedAnimation(
-      parent: _scaleController,
-      curve: Curves.bounceOut,
-    ));
-    
-    // Start animations with delays
+
     _fadeController.forward();
-    Future.delayed(const Duration(milliseconds: 300), () {
-      _slideController.forward();
-    });
-    Future.delayed(const Duration(milliseconds: 600), () {
-      _scaleController.forward();
-    });
+    _slideController.forward();
   }
 
   @override
   void dispose() {
     _fadeController.dispose();
     _slideController.dispose();
-    _scaleController.dispose();
     super.dispose();
   }
 
@@ -85,295 +60,263 @@ class _WelcomeScreenState extends State<WelcomeScreen>
       body: Container(
         decoration: const BoxDecoration(
           gradient: LinearGradient(
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
             colors: [
-              Color(0xFF2E7D32),
-              Color(0xFF4CAF50),
-              Color(0xFF66BB6A),
+              Color(0xFF0B5A42),
+              Color(0xFF0D7A57),
+              Color(0xFF2AA879),
             ],
-            stops: [0.0, 0.7, 1.0],
           ),
         ),
-        child: SafeArea(
-          child: Padding(
-            padding: const EdgeInsets.all(24.0),
-            child: Column(
-              children: [
-                const Spacer(),
-                
-                // Animated Logo and App Name
-                FadeTransition(
-                  opacity: _fadeAnimation,
-                  child: SlideTransition(
-                    position: _slideAnimation,
-                    child: ScaleTransition(
-                      scale: _scaleAnimation,
-                      child: Container(
-                        padding: const EdgeInsets.all(24),
-                        decoration: BoxDecoration(
-                          color: Colors.white.withValues(alpha: 0.15),
-                          borderRadius: BorderRadius.circular(24),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.black.withValues(alpha: 0.1),
-                              blurRadius: 20,
-                              offset: const Offset(0, 10),
-                            ),
-                          ],
-                        ),
-                        child: TweenAnimationBuilder<double>(
-                          tween: Tween(begin: 0, end: 1),
-                          duration: const Duration(seconds: 2),
-                          builder: (context, value, child) {
-                            return Transform.rotate(
-                              angle: value * 0.1,
-                              child: const Icon(
-                                Icons.water_drop,
-                                size: 80,
-                                color: Colors.white,
-                              ),
-                            );
-                          },
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-                
-                const SizedBox(height: 24),
-                
-                const Text(
-                  'Jal Guard',
-                  style: TextStyle(
-                    fontSize: 32,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.white,
-                  ),
-                ),
-                
-                const SizedBox(height: 8),
-                
-                const Text(
-                  'AI-Powered Public Health Command Center',
-                  style: TextStyle(
-                    fontSize: 16,
-                    color: Colors.white70,
-                  ),
-                  textAlign: TextAlign.center,
-                ),
-                
-                const SizedBox(height: 32),
-                
-                // Mission Statement
-                Container(
-                  padding: const EdgeInsets.all(20),
-                  decoration: BoxDecoration(
-                    color: Colors.white.withValues(alpha: 0.1),
-                    borderRadius: BorderRadius.circular(16),
-                  ),
-                  child: const Text(
-                    'Protecting communities from water-borne diseases in Northeast India through real-time monitoring, predictive analytics, and automated response coordination.',
-                    style: TextStyle(
-                      fontSize: 14,
-                      color: Colors.white,
-                      height: 1.5,
-                    ),
-                    textAlign: TextAlign.center,
-                  ),
-                ),
-                
-                const Spacer(),
-                
-                // Animated Action Buttons
-                FadeTransition(
-                  opacity: _fadeAnimation,
-                  child: SlideTransition(
-                    position: Tween<Offset>(
-                      begin: const Offset(0, 0.5),
-                      end: Offset.zero,
-                    ).animate(CurvedAnimation(
-                      parent: _slideController,
-                      curve: const Interval(0.5, 1.0, curve: Curves.elasticOut),
-                    )),
+        child: Stack(
+          children: [
+            Positioned(
+              top: -120,
+              right: -80,
+              child: _buildAmbientCircle(
+                size: 280,
+                color: Colors.white.withValues(alpha: 0.12),
+              ),
+            ),
+            Positioned(
+              left: -100,
+              bottom: 160,
+              child: _buildAmbientCircle(
+                size: 240,
+                color: Colors.white.withValues(alpha: 0.09),
+              ),
+            ),
+            SafeArea(
+              child: FadeTransition(
+                opacity: _fadeAnimation,
+                child: SlideTransition(
+                  position: _slideAnimation,
+                  child: Padding(
+                    padding: const EdgeInsets.fromLTRB(22, 18, 22, 22),
                     child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        _AnimatedButton(
-                          onPressed: () => context.push('/aadhaar-entry'),
-                          isPrimary: true,
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              const Icon(Icons.rocket_launch, size: 20),
-                              const SizedBox(width: 8),
-                              const Text(
-                                'Get Started',
-                                style: TextStyle(
-                                  fontSize: 18,
-                                  fontWeight: FontWeight.w600,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                        
+                        const SizedBox(height: 12),
+                        _buildBrandBlock(context),
+                        const SizedBox(height: 24),
+                        _buildMissionCard(context),
                         const SizedBox(height: 16),
-                        
-                        _AnimatedButton(
-                          onPressed: () => context.push('/aadhaar-entry'),
-                          isPrimary: false,
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              const Icon(Icons.login, size: 20),
-                              const SizedBox(width: 8),
-                              const Text(
-                                'Login',
-                                style: TextStyle(
-                                  fontSize: 18,
-                                  fontWeight: FontWeight.w600,
+                        _buildTrustRow(),
+                        const Spacer(),
+                        _buildActionButtons(context),
+                        const SizedBox(height: 16),
+                        Center(
+                          child: Text(
+                            'Secure data handling and role-based access',
+                            style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                                  color: Colors.white.withValues(alpha: 0.8),
+                                  letterSpacing: 0.1,
                                 ),
-                              ),
-                            ],
                           ),
                         ),
                       ],
                     ),
                   ),
                 ),
-                
-                const SizedBox(height: 32),
-                
-                // Footer
-                const Text(
-                  'Secure • Reliable • Community-Focused',
-                  style: TextStyle(
-                    fontSize: 12,
-                    color: Colors.white60,
-                  ),
-                ),
-              ],
+              ),
             ),
-          ),
+          ],
         ),
+      ),
+    );
+  }
+
+  Widget _buildAmbientCircle({required double size, required Color color}) {
+    return Container(
+      width: size,
+      height: size,
+      decoration: BoxDecoration(
+        color: color,
+        shape: BoxShape.circle,
+      ),
+    );
+  }
+
+  Widget _buildBrandBlock(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            Container(
+              width: 62,
+              height: 62,
+              decoration: BoxDecoration(
+                color: Colors.white.withValues(alpha: 0.16),
+                borderRadius: BorderRadius.circular(16),
+                border: Border.all(
+                  color: Colors.white.withValues(alpha: 0.22),
+                ),
+              ),
+              child: const Icon(
+                Icons.water_drop_rounded,
+                color: Colors.white,
+                size: 34,
+              ),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Text(
+                'Jal Guard',
+                style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                      color: Colors.white,
+                      fontWeight: FontWeight.w800,
+                      letterSpacing: 0.2,
+                    ),
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 14),
+        Text(
+          'Public Health Command Center for fast water-risk detection and response.',
+          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                color: Colors.white.withValues(alpha: 0.92),
+                height: 1.38,
+              ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildMissionCard(BuildContext context) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(18),
+      decoration: BoxDecoration(
+        color: Colors.white.withValues(alpha: 0.14),
+        borderRadius: BorderRadius.circular(18),
+        border: Border.all(color: Colors.white.withValues(alpha: 0.18)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'Mission',
+            style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                  color: Colors.white,
+                  fontWeight: FontWeight.w700,
+                ),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            'Support communities in Meghalaya with predictive alerts, field reporting, multilingual health guidance, and coordinated action planning.',
+            style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                  color: Colors.white.withValues(alpha: 0.9),
+                  height: 1.4,
+                ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildTrustRow() {
+    return Wrap(
+      spacing: 8,
+      runSpacing: 8,
+      children: const [
+        _TrustChip(icon: Icons.gpp_good_outlined, label: 'Secure Access'),
+        _TrustChip(icon: Icons.offline_bolt_outlined, label: 'Offline First'),
+        _TrustChip(icon: Icons.language_outlined, label: 'Multilingual'),
+      ],
+    );
+  }
+
+  Widget _buildActionButtons(BuildContext context) {
+    return Column(
+      children: [
+        _PrimaryActionButton(
+          label: 'Get Started',
+          icon: Icons.arrow_forward_rounded,
+          isFilled: true,
+          onTap: () => context.push('/aadhaar-entry'),
+        ),
+        const SizedBox(height: 12),
+        _PrimaryActionButton(
+          label: 'Login',
+          icon: Icons.login_rounded,
+          isFilled: false,
+          onTap: () => context.push('/aadhaar-entry'),
+        ),
+      ],
+    );
+  }
+}
+
+class _TrustChip extends StatelessWidget {
+  final IconData icon;
+  final String label;
+
+  const _TrustChip({required this.icon, required this.label});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 7),
+      decoration: BoxDecoration(
+        color: Colors.white.withValues(alpha: 0.14),
+        borderRadius: BorderRadius.circular(999),
+        border: Border.all(color: Colors.white.withValues(alpha: 0.2)),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, size: 14, color: Colors.white),
+          const SizedBox(width: 6),
+          Text(
+            label,
+            style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                  color: Colors.white,
+                  fontWeight: FontWeight.w600,
+                ),
+          ),
+        ],
       ),
     );
   }
 }
 
-class _AnimatedButton extends StatefulWidget {
-  final VoidCallback onPressed;
-  final Widget child;
-  final bool isPrimary;
+class _PrimaryActionButton extends StatelessWidget {
+  final String label;
+  final IconData icon;
+  final bool isFilled;
+  final VoidCallback onTap;
 
-  const _AnimatedButton({
-    required this.onPressed,
-    required this.child,
-    required this.isPrimary,
+  const _PrimaryActionButton({
+    required this.label,
+    required this.icon,
+    required this.isFilled,
+    required this.onTap,
   });
 
   @override
-  State<_AnimatedButton> createState() => _AnimatedButtonState();
-}
-
-class _AnimatedButtonState extends State<_AnimatedButton>
-    with SingleTickerProviderStateMixin {
-  late AnimationController _controller;
-  late Animation<double> _scaleAnimation;
-  late Animation<double> _glowAnimation;
-
-  @override
-  void initState() {
-    super.initState();
-    _controller = AnimationController(
-      duration: const Duration(milliseconds: 150),
-      vsync: this,
-    );
-
-    _scaleAnimation = Tween<double>(
-      begin: 1.0,
-      end: 0.95,
-    ).animate(CurvedAnimation(
-      parent: _controller,
-      curve: Curves.easeInOut,
-    ));
-
-    _glowAnimation = Tween<double>(
-      begin: 0.0,
-      end: 1.0,
-    ).animate(CurvedAnimation(
-      parent: _controller,
-      curve: Curves.easeInOut,
-    ));
-  }
-
-  @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
-  }
-
-  @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTapDown: (_) => _controller.forward(),
-      onTapUp: (_) {
-        _controller.reverse();
-        widget.onPressed();
-      },
-      onTapCancel: () => _controller.reverse(),
-      child: AnimatedBuilder(
-        animation: _controller,
-        builder: (context, child) {
-          return Transform.scale(
-            scale: _scaleAnimation.value,
-            child: Container(
-              width: double.infinity,
-              height: 56,
-              decoration: BoxDecoration(
-                gradient: widget.isPrimary
-                    ? const LinearGradient(
-                        colors: [Colors.white, Color(0xFFF5F5F5)],
-                      )
-                    : null,
-                border: widget.isPrimary
-                    ? null
-                    : Border.all(
-                        color: Colors.white.withValues(alpha: 0.8),
-                        width: 2,
-                      ),
-                borderRadius: BorderRadius.circular(16),
-                boxShadow: [
-                  BoxShadow(
-                    color: widget.isPrimary
-                        ? Colors.white.withValues(alpha: 0.3 * _glowAnimation.value)
-                        : Colors.transparent,
-                    blurRadius: 20 * _glowAnimation.value,
-                    spreadRadius: 2 * _glowAnimation.value,
-                  ),
-                ],
-              ),
-              child: Material(
-                color: Colors.transparent,
-                child: InkWell(
-                  onTap: widget.onPressed,
-                  borderRadius: BorderRadius.circular(16),
-                  child: Container(
-                    alignment: Alignment.center,
-                    child: DefaultTextStyle(
-                      style: TextStyle(
-                        color: widget.isPrimary
-                            ? const Color(0xFF2E7D32)
-                            : Colors.white,
-                      ),
-                      child: widget.child,
-                    ),
-                  ),
-                ),
-              ),
-            ),
-          );
-        },
+    return SizedBox(
+      width: double.infinity,
+      height: 54,
+      child: ElevatedButton.icon(
+        onPressed: onTap,
+        style: ElevatedButton.styleFrom(
+          backgroundColor: isFilled ? Colors.white : Colors.transparent,
+          foregroundColor: isFilled ? const Color(0xFF0D7A57) : Colors.white,
+          elevation: isFilled ? 2 : 0,
+          side: isFilled
+              ? null
+              : BorderSide(color: Colors.white.withValues(alpha: 0.8), width: 1.5),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+        ),
+        icon: Icon(icon, size: 18),
+        label: Text(
+          label,
+          style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700),
+        ),
       ),
     );
   }

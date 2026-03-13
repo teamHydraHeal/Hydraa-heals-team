@@ -132,7 +132,7 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen>
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: const Text('OTP sent successfully'),
-        backgroundColor: const Color(0xFF43A047),
+        backgroundColor: const Color(0xFF2AA879),
         behavior: SnackBarBehavior.floating,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
       ),
@@ -182,7 +182,7 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen>
                         ],
                       ),
                       child: const Icon(Icons.arrow_back_ios_new,
-                          size: 18, color: Color(0xFF2E7D32)),
+                          size: 18, color: Color(0xFF0D7A57)),
                     ),
                   ),
 
@@ -195,12 +195,12 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen>
                       height: 90,
                       decoration: BoxDecoration(
                         gradient: const LinearGradient(
-                          colors: [Color(0xFF43A047), Color(0xFF2E7D32)],
+                          colors: [Color(0xFF2AA879), Color(0xFF0D7A57)],
                         ),
                         borderRadius: BorderRadius.circular(22),
                         boxShadow: [
                           BoxShadow(
-                            color: const Color(0xFF2E7D32).withOpacity(0.3),
+                            color: const Color(0xFF0D7A57).withOpacity(0.3),
                             blurRadius: 20,
                             offset: const Offset(0, 10),
                           ),
@@ -220,7 +220,7 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen>
                       style: TextStyle(
                         fontSize: 26,
                         fontWeight: FontWeight.bold,
-                        color: Color(0xFF1B5E20),
+                        color: Color(0xFF1E2C25),
                       ),
                     ),
                   ),
@@ -292,7 +292,7 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen>
                                   focusedBorder: OutlineInputBorder(
                                     borderRadius: BorderRadius.circular(12),
                                     borderSide: const BorderSide(
-                                        color: Color(0xFF2E7D32), width: 2),
+                                        color: Color(0xFF0D7A57), width: 2),
                                   ),
                                   contentPadding:
                                       const EdgeInsets.symmetric(vertical: 16),
@@ -319,11 +319,11 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen>
                                 onPressed:
                                     authProvider.isLoading ? null : _verifyOtp,
                                 style: ElevatedButton.styleFrom(
-                                  backgroundColor: const Color(0xFF2E7D32),
+                                  backgroundColor: const Color(0xFF0D7A57),
                                   disabledBackgroundColor: Colors.grey[300],
                                   elevation: 8,
                                   shadowColor:
-                                      const Color(0xFF2E7D32).withOpacity(0.4),
+                                      const Color(0xFF0D7A57).withOpacity(0.4),
                                   shape: RoundedRectangleBorder(
                                     borderRadius: BorderRadius.circular(14),
                                   ),
@@ -366,13 +366,13 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen>
                             ? TextButton.icon(
                                 onPressed: _resendOtp,
                                 icon: const Icon(Icons.refresh,
-                                    color: Color(0xFF2E7D32), size: 18),
+                                    color: Color(0xFF0D7A57), size: 18),
                                 label: const Text(
                                   'Resend OTP',
                                   style: TextStyle(
                                     fontSize: 15,
                                     fontWeight: FontWeight.w600,
-                                    color: Color(0xFF2E7D32),
+                                    color: Color(0xFF0D7A57),
                                   ),
                                 ),
                               )
