@@ -50,9 +50,13 @@ class _DistrictMapWidgetState extends State<DistrictMapWidget> {
         position: LatLng(district.latitude, district.longitude),
         infoWindow: InfoWindow(
           title: district.name,
-          snippet: 'Risk: ${district.riskLevel.name.toUpperCase()}',
+          snippet: widget.showRiskPrediction
+              ? 'Risk: ${district.riskLevel.name.toUpperCase()}'
+              : 'Reports: ${district.activeReports} active, ${district.criticalReports} critical',
         ),
-        icon: _getMarkerIcon(district.riskLevel),
+        icon: widget.showRiskPrediction
+            ? _getMarkerIcon(district.riskLevel)
+            : BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueAzure),
         onTap: () => widget.onDistrictSelected(district),
       );
       _markers.add(marker);
@@ -76,6 +80,26 @@ class _DistrictMapWidgetState extends State<DistrictMapWidget> {
 
   void _createZoneCircles() {
     _circles.clear();
+
+    if (!widget.showRiskPrediction) {
+      for (final district in widget.districts) {
+        final bool hasCritical = district.criticalReports > 0;
+        final Color reportColor = hasCritical ? Colors.red : Colors.orange;
+        final double radius = 6000 + (district.activeReports * 350);
+
+        _circles.add(
+          Circle(
+            circleId: CircleId('${district.id}_reports'),
+            center: LatLng(district.latitude, district.longitude),
+            radius: radius,
+            fillColor: reportColor.withValues(alpha: 0.2),
+            strokeColor: reportColor.withValues(alpha: 0.7),
+            strokeWidth: 2,
+          ),
+        );
+      }
+      return;
+    }
 
     for (final district in widget.districts) {
       final color = _getRiskColor(district.riskLevel);
@@ -159,12 +183,19 @@ class _DistrictMapWidgetState extends State<DistrictMapWidget> {
           padding: const EdgeInsets.all(16),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-            children: [
-              _buildLegendItem('Low', Colors.green),
-              _buildLegendItem('Medium', Colors.orange),
-              _buildLegendItem('High', Colors.red),
-              _buildLegendItem('Critical', Colors.purple),
-            ],
+            children: widget.showRiskPrediction
+                ? [
+                    _buildLegendItem('Low', Colors.green),
+                    _buildLegendItem('Medium', Colors.orange),
+                    _buildLegendItem('High', Colors.red),
+                    _buildLegendItem('Critical', Colors.purple),
+                  ]
+                : [
+                    _buildLegendItem('No reports', Colors.green),
+                    _buildLegendItem('Active reports', Colors.orange),
+                    _buildLegendItem('Critical present', Colors.red),
+                    _buildLegendItem('Report marker', Colors.blue),
+                  ],
           ),
         ),
         
