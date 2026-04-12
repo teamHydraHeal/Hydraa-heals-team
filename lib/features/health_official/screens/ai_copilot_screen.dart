@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../core/services/ai_analytics_service.dart';
+import '../../../core/services/iot_service.dart';
 import '../../../core/services/ml_prediction_service.dart';
 import '../../../core/models/health_report_model.dart';
 import '../widgets/action_plan_widget.dart';
@@ -73,25 +74,43 @@ class _AiCopilotScreenState extends State<AiCopilotScreen>
         ),
       ];
 
-      final mockIotData = {
-        'water_quality': 'Critical',
-        'temperature': 30.5,
-        'humidity': 88.2,
-        'ph_level': 5.8,
-      };
+      // Fetch live IoT data from ESP32 sensor pods
+      Map<String, dynamic> iotData;
+      try {
+        iotData = await IoTService.getLatestIotData();
+        // If no live data, fall back to mock
+        if (iotData['water_quality'] == 'Unknown') {
+          iotData = {
+            'water_quality': 'Critical',
+            'temperature': 30.5,
+            'humidity': 88.2,
+            'ph_level': 5.8,
+          };
+        }
+      } catch (e) {
+        debugPrint('IoT fetch failed, using mock: $e');
+        iotData = {
+          'water_quality': 'Critical',
+          'temperature': 30.5,
+          'humidity': 88.2,
+          'ph_level': 5.8,
+        };
+      }
 
       final actionPlan = await AIAnalyticsService.generateActionPlan(
         'east_khasi_hills',
         mockReports,
-        mockIotData,
+        iotData,
       );
 
-      // Try ML prediction from Flask backend
+      // Try ML prediction from Flask backend — use live sensor values if available
       Map<String, dynamic>? mlPrediction;
       try {
+        final liveTurbidity = (iotData['turbidity'] as num?)?.toDouble() ?? 12.0;
+        final livePh = (iotData['ph_level'] as num?)?.toDouble() ?? 5.8;
         mlPrediction = await MlPredictionService.predict(
-          ph: 5.8,
-          turbidity: 12.0,
+          ph: livePh,
+          turbidity: liveTurbidity,
           orp: 220.0,
           rainfall: 25.0,
           diarrhea: 3,

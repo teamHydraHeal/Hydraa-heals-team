@@ -26,4 +26,4 @@ ENV OLLAMA_MODEL=gemma2:2b
 EXPOSE 5001
 
 # Run with gunicorn for production
-CMD ["gunicorn", "--bind", "0.0.0.0:5001", "--workers", "2", "--timeout", "120", "backend:app"]
+CMD ["gunicorn", "--bind", "0.0.0.0:5001", "--workers", "1", "--threads", "4", "--timeout", "120", "backend:app"]

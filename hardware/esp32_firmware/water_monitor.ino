@@ -36,9 +36,9 @@
 #define BUTTON_PIN    23
 
 // ─── WiFi & Backend Config ─────────────────────────
-const char* WIFI_SSID     = "YOUR_SSID";
-const char* WIFI_PASSWORD = "YOUR_PASSWORD";
-const char* BACKEND_URL   = "http://YOUR_SERVER_IP:9090/api/iot/data";
+const char* WIFI_SSID     = "Mahawar_5g";
+const char* WIFI_PASSWORD = "manu0205";
+const char* BACKEND_URL   = "http://35.226.149.77:9090/api/iot/data";
 const char* SENSOR_ID     = "JG001";
 const char* LOCATION_ID   = "field_station_01";
 

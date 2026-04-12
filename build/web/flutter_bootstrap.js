@@ -9,13 +9,8 @@ if (!window._flutter) {
 _flutter.buildConfig = {"engineRevision":"82bd5b7209295a5b7ff8cae0df96e7870171e3a5","builds":[{"compileTarget":"dart2js","renderer":"canvaskit","mainJsPath":"main.dart.js"}]};
 
 
-if (window.isSecureContext) {
-  _flutter.loader.load({
-    serviceWorkerSettings: {
-      serviceWorkerVersion: "595509500"
-    }
-  });
-} else {
-  // Running over HTTP (not secure context): skip SW registration to avoid warnings.
-  _flutter.loader.load();
-}
+_flutter.loader.load({
+  serviceWorkerSettings: {
+    serviceWorkerVersion: "551524463"
+  }
+});

@@ -248,17 +248,36 @@ class AIAnalyticsService {
   }
   
   static double _calculateIotScore(Map<String, dynamic> iotData) {
-    // Mock IoT score calculation
     double score = 0.5; // Base score
     
-    if (iotData['water_quality'] == 'Poor') score += 0.3;
-    if (iotData['water_quality'] == 'Critical') score += 0.5;
+    // Water quality status from live API or mock
+    final wq = iotData['water_quality']?.toString().toUpperCase() ?? '';
+    if (wq == 'POOR' || wq == 'UNSAFE' || wq == 'CAUTION') score += 0.3;
+    if (wq == 'CRITICAL') score += 0.5;
     
-    final temperature = iotData['temperature'] as double? ?? 25.0;
-    if (temperature > 30) score += 0.2;
+    // TDS from ESP32 sensor
+    final tds = (iotData['tds'] as num?)?.toDouble();
+    if (tds != null) {
+      if (tds > 1000) score += 0.4;
+      else if (tds > 500) score += 0.2;
+    }
     
-    final humidity = iotData['humidity'] as double? ?? 70.0;
+    final temperature = (iotData['temperature'] as num?)?.toDouble() ?? 25.0;
+    if (temperature > 35) score += 0.3;
+    else if (temperature > 30) score += 0.2;
+    
+    // Turbidity from sensor
+    final turbidity = (iotData['turbidity'] as num?)?.toDouble();
+    if (turbidity != null && turbidity > 5) score += 0.3;
+    
+    final humidity = (iotData['humidity'] as num?)?.toDouble() ?? 70.0;
     if (humidity > 85) score += 0.2;
+    
+    // Combined risk from backend (if live data)
+    final combinedRisk = (iotData['combined_risk'] as num?)?.toDouble();
+    if (combinedRisk != null) {
+      score = (score + combinedRisk) / 2; // Blend with backend risk
+    }
     
     return score.clamp(0.0, 1.0);
   }
@@ -362,13 +381,20 @@ class AIAnalyticsService {
   }
   
   static Map<String, dynamic> _analyzeSituation(List<HealthReport> reports, Map<String, dynamic> iotData) {
+    final wq = iotData['water_quality']?.toString().toUpperCase() ?? '';
+    final tds = (iotData['tds'] as num?)?.toDouble();
+    final temp = (iotData['temperature'] as num?)?.toDouble() ?? 25.0;
+    
     return {
       'total_reports': reports.length,
       'critical_reports': reports.where((r) => r.severity == ReportSeverity.critical).length,
       'high_risk_reports': reports.where((r) => r.severity == ReportSeverity.high).length,
-      'water_quality_issue': iotData['water_quality'] == 'Poor' || iotData['water_quality'] == 'Critical',
-      'environmental_risk': (iotData['temperature'] as double? ?? 25.0) > 30.0,
+      'water_quality_issue': wq == 'POOR' || wq == 'CRITICAL' || wq == 'UNSAFE' || wq == 'CAUTION' || (tds != null && tds > 500),
+      'environmental_risk': temp > 30.0,
       'outbreak_risk': reports.length > 10 && reports.any((r) => r.severity == ReportSeverity.critical),
+      'live_sensor_data': iotData['sensor_id'] != null,
+      'tds_value': tds,
+      'temperature_value': temp,
     };
   }
   

@@ -3,6 +3,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../../core/models/district_model.dart';
 import '../../../core/models/health_report_model.dart';
+import '../../../core/services/iot_service.dart';
 import '../widgets/iot_data_widget.dart';
 import '../widgets/reports_list_widget.dart';
 
@@ -21,6 +22,7 @@ class DistrictDetailsScreen extends StatefulWidget {
 class _DistrictDetailsScreenState extends State<DistrictDetailsScreen> {
   District? _district;
   List<HealthReport> _reports = [];
+  Map<String, dynamic> _iotData = {};
   bool _isLoading = true;
   final GlobalKey _reportsSectionKey = GlobalKey();
 
@@ -34,9 +36,13 @@ class _DistrictDetailsScreenState extends State<DistrictDetailsScreen> {
     // Mock data loading - in real app, this would fetch from API
     await Future.delayed(const Duration(seconds: 1));
     
+    // Fetch live IoT sensor data from ESP32 pods
+    final liveIotData = await IoTService.getLatestIotData();
+    
     setState(() {
       _district = _getMockDistrict(widget.districtId);
       _reports = _getMockReports(widget.districtId);
+      _iotData = liveIotData;
       _isLoading = false;
     });
   }
@@ -199,8 +205,8 @@ class _DistrictDetailsScreenState extends State<DistrictDetailsScreen> {
             
             const SizedBox(height: 16),
             
-            // IoT Data
-            IotDataWidget(iotData: {}), // Mock IoT data
+            // IoT Data — live from ESP32 sensor pods
+            IotDataWidget(iotData: _iotData),
             
             const SizedBox(height: 16),
             

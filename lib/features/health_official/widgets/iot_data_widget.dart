@@ -27,8 +27,34 @@ class IotDataWidget extends StatelessWidget {
                     fontWeight: FontWeight.bold,
                   ),
                 ),
+                Spacer(),
               ],
             ),
+            if (iotData['sensor_id'] != null)
+              Padding(
+                padding: const EdgeInsets.only(top: 4),
+                child: Row(
+                  children: [
+                    Container(
+                      width: 8,
+                      height: 8,
+                      decoration: const BoxDecoration(
+                        color: Colors.green,
+                        shape: BoxShape.circle,
+                      ),
+                    ),
+                    const SizedBox(width: 6),
+                    Text(
+                      'Live • ${iotData['sensor_id']} • ${iotData['location_id'] ?? ''}',
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: Colors.green.shade700,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
             const SizedBox(height: 16),
             _buildSensorGrid(),
           ],
@@ -48,6 +74,14 @@ class IotDataWidget extends StatelessWidget {
         'color': _getWaterQualityColor(iotData['water_quality']),
       },
       {
+        'key': 'tds',
+        'label': 'TDS',
+        'value': iotData['tds']?.toStringAsFixed(0) ?? 'N/A',
+        'unit': ' ppm',
+        'icon': Icons.speed,
+        'color': _getTdsColor(iotData['tds']),
+      },
+      {
         'key': 'temperature',
         'label': 'Temperature',
         'value': iotData['temperature']?.toString() ?? 'N/A',
@@ -56,12 +90,12 @@ class IotDataWidget extends StatelessWidget {
         'color': _getTemperatureColor(iotData['temperature']),
       },
       {
-        'key': 'humidity',
-        'label': 'Humidity',
-        'value': iotData['humidity']?.toString() ?? 'N/A',
-        'unit': '%',
-        'icon': Icons.water,
-        'color': _getHumidityColor(iotData['humidity']),
+        'key': 'turbidity',
+        'label': 'Turbidity',
+        'value': iotData['turbidity']?.toString() ?? 'N/A',
+        'unit': ' NTU',
+        'icon': Icons.visibility,
+        'color': _getTurbidityColor(iotData['turbidity']),
       },
       {
         'key': 'ph_level',
@@ -72,18 +106,10 @@ class IotDataWidget extends StatelessWidget {
         'color': _getPhColor(iotData['ph_level']),
       },
       {
-        'key': 'turbidity',
-        'label': 'Turbidity',
-        'value': iotData['turbidity']?.toString() ?? 'N/A',
-        'unit': 'NTU',
-        'icon': Icons.visibility,
-        'color': _getTurbidityColor(iotData['turbidity']),
-      },
-      {
         'key': 'chlorine_level',
         'label': 'Chlorine',
         'value': iotData['chlorine_level']?.toString() ?? 'N/A',
-        'unit': 'mg/L',
+        'unit': ' mg/L',
         'icon': Icons.cleaning_services,
         'color': _getChlorineColor(iotData['chlorine_level']),
       },
@@ -214,6 +240,17 @@ class IotDataWidget extends StatelessWidget {
     if (chlor < 0.2) return Colors.red;
     if (chlor < 0.5) return Colors.orange;
     if (chlor < 4.0) return Colors.green;
+    return Colors.red;
+  }
+
+  Color _getTdsColor(dynamic tds) {
+    if (tds == null) return Colors.grey;
+    
+    final tdsVal = double.tryParse(tds.toString()) ?? 0;
+    
+    if (tdsVal < 300) return Colors.green;
+    if (tdsVal < 500) return Colors.orange;
+    if (tdsVal < 1000) return Colors.deepOrange;
     return Colors.red;
   }
 }

@@ -65,6 +65,40 @@ def health_risk(diarrhea, vomiting, fever):
     return min(1.0, score / 2.2)
 
 
+def tds_risk(tds):
+    """Total Dissolved Solids risk — WHO: <500 ppm safe, BIS: <300 desirable."""
+    if pd.isna(tds):
+        return 0.0
+
+    if tds < 300:
+        return 0.0
+    elif tds < 500:
+        return 0.2
+    elif tds < 1000:
+        return 0.5
+    elif tds < 2000:
+        return 0.8
+    else:
+        return 1.0
+
+
+def temperature_risk(temp):
+    """Water temperature risk — high temp promotes bacterial growth."""
+    if pd.isna(temp):
+        return 0.0
+
+    if temp < 25:
+        return 0.0
+    elif temp < 30:
+        return 0.1
+    elif temp < 35:
+        return 0.3
+    elif temp < 45:
+        return 0.6
+    else:
+        return 1.0
+
+
 def compute_total_risk(row):
 
     r_ph = ph_risk(row["ph"])
@@ -76,6 +110,10 @@ def compute_total_risk(row):
         row["vomiting"],
         row["fever"]
     )
+
+    # IoT sensor fields (optional — present when ESP32 data is available)
+    r_tds = tds_risk(row.get("tds") if hasattr(row, "get") else (row["tds"] if "tds" in row.index else None))
+    r_temp = temperature_risk(row.get("water_temp") if hasattr(row, "get") else (row["water_temp"] if "water_temp" in row.index else None))
 
     available = 0
 
@@ -96,13 +134,33 @@ def compute_total_risk(row):
     ):
         available += 1
 
-    total = (
-        0.15 * r_ph +
-        0.25 * r_turb +
-        0.15 * r_orp +
-        0.15 * r_rain +
-        0.30 * r_health
-    )
+    has_tds = r_tds > 0
+    has_temp = r_temp > 0
+    if has_tds:
+        available += 1
+    if has_temp:
+        available += 1
+
+    if has_tds or has_temp:
+        # Re-weight to include IoT sensor contributions
+        total = (
+            0.10 * r_ph +
+            0.20 * r_turb +
+            0.10 * r_orp +
+            0.10 * r_rain +
+            0.25 * r_health +
+            0.15 * r_tds +
+            0.10 * r_temp
+        )
+    else:
+        # Original weights when no IoT data
+        total = (
+            0.15 * r_ph +
+            0.25 * r_turb +
+            0.15 * r_orp +
+            0.15 * r_rain +
+            0.30 * r_health
+        )
 
     return total, {
         "ph": r_ph,
@@ -110,6 +168,8 @@ def compute_total_risk(row):
         "orp": r_orp,
         "rainfall": r_rain,
         "health": r_health,
+        "tds": r_tds,
+        "water_temp": r_temp,
         "available_signals": available
     }
 

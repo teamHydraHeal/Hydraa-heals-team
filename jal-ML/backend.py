@@ -713,7 +713,7 @@ def iot_ingest():
         return jsonify({"error": "sensor_id is required"}), 400
 
     tds = float(data.get("tds", 0))
-    temperature = float(data.get("temperature", 0))
+    temperature = float(data.get("water_temp", data.get("temperature", 0)))
     turbidity = float(data.get("turbidity", 0))
     location_id = data.get("location_id", "unknown")
     timestamp = data.get("timestamp", "")
