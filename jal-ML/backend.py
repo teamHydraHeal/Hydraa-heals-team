@@ -631,6 +631,212 @@ def _fallback_chat(message):
 # ────────────────────────────────────────────────────
 # Ollama Status Check
 # ────────────────────────────────────────────────────
+# ────────────────────────────────────────────────────
+# IoT Sensor Data Ingestion — ESP32 sensor pods
+# Accepts TDS, temperature, turbidity from field devices
+# ────────────────────────────────────────────────────
+import threading
+import time as _time
+
+# In-memory store for latest readings per sensor (production: use DB)
+_iot_readings = {}          # sensor_id -> latest reading dict
+_iot_readings_lock = threading.Lock()
+
+# WHO / BIS safety thresholds
+IOT_THRESHOLDS = {
+    "tds":         {"safe_max": 500, "caution_max": 1000, "unit": "ppm"},
+    "temperature": {"safe_max": 35,  "caution_max": 45,   "unit": "°C"},
+    "turbidity":   {"safe_max": 5,   "caution_max": 10,   "unit": "NTU"},
+}
+
+
+def _evaluate_water_quality(tds, temperature, turbidity):
+    """Return quality_score (0-1, lower=safer), status, and per-parameter flags."""
+    issues = []
+    score = 0.0
+
+    # TDS
+    if tds > IOT_THRESHOLDS["tds"]["caution_max"]:
+        score += 0.4
+        issues.append(f"TDS critically high ({tds} ppm)")
+    elif tds > IOT_THRESHOLDS["tds"]["safe_max"]:
+        score += 0.2
+        issues.append(f"TDS elevated ({tds} ppm)")
+
+    # Temperature
+    if temperature > IOT_THRESHOLDS["temperature"]["caution_max"]:
+        score += 0.3
+        issues.append(f"Temperature very high ({temperature}°C)")
+    elif temperature > IOT_THRESHOLDS["temperature"]["safe_max"]:
+        score += 0.15
+        issues.append(f"Temperature elevated ({temperature}°C)")
+
+    # Turbidity
+    if turbidity > IOT_THRESHOLDS["turbidity"]["caution_max"]:
+        score += 0.4
+        issues.append(f"Turbidity critically high ({turbidity} NTU)")
+    elif turbidity > IOT_THRESHOLDS["turbidity"]["safe_max"]:
+        score += 0.2
+        issues.append(f"Turbidity elevated ({turbidity} NTU)")
+
+    score = min(score, 1.0)
+
+    if score >= 0.6:
+        status = "UNSAFE"
+    elif score >= 0.3:
+        status = "CAUTION"
+    else:
+        status = "SAFE"
+
+    return score, status, issues
+
+
+@app.route("/api/iot/data", methods=["POST"])
+def iot_ingest():
+    """Ingest sensor readings from ESP32 pods.
+
+    Request JSON:
+        sensor_id (str): Unique device identifier (e.g. "JG001")
+        location_id (str): Deployment location label
+        timestamp (str): ISO-8601 timestamp from device
+        tds (float): Total Dissolved Solids in ppm
+        temperature (float): Water temperature in °C
+        turbidity (float): Water clarity in NTU
+        battery (float, optional): Battery percentage
+
+    Returns: JSON with quality evaluation and risk assessment
+    """
+    data = request.json or {}
+
+    sensor_id = data.get("sensor_id", "").strip()
+    if not sensor_id:
+        return jsonify({"error": "sensor_id is required"}), 400
+
+    tds = float(data.get("tds", 0))
+    temperature = float(data.get("temperature", 0))
+    turbidity = float(data.get("turbidity", 0))
+    location_id = data.get("location_id", "unknown")
+    timestamp = data.get("timestamp", "")
+    battery = data.get("battery")
+
+    # Evaluate water quality
+    quality_score, quality_status, issues = _evaluate_water_quality(tds, temperature, turbidity)
+
+    # Build risk-engine compatible row and run prediction
+    risk_row = pd.Series({
+        "ph": 7.0,  # Default — ESP32 pod doesn't have pH sensor
+        "turbidity": turbidity,
+        "orp": 300.0,  # Default — no ORP sensor
+        "rainfall": 0.0,
+        "diarrhea": 0,
+        "vomiting": 0,
+        "fever": 0,
+    })
+    total_risk, risks = compute_total_risk(risk_row)
+
+    # Add TDS-based risk contribution (not in original engine)
+    tds_risk = 0.0
+    if tds > 2000:
+        tds_risk = 1.0
+    elif tds > 1000:
+        tds_risk = 0.6
+    elif tds > 500:
+        tds_risk = 0.3
+    elif tds > 300:
+        tds_risk = 0.1
+
+    # Temperature risk for bacterial growth
+    temp_risk = 0.0
+    if temperature > 45:
+        temp_risk = 0.8
+    elif temperature > 35:
+        temp_risk = 0.4
+    elif temperature > 30:
+        temp_risk = 0.2
+
+    # Combined IoT risk = original engine + TDS/temp contributions
+    combined_risk = min(1.0, total_risk + 0.2 * tds_risk + 0.15 * temp_risk)
+    combined_status = risk_to_status(combined_risk, max(risks["available_signals"], 2))
+
+    # Store latest reading
+    reading = {
+        "sensor_id": sensor_id,
+        "location_id": location_id,
+        "timestamp": timestamp,
+        "tds": tds,
+        "temperature": temperature,
+        "turbidity": turbidity,
+        "battery": battery,
+        "quality_score": quality_score,
+        "quality_status": quality_status,
+        "combined_risk": combined_risk,
+        "combined_status": combined_status,
+        "received_at": _time.strftime("%Y-%m-%dT%H:%M:%SZ", _time.gmtime()),
+    }
+
+    with _iot_readings_lock:
+        _iot_readings[sensor_id] = reading
+
+    print(f"[IoT] {sensor_id}: TDS={tds}, Temp={temperature}, Turb={turbidity} → {quality_status} (risk={combined_risk:.2f})")
+
+    return jsonify({
+        "status": "ok",
+        "sensor_id": sensor_id,
+        "quality": {
+            "score": quality_score,
+            "status": quality_status,
+            "issues": issues,
+        },
+        "risk": {
+            "total_risk": combined_risk,
+            "status": combined_status,
+            "tds_risk": tds_risk,
+            "temp_risk": temp_risk,
+            "turbidity_risk": risks["turbidity"],
+            "engine_risks": risks,
+        },
+        "thresholds": IOT_THRESHOLDS,
+    })
+
+
+@app.route("/api/iot/latest", methods=["GET"])
+def iot_latest():
+    """Return latest readings from all registered sensor pods.
+
+    Query params:
+        sensor_id (str, optional): Filter by specific sensor
+    """
+    sensor_id = request.args.get("sensor_id", "").strip()
+
+    with _iot_readings_lock:
+        if sensor_id:
+            reading = _iot_readings.get(sensor_id)
+            if reading:
+                return jsonify({"readings": [reading]})
+            return jsonify({"readings": [], "message": f"No data for {sensor_id}"}), 404
+        return jsonify({"readings": list(_iot_readings.values())})
+
+
+@app.route("/api/iot/status", methods=["GET"])
+def iot_device_status():
+    """Return summary of all known sensor pods — useful for dashboard."""
+    with _iot_readings_lock:
+        devices = []
+        for sid, r in _iot_readings.items():
+            devices.append({
+                "sensor_id": sid,
+                "location_id": r.get("location_id"),
+                "quality_status": r.get("quality_status"),
+                "combined_risk": r.get("combined_risk"),
+                "battery": r.get("battery"),
+                "last_seen": r.get("received_at"),
+            })
+    return jsonify({"devices": devices, "count": len(devices)})
+
+
+# ────────────────────────────────────────────────────
+# Ollama Status Check
+# ────────────────────────────────────────────────────
 @app.route("/ollama/status", methods=["GET"])
 def ollama_status():
     """Check if Ollama is running and the configured model is available."""
