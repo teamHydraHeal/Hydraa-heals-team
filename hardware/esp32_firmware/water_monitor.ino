@@ -16,9 +16,10 @@
  *   Push Button  → GPIO23 (INPUT_PULLUP)
  *
  * Audio Files on SD Card:
- *   0001.mp3 — Green zone (water is safe)
- *   0002.mp3 — Yellow zone (caution)
- *   0003.mp3 — Red zone (danger)
+ *   0001.mp3 — Red zone continuous alert ("Danger! Water is unsafe")
+ *   0002.mp3 — Button response for CRITICAL (TDS>=2000 or Temp>=45)
+ *   0003.mp3 — Button response for Yellow zone ("Caution")
+ *   0004.mp3 — Button response for Normal Red ("Water unsafe")
  */
 
 #include <OneWire.h>
@@ -198,9 +199,11 @@ float readTemperature() {
 
 // ─── Zone Evaluation ───────────────────────────────
 int evaluateZone(float tds, float temp) {
-    // Red if any critical threshold
-    if (tds > TDS_CRITICAL || temp > TEMP_CRIT2) return 2;
-    if (tds > TDS_YELLOW   || temp > TEMP_YELLOW) return 1;
+    // Red: TDS >= 500 OR Temp >= 36°C (includes critical levels)
+    if (tds >= TDS_YELLOW || temp >= TEMP_YELLOW) return 2;
+    // Yellow: TDS 300-499 OR Temp 34-35.9°C
+    if (tds >= TDS_GREEN  || temp >= TEMP_GREEN)  return 1;
+    // Green: everything below thresholds
     return 0;
 }
 
@@ -227,12 +230,15 @@ void setLED(int zone) {
 
 // ─── Audio Alert via DFPlayer ──────────────────────
 void playAlert(int zone) {
-    int track = zone + 1;  // 1=green, 2=yellow, 3=red
-    Serial.printf("[Audio] Playing track %d\n", track);
-    dfPlayer.play(track);
+    // Red zone → 0001.mp3 (continuous danger alert)
+    // Yellow zone has no auto-play alert
+    if (zone == 2) {
+        Serial.println("[Audio] Playing track 1 (Red zone alert)");
+        dfPlayer.play(1);
+    }
 }
 
-// ─── Button Handler (acknowledge alert) ────────────
+// ─── Button Handler (acknowledge + response audio) ─
 void checkButton() {
     static bool lastState = HIGH;
     bool state = digitalRead(BUTTON_PIN);
@@ -244,6 +250,21 @@ void checkButton() {
             Serial.println("[Button] Alert acknowledged");
             acked = true;
             alertActive = false;
+
+            // Play response track based on zone and severity
+            if (currentZone == 2) {
+                // Critical: TDS >= 2000 OR Temp >= 45°C
+                if (tdsValue >= TDS_CRITICAL || temperature >= TEMP_CRIT1) {
+                    Serial.println("[Audio] Button → track 2 (Critical response)");
+                    dfPlayer.play(2);  // 0002.mp3
+                } else {
+                    Serial.println("[Audio] Button → track 4 (Red response)");
+                    dfPlayer.play(4);  // 0004.mp3
+                }
+            } else if (currentZone == 1) {
+                Serial.println("[Audio] Button → track 3 (Yellow response)");
+                dfPlayer.play(3);      // 0003.mp3
+            }
         }
     }
     lastState = state;

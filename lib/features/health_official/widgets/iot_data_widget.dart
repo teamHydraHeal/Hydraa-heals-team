@@ -178,10 +178,13 @@ class IotDataWidget extends StatelessWidget {
     
     switch (quality.toString().toLowerCase()) {
       case 'good':
+      case 'safe':
         return Colors.green;
       case 'fair':
+      case 'caution':
         return Colors.orange;
       case 'poor':
+      case 'unsafe':
         return Colors.red;
       case 'critical':
         return Colors.purple;
